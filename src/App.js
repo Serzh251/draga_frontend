@@ -1,25 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import MapComponent from './components/map/Map';
+import 'leaflet/dist/leaflet.css';
+import { useAuth } from "./hook/use-auth";
+import { Route, Routes } from "react-router-dom";
+import RouteLayout from "./components/Header";
+import Login from "./components/auth/login";
+import Logout from "./components/auth/logout";
 
-function App() {
+const App = () => {
+  const {isAuth} = useAuth();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      <Route path="/" element={<RouteLayout isAuth={isAuth}/>}>
+        <Route index element={<MapComponent/>}/>
+        <Route path="login" element={<Login/>}/>
+        <Route path="logout" element={<Logout/>}/>
+      </Route>
+    </Routes>
   );
-}
+};
 
 export default App;
