@@ -1,0 +1,10 @@
+.current-user {
+    color: rgba(255, 255, 255, 0.65);
+    right: 30px;
+    top: 0;
+    position: absolute;
+}
+
+.current-user:hover {
+    color: #fff !important;
+}

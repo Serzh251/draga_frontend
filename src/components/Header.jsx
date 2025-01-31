@@ -4,7 +4,7 @@ import {useAuth} from "../hook/use-auth";
 import {Layout, Menu} from 'antd'
 import {HomeOutlined, LoginOutlined, LogoutOutlined,} from '@ant-design/icons';
 import config from "../config";
-
+import '../static/css/Header.css';
 
 const RouteLayout = (props) => {
   const {currentUser} = useAuth();
