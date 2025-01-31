@@ -7,11 +7,12 @@ import config from "../config";
 import '../static/css/Header.css';
 
 const RouteLayout = (props) => {
-  const {currentUser} = useAuth();
+  const {firstName } = useAuth();
   const {Header} = Layout;
   const apiAdmin = config.API_ADMIN;
 
   return (
+
     <>
       <Header>
         <Menu theme="dark" mode="horizontal" selectable={false} style={{marginRight: 15}}>
@@ -34,7 +35,7 @@ const RouteLayout = (props) => {
                 </NavLink>
               </Menu.Item>
             </>)}
-          <a href={apiAdmin} className="current-user text-decoration-none">{currentUser}</a>
+          <a href={apiAdmin} className="current-user text-decoration-none">{firstName}</a>
         </Menu>
       </Header>
       <Outlet/>

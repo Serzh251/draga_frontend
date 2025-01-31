@@ -37,12 +37,15 @@ const Login = () => {
       const payloadJSON = atob(payloadBase64);
       const payloadData = JSON.parse(payloadJSON);
       const currentUser = payloadData?.user_id;
+      const firstName = payloadData?.first_name;
       localStorage.setItem('token', `${access}`);
       localStorage.setItem('currentUser', currentUser);
+      localStorage.setItem('firstName', firstName);
       localStorage.setItem('isAuth', 'true');
       cookie.set("refresh", refresh,);
       dispatch(
         setUser({
+          firstName: firstName,
           currentUser: currentUser,
           token: access,
           isAuth: true
