@@ -22,21 +22,3 @@
     display: none;
 }
 
-/*.current-cursor {*/
-/*    background-color: #eee;*/
-/*    font-family: Verdana, Geneva, DejaVu Sans, sans-serif;*/
-/*    padding: 4px;*/
-/*    margin-left: 5px;*/
-/*    margin-bottom: 5px;*/
-/*    color: #555;*/
-/*    z-index: 99999;*/
-/*}*/
-
-/*.leaflet-top, .leaflet-left {*/
-/*    right: 0 !important;*/
-/*    bottom: 0 !important;*/
-/*    top: unset !important;*/
-/*    left: unset !important;*/
-/*    margin-right: 15px;*/
-/*    margin-bottom: 30px;*/
-/*}*/

@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { LayersControl, MapContainer, TileLayer, ZoomControl } from "react-leaflet";
+import { LayersControl, MapContainer, TileLayer, useMap, ZoomControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet-draw/dist/leaflet.draw.css";
+import "leaflet-ruler/src/leaflet-ruler.css";
+import L from "leaflet";
+import "leaflet-draw";
+import "leaflet-ruler";
 import '../../static/css/MapMain.css';
 
 const position = [
-  [65, 42],
-  [61, 40],
+
+  [65, 40],
+  [62, 45],
 ];
 
 const layers = [
@@ -46,6 +52,68 @@ const layers = [
   }
 ];
 
+function DrawTools() {
+  const map = useMap();
+
+  useEffect(() => {
+    if (map.drawControl) return; // Предотвращение дублирования
+
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    const drawControl = new L.Control.Draw({
+      position: 'topleft',
+      edit: {
+        featureGroup: drawnItems
+      },
+      draw: {
+        polygon: true,
+        polyline: true,
+        rectangle: true,
+        circle: true,
+        marker: false
+      }
+    });
+    map.addControl(drawControl);
+    map.drawControl = drawControl;
+
+    map.on(L.Draw.Event.CREATED, (event) => {
+      const layer = event.layer;
+      drawnItems.addLayer(layer);
+    });
+  }, [map]);
+
+  return null;
+}
+
+function RulerControl() {
+  const map = useMap();
+
+  useEffect(() => {
+    const rulerControl = L.control.ruler({
+      position: 'topright',
+      lengthUnit: { display: "km", decimal: 3, factor: null, label: 'Расстояние:' },
+      angleUnit: {
+        display: '&deg;',
+        decimal: 2,
+        factor: null,
+        label: 'Азимут' +
+          ':'
+      }
+    });
+
+    map.addControl(rulerControl);
+
+    return () => {
+
+      map.removeControl(rulerControl);
+    };
+  }, [map]);
+
+  return null;
+}
+
+
 
 export default function MapComponent() {
   const [selectedLayer, setSelectedLayer] = useState(() => {
@@ -58,12 +126,7 @@ export default function MapComponent() {
 
   return (
     <div className="app-layout">
-    <MapContainer
-      zoomControl={false}
-      bounds={position}
-      zoom={13}
-      style={{ height: '100%', width: '100%' }}
-    >
+    <MapContainer bounds={position} zoom={13} style={{ height: '100%', width: '100%' }} zoomControl={false}>
       <ZoomControl position="bottomright" />
       <LayersControl position="topright">
         {layers.map((layer) => (
@@ -82,7 +145,10 @@ export default function MapComponent() {
           </LayersControl.BaseLayer>
         ))}
       </LayersControl>
+      <DrawTools />
+      <RulerControl />
     </MapContainer>
     </div>
+
   );
 }
