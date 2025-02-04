@@ -1,46 +1,70 @@
-import {NavLink, Outlet} from "react-router-dom";
-import React from "react";
-import {useAuth} from "../hook/use-auth";
-import {Layout, Menu} from 'antd'
-import {HomeOutlined, LoginOutlined, LogoutOutlined,} from '@ant-design/icons';
+import React from 'react';
+import { Layout, Menu } from 'antd';
+import { NavLink, Outlet } from 'react-router-dom';
+import {
+  HomeOutlined,
+  LoginOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
 import config from "../config";
-import '../static/css/Header.css';
+import { useAuth } from "../hook/use-auth";
+const { Header } = Layout;
 
-const RouteLayout = (props) => {
-  const {firstName } = useAuth();
-  const {Header} = Layout;
+const AppHeader = (props) => {
+
   const apiAdmin = config.API_ADMIN;
+  const {isAuth, firstName } = useAuth();
+  const menuItems = [
+    {
+      key: '1',
+      icon: <HomeOutlined />,
+      label: <NavLink to="/">Home</NavLink>,
+    },
+  ];
+
+  if (!isAuth) {
+    menuItems.push({
+      key: '2',
+      icon: <LoginOutlined />,
+      label: <NavLink to="login">Вход</NavLink>,
+    });
+  } else {
+    menuItems.push({
+      key: '3',
+      icon: <LogoutOutlined />,
+      label: <NavLink to="logout">Выход</NavLink>,
+    });
+    menuItems.push({
+      key: '4',
+      icon: <SettingOutlined />,
+      label: <NavLink to={apiAdmin}>Админ панель</NavLink>,
+    });
+    menuItems.push({
+      key: '5',
+      label: (
+        <div className="current-user text-decoration-none">
+          {firstName}
+        </div>
+      ),
+      style: { marginLeft: 'auto' },
+    });
+  }
 
   return (
-
     <>
       <Header>
-        <Menu theme="dark" mode="horizontal" selectable={false} style={{marginRight: 15}}>
-          <Menu.Item key="1" icon={<HomeOutlined/>}>
-            <NavLink className="" to="/">
-              Home
-            </NavLink>
-          </Menu.Item>
-          {!props.isAuth ? (
-            <Menu.Item key="2" icon={<LoginOutlined/>} title={"Login"}>
-              <NavLink to="login">
-                Вход
-              </NavLink>
-            </Menu.Item>
-          ) : (
-            <>
-              <Menu.Item key="3" icon={<LogoutOutlined/>} title={"Logout"}>
-                <NavLink to="logout">
-                  Выход
-                </NavLink>
-              </Menu.Item>
-            </>)}
-          <a href={apiAdmin} className="current-user text-decoration-none">{firstName}</a>
-        </Menu>
+        <Menu
+          theme="dark"
+          mode="horizontal"
+          selectable={false}
+          style={{ marginRight: 15 }}
+          items={menuItems}
+        />
       </Header>
-      <Outlet/>
+      <Outlet />
     </>
   );
 };
 
-export default RouteLayout;
+export default AppHeader;
