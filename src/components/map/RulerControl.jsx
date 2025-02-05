@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import L from "leaflet";
 import "leaflet-ruler/src/leaflet-ruler.css";
 import "leaflet-ruler";
