@@ -1,53 +1,39 @@
-import React, { useState } from "react";
-import { MapContainer, ScaleControl, ZoomControl } from "react-leaflet";
+import React from "react";
+import { MapContainer, ZoomControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw";
-import "../../static/css/MapMain.css";
+import '../../static/css/MapMain.css';
 import LayersControlComponent from "./LayersControlComponent";
 import RulerControl from "./RulerControl";
 import config from "../../config";
 import DrawTools from "./DrawTools";
-import useListFields from "../../hook/useListFields";
+import useGeoData from "../../hook/useGeodataPoints";
 import MapPoints from "./MapPoints";
-import MapFields from "./Fields/MapFields";
-import FieldSelectionSidebar from "./Fields/FieldsList";
-import MapCleanPoints from "./MapCleanPoints";
-import GridCells from "./Fields/GridCells";
-
+import HeatmapLayer from "./HeatMapLayer";
 
 const MapComponent = () => {
-  const { listGeojsonFields } = useListFields();
-  const [selectedFields, setSelectedFields] = useState(new Set());
+  const { geojsonData, loading, error } = useGeoData("http://localhost:2025/api/points/?is_working=1");
+
+  if (loading) return <p>Загрузка данных...</p>;
+  if (error) return <p>Ошибка загрузки: {error.message}</p>;
 
   return (
     <div className="app-layout">
-      <FieldSelectionSidebar
-        fields={listGeojsonFields?.features || []}
-        selectedFields={selectedFields}
-        onSelectionChange={setSelectedFields}
-      />
       <MapContainer
         bounds={config.defaultPosition}
         zoom={13}
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
-        maxZoom={25}
       >
         <ZoomControl position="bottomright" />
-        <ScaleControl position="bottomleft" imperial={false} />
         <LayersControlComponent />
-        <GridCells />
         <DrawTools />
         <RulerControl />
-        {<MapPoints selectedFields={selectedFields}/>}
-        {<MapCleanPoints selectedFields={selectedFields}/>}
-        {listGeojsonFields && (
-          <MapFields listGeojsonFields={listGeojsonFields}/>
-        )}
+        {/*{geojsonData && <MapPoints geojsonData={geojsonData} />}*/}
+        {geojsonData && <HeatmapLayer data={geojsonData.features} />}
       </MapContainer>
     </div>
   );
 };
-
-export default MapComponent;
+export default  MapComponent;
