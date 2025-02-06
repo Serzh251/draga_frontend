@@ -10,6 +10,7 @@ import config from "../../config";
 import DrawTools from "./DrawTools";
 import useGeoData from "../../hook/useGeodataPoints";
 import MapPoints from "./MapPoints";
+import VoronoiPolygons from "./VoronoiPolygons";
 
 const MapComponent = () => {
   const { geojsonData, loading, error } = useGeoData("http://localhost:2025/api/points/?is_working=1");
@@ -29,7 +30,8 @@ const MapComponent = () => {
         <LayersControlComponent />
         <DrawTools />
         <RulerControl />
-        {geojsonData && <MapPoints geojsonData={geojsonData} />}
+        {/*{geojsonData && <MapPoints geojsonData={geojsonData} />}*/}
+        {geojsonData && <VoronoiPolygons data={geojsonData.features} />}
       </MapContainer>
     </div>
   );
