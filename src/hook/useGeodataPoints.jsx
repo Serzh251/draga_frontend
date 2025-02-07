@@ -2,27 +2,36 @@ import { useState, useEffect } from "react";
 import { axiosPrivate } from "../api/axois";
 import configApi from "../api/config-api";
 
-const useGeoData = (endpoint) => {
+const useGeoData = ({ selectedFields }) => {
   const [geojsonData, setGeojsonData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchGeoData = async () => {
+      if (!selectedFields || selectedFields.size === 0) {
+        setGeojsonData(null);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
+      setError(null);
+
       try {
-        const response = await axiosPrivate.get(configApi.GET_POINTS);
+        const fieldParam = Array.from(selectedFields).join(",");
+        const response = await axiosPrivate.get(
+          `${configApi.GET_POINTS}?field=${encodeURIComponent(fieldParam)}`
+        );
         setGeojsonData(response.data);
       } catch (err) {
         setError(err);
+        setGeojsonData(null);
       } finally {
         setLoading(false);
       }
     };
-
     fetchGeoData();
-  }, [configApi.GET_POINTS, axiosPrivate]);
-
+  }, [selectedFields]);
   return { geojsonData, loading, error };
 };
 

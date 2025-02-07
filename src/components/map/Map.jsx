@@ -1,26 +1,30 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { MapContainer, ZoomControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw";
-import '../../static/css/MapMain.css';
+import "../../static/css/MapMain.css";
 import LayersControlComponent from "./LayersControlComponent";
 import RulerControl from "./RulerControl";
 import config from "../../config";
 import DrawTools from "./DrawTools";
-import useGeoData from "../../hook/useGeodataPoints";
-import MapPoints from "./MapPoints";
 import useListFields from "../../hook/useListFields";
+import MapPoints from "./MapPoints";
+import MapFields from "./Fields/MapFields";
+import FieldSelectionSidebar from "./Fields/FieldsList";
+
 
 const MapComponent = () => {
-  const { geojsonData, loading, error } = useGeoData();
   const { listGeojsonFields } = useListFields();
-
-  if (loading) return <p>Загрузка данных...</p>;
-  if (error) return <p>Ошибка загрузки: {error.message}</p>;
+  const [selectedFields, setSelectedFields] = useState(new Set());
 
   return (
     <div className="app-layout">
+      <FieldSelectionSidebar
+        fields={listGeojsonFields?.features || []}
+        selectedFields={selectedFields}
+        onSelectionChange={setSelectedFields}
+      />
       <MapContainer
         bounds={config.defaultPosition}
         zoom={13}
@@ -31,9 +35,13 @@ const MapComponent = () => {
         <LayersControlComponent />
         <DrawTools />
         <RulerControl />
-        {geojsonData && <MapPoints geojsonData={geojsonData} />}
+        {<MapPoints selectedFields={selectedFields}/>}
+        {listGeojsonFields && (
+          <MapFields listGeojsonFields={listGeojsonFields}/>
+        )}
       </MapContainer>
     </div>
   );
 };
-export default  MapComponent;
+
+export default MapComponent;

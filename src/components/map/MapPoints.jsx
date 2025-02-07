@@ -1,9 +1,11 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
+import useGeoData from "../../hook/useGeodataPoints";
 
-const MapPoints = ({ geojsonData }) => {
+const MapPoints = (selectedFields) => {
   const map = useMap();
+  const { geojsonData, loading, error } = useGeoData(selectedFields);
 
   useEffect(() => {
     if (!geojsonData) return;
@@ -47,6 +49,9 @@ const MapPoints = ({ geojsonData }) => {
 
     return () => map.removeLayer(geoJsonLayer);
   }, [geojsonData, map]);
+
+  if (loading) return <p>Загрузка данных...</p>;
+  if (error) return <p>Ошибка загрузки: {error.message}</p>;
 
   return null;
 };
