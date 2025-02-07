@@ -10,9 +10,11 @@ import config from "../../config";
 import DrawTools from "./DrawTools";
 import useGeoData from "../../hook/useGeodataPoints";
 import MapPoints from "./MapPoints";
+import useListFields from "../../hook/useListFields";
 
 const MapComponent = () => {
-  const { geojsonData, loading, error } = useGeoData("http://localhost:2025/api/points/?is_working=1");
+  const { geojsonData, loading, error } = useGeoData();
+  const { listGeojsonFields } = useListFields();
 
   if (loading) return <p>Загрузка данных...</p>;
   if (error) return <p>Ошибка загрузки: {error.message}</p>;
