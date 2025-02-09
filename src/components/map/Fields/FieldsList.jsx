@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { Select } from "antd";
+import "antd/dist/reset.css"; // Анту нужен импорт стилей
 import "../../../static/css/MapFields.css";
 
+const { Option } = Select;
+
 const FieldSelectionSidebar = ({ fields, onSelectionChange }) => {
-  const [selectedFields, setSelectedFields] = useState(new Set());
-  const [isOpen, setIsOpen] = useState(new Set());
+  const [selectedField, setSelectedField] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    onSelectionChange(selectedFields);
-    localStorage.setItem("selectedFields", JSON.stringify([...selectedFields]));
-  }, [selectedFields, onSelectionChange]);
-
-  const toggleField = (fieldId) => {
-    setSelectedFields((prev) => {
-      const newSelection = new Set(prev);
-      newSelection.has(fieldId) ? newSelection.delete(fieldId) : newSelection.add(fieldId);
-      return newSelection;
-    });
-  };
+    onSelectionChange(selectedField ? new Set([selectedField]) : new Set());
+    localStorage.setItem("selectedField", JSON.stringify(selectedField));
+  }, [selectedField, onSelectionChange]);
 
   return (
     <div
@@ -27,17 +23,20 @@ const FieldSelectionSidebar = ({ fields, onSelectionChange }) => {
       <div className="field-toggle-button">☰</div>
       {isOpen && (
         <div className="field-sidebar">
-          <div>Месторождения</div>
-          {fields.map((field) => (
-            <label key={field.id} className="field-checkbox">
-              <input
-                type="checkbox"
-                checked={selectedFields.has(field.id)}
-                onChange={() => toggleField(field.id)}
-              />
-              {field.properties.name}
-            </label>
-          ))}
+          <div className="field-sidebar-title">Месторождения</div>
+          <Select
+            style={{ width: "100%" }}
+            placeholder="Выберите месторождение"
+            value={selectedField}
+            onChange={setSelectedField}
+            allowClear
+          >
+            {fields.map((field) => (
+              <Option key={field.id} value={field.id}>
+                {field.properties.name}
+              </Option>
+            ))}
+          </Select>
         </div>
       )}
     </div>
