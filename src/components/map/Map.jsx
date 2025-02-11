@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { MapContainer, ZoomControl } from "react-leaflet";
+import React, { useState } from "react";
+import { MapContainer, ScaleControl, ZoomControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw";
@@ -12,6 +12,7 @@ import useListFields from "../../hook/useListFields";
 import MapPoints from "./MapPoints";
 import MapFields from "./Fields/MapFields";
 import FieldSelectionSidebar from "./Fields/FieldsList";
+import MapCleanPoints from "./MapCleanPoints";
 
 
 const MapComponent = () => {
@@ -30,12 +31,15 @@ const MapComponent = () => {
         zoom={13}
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
+        maxZoom={25}
       >
         <ZoomControl position="bottomright" />
+        <ScaleControl position="bottomleft" imperial={false} />
         <LayersControlComponent />
         <DrawTools />
         <RulerControl />
         {<MapPoints selectedFields={selectedFields}/>}
+        {<MapCleanPoints selectedFields={selectedFields}/>}
         {listGeojsonFields && (
           <MapFields listGeojsonFields={listGeojsonFields}/>
         )}

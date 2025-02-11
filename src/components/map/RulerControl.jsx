@@ -17,14 +17,24 @@ const RulerControl = () => {
 
     const rulerControl = L.control.ruler({
       position: "topright",
-      lengthUnit: { display: "km", decimal: 3, factor: null, label: "Расстояние:" },
+      lengthUnit: {
+        display: "m",  // Показ в метрах
+        decimal: 2,    // Два знака после запятой
+        factor: 1000,  // Принудительно переводим км → м
+        label: "Расстояние:"
+      },
       angleUnit: {
         display: "&deg;",
         decimal: 2,
         factor: null,
-        label: "Азимут:",
+        label: "Азимут:"
       },
+      styles: {
+        rulerLabel: "font-size: 36px; font-weight: bold;", // Увеличение шрифта
+      }
     });
+
+
 
     map.addControl(rulerControl);
 

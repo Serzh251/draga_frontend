@@ -22,3 +22,12 @@
     display: none;
 }
 
+
+/* Стиль для замеров расстояния */
+.moving-tooltip{
+    font-size: 24px !important;
+}
+.result-tooltip{
+    font-size: 24px !important;
+}
+
