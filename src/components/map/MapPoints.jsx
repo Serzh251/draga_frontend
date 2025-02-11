@@ -39,7 +39,11 @@ const MapPoints = (selectedFields) => {
           fillOpacity: opacity * 0.8, // fillOpacity тоже меняем
         });
 
-        circleMarker.bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
+        // Добавляем ID и глубину в попап
+        circleMarker.bindPopup(`
+          <strong>ID точки:</strong> ${feature?.id || "Не указан"}<br>
+          <strong>Глубина:</strong> ${depth.toFixed(2)} м
+        `);
 
         return circleMarker;
       },

@@ -43,7 +43,10 @@ const MapCleanPoints = (selectedFields) => {
           fillOpacity: opacity * 0.8,
         });
 
-        circleMarker.bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
+        circleMarker.bindPopup(`
+          <strong>ID точки:</strong> ${feature?.id || "Не указан"}<br>
+          <strong>Глубина:</strong> ${depth.toFixed(2)} м
+        `);
 
         return circleMarker;
       },

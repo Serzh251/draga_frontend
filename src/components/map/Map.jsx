@@ -13,6 +13,7 @@ import MapPoints from "./MapPoints";
 import MapFields from "./Fields/MapFields";
 import FieldSelectionSidebar from "./Fields/FieldsList";
 import MapCleanPoints from "./MapCleanPoints";
+import GridCells from "./Fields/GridCells";
 
 
 const MapComponent = () => {
@@ -36,6 +37,7 @@ const MapComponent = () => {
         <ZoomControl position="bottomright" />
         <ScaleControl position="bottomleft" imperial={false} />
         <LayersControlComponent />
+        <GridCells />
         <DrawTools />
         <RulerControl />
         {<MapPoints selectedFields={selectedFields}/>}

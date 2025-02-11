@@ -20,7 +20,7 @@ const useCleanPoints = ({ selectedFields }) => {
       try {
         const fieldParam = Array.from(selectedFields).join(",");
         const response = await axiosPrivate.get(
-          `${configApi.GET_CLEAN_POINTS}/?field=${encodeURIComponent(fieldParam)}`
+          `${configApi.GET_CLEAN_POINTS}?field=${encodeURIComponent(fieldParam)}`
         );
         setGeojsonData(response.data);
       } catch (err) {

@@ -20,7 +20,7 @@ const useGeoData = ({ selectedFields }) => {
       try {
         const fieldParam = Array.from(selectedFields).join(",");
         const response = await axiosPrivate.get(
-          `${configApi.GET_POINTS}&field=${encodeURIComponent(fieldParam)}`
+          `${configApi.GET_POINTS}?is_working=1&field=${encodeURIComponent(fieldParam)}`
         );
         setGeojsonData(response.data);
       } catch (err) {
