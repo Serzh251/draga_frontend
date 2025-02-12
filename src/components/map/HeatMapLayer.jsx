@@ -16,7 +16,6 @@ const HeatmapLayer = ({ data }) => {
       const normalizedDepth = Math.min(1, depth / 20);
       return [coordinates[1], coordinates[0], normalizedDepth]; // lat, lng, weight
     });
-
     const heatLayer = L.heatLayer(heatData, {
       radius: 20,
       blur: 15,
@@ -28,13 +27,11 @@ const HeatmapLayer = ({ data }) => {
         1.0: "#00004B", // Почти черный (очень глубокие)
       },
     });
-
     heatLayer.addTo(map);
     return () => {
       map.removeLayer(heatLayer);
     };
   }, [data, map]);
-
   return null;
 };
 

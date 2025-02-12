@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { axiosPrivate } from "../api/axois";
 import configApi from "../api/config-api";
 
-const useCleanPoints = ({ selectedFields }) => {
+const useCleanPoints = (selectedFields) => {
   const [geojsonData, setGeojsonData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

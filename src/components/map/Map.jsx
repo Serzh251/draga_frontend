@@ -20,6 +20,7 @@ import MapFields from "./Fields/MapFields";
 const MapComponent = () => {
   const { listGeojsonFields } = useListFields();
   const [selectedFields, setSelectedFields] = useState(new Set());
+  const [cleanGeojsonData, setCleanGeojsonData] = useState(null);
 
   return (
     <div className="app-layout">
@@ -45,8 +46,8 @@ const MapComponent = () => {
         <DrawTools />
         <RulerControl />
         {<MapPoints selectedFields={selectedFields}/>}
-        {<MapCleanPoints selectedFields={selectedFields}/>}
-        {/*{geojsonData && <HeatmapLayer data={geojsonData.features} />}*/}
+        {<MapCleanPoints selectedFields={selectedFields} onDataLoaded={setCleanGeojsonData} />}
+        {cleanGeojsonData && <HeatmapLayer data={cleanGeojsonData.features} />}
       </MapContainer>
     </div>
   );

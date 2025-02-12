@@ -4,7 +4,7 @@ import { useMap } from "react-leaflet";
 import L from "leaflet";
 import useCleanPoints from "../../hook/useCleanPoints";
 
-const MapCleanPoints = (selectedFields) => {
+const MapCleanPoints = ({ selectedFields, onDataLoaded }) => {
   const map = useMap();
   const { geojsonData, loading, error } = useCleanPoints(selectedFields);
   const [opacity, setOpacity] = useState(1); // Прозрачность точек
@@ -12,7 +12,11 @@ const MapCleanPoints = (selectedFields) => {
   const toggleVisibility = () => {
     setOpacity((prev) => (prev === 1 ? 0 : 1)); // Переключаем прозрачность
   };
-
+  useEffect(() => {
+    if (geojsonData) {
+      onDataLoaded(geojsonData);
+    }
+  }, [geojsonData, onDataLoaded]);
   useEffect(() => {
     if (!geojsonData) return;
 
@@ -44,7 +48,7 @@ const MapCleanPoints = (selectedFields) => {
         });
 
         circleMarker.bindPopup(`
-          <strong>ID точки:</strong> ${feature?.id || "Не указан"}<br>
+<!--          <strong>ID точки:</strong> ${feature?.id || "Не указан"}<br>-->
           <strong>Глубина:</strong> ${depth.toFixed(2)} м
         `);
 
