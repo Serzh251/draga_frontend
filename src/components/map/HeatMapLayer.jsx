@@ -9,22 +9,23 @@ const HeatmapLayer = ({ data }) => {
   useEffect(() => {
     if (!data || data.length === 0) return;
 
-    const heatData = data.map((feature) => [
-      feature.geometry.coordinates[1], // Lat
-      feature.geometry.coordinates[0], // Lng
-      feature.properties.depth / 15, // Интенсивность (0-1)
-    ]);
+    const heatData = data.map((feature) => {
+      const { coordinates } = feature.geometry;
+      const depth = feature.properties?.depth ?? 0;
+      // Нормализация глубины (0 м -> 0, 20 м -> 1)
+      const normalizedDepth = Math.min(1, depth / 20);
+      return [coordinates[1], coordinates[0], normalizedDepth]; // lat, lng, weight
+    });
 
     const heatLayer = L.heatLayer(heatData, {
-      radius: 15,
-      blur: 10,
+      radius: 20,
+      blur: 15,
       maxZoom: 10,
       gradient: {
-        0.1: "blue",
-        0.3: "cyan",
-        0.5: "lime",
-        0.7: "yellow",
-        1.0: "red",
+        0.1: "#ADD8E6", // Светло-голубой (мелкие)
+        0.3: "#0000FF", // Синий (средняя глубина)
+        0.6: "#00008B", // Темно-синий (глубокие)
+        1.0: "#00004B", // Почти черный (очень глубокие)
       },
     });
 
