@@ -1,51 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import useGridCells from "../../../hook/useGridCells";
-import { Button } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const GridCells = () => {
   const map = useMap();
   const { cells, hasMore, loading, loadMore } = useGridCells();
-  const [isGridVisible, setIsGridVisible] = useState(false); // Состояние для управления видимостью сетки
 
   useEffect(() => {
-    // Загружаем данные только при активации сетки
-    if (isGridVisible && !loading && cells.length === 0) {
+    if (!loading && cells.length === 0) {
       loadMore();
     }
-  }, [isGridVisible, loading, cells, loadMore]);
+  }, [loading, cells, loadMore]);
 
   useEffect(() => {
-    if (!map || !isGridVisible || !cells || cells.length === 0) return; // Отображаем данные только если сетка активирована
+    if (!map || !cells || cells.length === 0) return;
 
     try {
       const layerGroup = L.layerGroup().addTo(map);
-
-      // Формирование объекта FeatureCollection для Leaflet
       const geoJsonData = {
         type: "FeatureCollection",
-        features: cells.map((cell) => {
-          if (cell?.properties?.cell?.coordinates) {
-            return {
-              type: "Feature",
-              geometry: {
-                type: "Polygon",
-                coordinates: cell.properties.cell.coordinates,
-              },
-              properties: {
-                ...cell.properties,
-                // Добавляем уникальный идентификатор для попапа
-                cell_id: cell.id, // Используем ID ячейки (или другой уникальный идентификатор)
-              },
-            };
-          }
-          console.error("Ошибка: некорректная геометрия", cell);
-          return null;
-        }).filter(Boolean),
+        features: cells
+          .map((cell) => {
+            if (cell?.properties?.cell?.coordinates) {
+              return {
+                type: "Feature",
+                geometry: {
+                  type: "Polygon",
+                  coordinates: cell.properties.cell.coordinates,
+                },
+                properties: {
+                  ...cell.properties,
+                  cell_id: cell.id, // Уникальный идентификатор
+                },
+              };
+            }
+            console.error("Ошибка: некорректная геометрия", cell);
+            return null;
+          })
+          .filter(Boolean),
       };
 
-      // Добавляем полигоны с обработчиком клика
       const geoJsonLayer = L.geoJSON(geoJsonData, {
         style: {
           color: "#000",
@@ -53,7 +49,6 @@ const GridCells = () => {
           fillOpacity: 0,
         },
         onEachFeature: (feature, layer) => {
-          // Проверяем, что у feature есть cell_id
           if (feature.properties.cell_id) {
             layer.on("click", () => {
               const popupContent = `
@@ -65,40 +60,42 @@ const GridCells = () => {
         },
       });
 
-      // Добавляем слой на карту
       geoJsonLayer.addTo(layerGroup);
-
-      // Очистка слоя, когда компонент размонтируется или когда слой скрывается
       return () => {
         map.removeLayer(geoJsonLayer);
       };
     } catch (error) {
       console.error("Ошибка при добавлении GeoJSON:", error);
     }
-  }, [cells, map, isGridVisible]);
+  }, [cells, map]);
 
-  return (
-    <div>
-      <div style={{ position: "absolute", bottom: 10, left: 10, background: "white", padding: "5px" }}>
-        {loading && <span>Загрузка данных...</span>}
-        {!hasMore && <span>Все данные загружены</span>}
-      </div>
+  if (loading) {
+    return (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 20,
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "rgba(255, 255, 255, 0.9)",
+            padding: "7px 10px",
+            borderRadius: "5px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+            zIndex: 1000,
+          }}
+        >
+          <LoadingOutlined />
+          Загрузка данных для сетки...
+        </div>
+    );
+  }
 
-      <Button
-        id="button-grid"
-        onClick={() => setIsGridVisible((prev) => !prev)} // Переключение видимости сетки
-        type="primary"
-        style={{
-          position: "absolute",
-          zIndex: 1000,
-          top: 400,
-          right: 10,
-        }}
-      >
-        {isGridVisible ? "Скрыть сетку" : "Показать сетку"}
-      </Button>
-    </div>
-  );
+  return null;
 };
 
 export default GridCells;

@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Button } from "antd";
+import React, { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import useGeoData from "../../hook/useGeodataPoints";
+import { LoadingOutlined } from "@ant-design/icons";
 
-const MapPoints = (selectedFields) => {
+const MapPoints = ( selectedFields ) => {
   const map = useMap();
   const { geojsonData, loading, error } = useGeoData(selectedFields);
-  const [opacity, setOpacity] = useState(1); // Используем прозрачность вместо удаления слоя
-
-  const toggleVisibility = () => {
-    setOpacity((prev) => (prev === 1 ? 0 : 1)); // Переключаем прозрачность
-  };
 
   useEffect(() => {
-    if (!geojsonData) return;
+    if (!geojsonData || !map) return;
 
     function getFillColor(depth) {
       if (depth > 15) return "#aba9a9";
@@ -35,16 +30,11 @@ const MapPoints = (selectedFields) => {
           fillColor: getFillColor(depth),
           color: "#000",
           weight: 1,
-          opacity: opacity, // Управляем прозрачностью
-          fillOpacity: opacity * 0.8, // fillOpacity тоже меняем
+          opacity: 1,
+          fillOpacity: 0.8,
         });
 
-        // Добавляем ID и глубину в попап
-        circleMarker.bindPopup(`
-<!--          <strong>ID точки:</strong> ${feature?.id || "Не указан"}<br>-->
-          <strong>Глубина:</strong> ${depth.toFixed(2)} м
-        `);
-
+        circleMarker.bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
         return circleMarker;
       },
     });
@@ -52,27 +42,35 @@ const MapPoints = (selectedFields) => {
     geoJsonLayer.addTo(map);
 
     return () => map.removeLayer(geoJsonLayer);
-  }, [geojsonData, map, opacity]); // Изменение opacity не влияет на загрузку данных!
+  }, [geojsonData, map]);
 
-  if (loading) return <p>Загрузка данных...</p>;
-  if (error) return <p>Ошибка загрузки: {error.message}</p>;
-
-  return (
-    <>
-      <Button
-        onClick={toggleVisibility}
-        type="primary"
+  if (loading) {
+    return (
+      <div
         style={{
-          position: "absolute",
-          top: "300px",
-          right: "10px",
+          position: "fixed",
+          bottom: 60,
+          left: "50%",
+          transform: "translateX(-50%)",
+          background: "rgba(255, 255, 255, 0.9)",
+          padding: "7px 10px",
+          borderRadius: "5px",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          fontSize: "12px",
+          fontWeight: "bold",
+          boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
           zIndex: 1000,
         }}
       >
-        {opacity === 1 ? "Скрыть точки" : "Показать точки"}
-      </Button>
-    </>
-  );
+        <LoadingOutlined style={{ fontSize: 18, marginRight: 8 }} />
+        Загрузка очищенных данных...
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default MapPoints;
