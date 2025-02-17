@@ -65,7 +65,7 @@ const MapPoints = ( selectedFields ) => {
         }}
       >
         <LoadingOutlined style={{ fontSize: 18, marginRight: 8 }} />
-        Загрузка очищенных данных...
+        Загрузка всех данных...
       </div>
     );
   }

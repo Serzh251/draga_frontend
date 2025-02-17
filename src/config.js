@@ -4,8 +4,8 @@ const config = {
   WS_API_HOST: "ws://127.0.0.1:8055/ws",
   timeZone: "Europe/Moscow",
   defaultPosition: [
-    [64.56, 40.486086666666665],
-    [64.559, 40.486086666666665],
+    [64.5624, 40.488],
+    [64.559, 40.482],
   ],
   layers: [
     {
