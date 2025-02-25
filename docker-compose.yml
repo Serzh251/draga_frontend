@@ -1,0 +1,22 @@
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/build:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - staticfiles:/app/staticfiles
+      - mediafiles:/app/media
+    networks:
+      - containers_network
+volumes:
+  staticfiles:
+    external: true
+  mediafiles:
+    external: true
+
+networks:
+  containers_network:
+    external: true

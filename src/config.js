@@ -1,7 +1,7 @@
 const config = {
   API_URL: "http://localhost:2025",
-  API_ADMIN: "http://127.0.0.1:2025/admin/",
-  WS_API_HOST: "ws://127.0.0.1:8055/ws",
+  API_ADMIN: "http://localhost/admin/",
+  WS_API_HOST: "ws://localhost:8055/ws",
   timeZone: "Europe/Moscow",
   defaultPosition: [
     [64.5624, 40.488],
