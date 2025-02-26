@@ -38,7 +38,7 @@ const AppHeader = (props) => {
     menuItems.push({
       key: '4',
       icon: <SettingOutlined />,
-      label: <NavLink to={apiAdmin}>Админ панель</NavLink>,
+      label: <a href={apiAdmin}rel="noopener noreferrer">Админ панель</a>,
     });
     menuItems.push({
       key: '5',
