@@ -15,8 +15,8 @@ import MapCleanPoints from "./MapCleanPoints";
 import FieldSelectionSidebar from "./Fields/FieldsList";
 import useListFields from "../../hook/useListFields";
 import MapFields from "./Fields/MapFields";
-import { AlignCenterOutlined, EnvironmentOutlined } from "@ant-design/icons";
-import { Tooltip } from "antd";
+import ToggleButtonGroup from "../buttons/ToogleButtons";
+
 
 const MapComponent = () => {
   const { listGeojsonFields } = useListFields();
@@ -52,59 +52,14 @@ const MapComponent = () => {
         {showGridCells && <GridCells />}
       </MapContainer>
 
-      <Tooltip title={showMapPoints ? "Скрыть все точки" : "Показать все точки"}>
-        <EnvironmentOutlined
-          onClick={() => setShowMapPoints((prev) => !prev)}
-          style={{
-            position: "absolute",
-            zIndex: 1000,
-            top: 250,
-            right: 10,
-            fontSize: "24px",
-            cursor: "pointer",
-            background: "white",
-            padding: "10px",
-            borderRadius: "5px",
-            boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-          }}
-        />
-      </Tooltip>
-
-      <Tooltip title={showCleanPoints ? "Скрыть clean точки" : "Показать clean точки"}>
-        <EnvironmentOutlined
-          onClick={() => setShowCleanPoints((prev) => !prev)} // Управляем отображением MapCleanPoints
-          style={{
-            position: "absolute",
-            zIndex: 1000,
-            top: 320,
-            right: 10,
-            fontSize: "24px",
-            cursor: "pointer",
-            background: "white",
-            padding: "10px",
-            borderRadius: "5px",
-            boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-          }}
-        />
-      </Tooltip>
-
-      <Tooltip title={showGridCells ? "Скрыть сетку" : "Показать сетку"}>
-        <AlignCenterOutlined
-          onClick={() => setShowGridCells((prev) => !prev)}
-          style={{
-            position: "absolute",
-            zIndex: 1000,
-            top: 390,
-            right: 10,
-            fontSize: "24px",
-            cursor: "pointer",
-            background: "white",
-            padding: "10px",
-            borderRadius: "5px",
-            boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-          }}
-        />
-      </Tooltip>
+      <ToggleButtonGroup
+        showMapPoints={showMapPoints}
+        setShowMapPoints={setShowMapPoints}
+        showCleanPoints={showCleanPoints}
+        setShowCleanPoints={setShowCleanPoints}
+        showGridCells={showGridCells}
+        setShowGridCells={setShowGridCells}
+      />
     </div>
   );
 };

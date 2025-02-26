@@ -81,10 +81,13 @@ const HeatmapLayer = ({ data }) => {
             height: 80px;
             background: linear-gradient(to top, #00004B, #00008B, #0000FF, #9ea4a6);
           }
+          .depth {
+            font-size: 11px;
+          }
         </style>
         <div class="legend-scale">
           <div class="legend-bar"></div>
-          <div>Глубина, м</div>
+          <div class="depth">Глубина</div>
           <div>20+</div>
           <div>10</div>
           <div>5</div>
