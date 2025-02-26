@@ -16,6 +16,8 @@ import FieldSelectionSidebar from "./Fields/FieldsList";
 import useListFields from "../../hook/useListFields";
 import MapFields from "./Fields/MapFields";
 import ToggleButtonGroup from "../buttons/ToogleButtons";
+import WebSocketComponent from "../location/WebsockerLocation";
+import LocationMarker from "../location/LocationMarker";
 
 
 const MapComponent = () => {
@@ -25,6 +27,7 @@ const MapComponent = () => {
   const [showGridCells, setShowGridCells] = useState(false);
   const [showMapPoints, setShowMapPoints] = useState(true);
   const [showCleanPoints, setShowCleanPoints] = useState(true);
+  const [location, setLocation] = useState(null); // Состояние для хранения местоположения
 
   return (
     <div className="app-layout">
@@ -50,6 +53,7 @@ const MapComponent = () => {
         {showCleanPoints && <MapCleanPoints selectedFields={selectedFields} onDataLoaded={setCleanGeojsonData} />}
         {cleanGeojsonData && <HeatmapLayer data={cleanGeojsonData.features} />}
         {showGridCells && <GridCells />}
+        {location && <LocationMarker location={location} />}
       </MapContainer>
 
       <ToggleButtonGroup
@@ -60,6 +64,8 @@ const MapComponent = () => {
         showGridCells={showGridCells}
         setShowGridCells={setShowGridCells}
       />
+
+      <WebSocketComponent setLocation={setLocation} />
     </div>
   );
 };
