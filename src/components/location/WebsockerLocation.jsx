@@ -10,7 +10,7 @@ const WebSocketComponent = ({ setLocation }) => {
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data).message;
-      setLocation({ lat: message.lat, lng: message.long });
+      setLocation({ lat: message.lat, lng: message.lng, course: message.course });
     };
 
     ws.onclose = () => {
