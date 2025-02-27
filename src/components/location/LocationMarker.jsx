@@ -1,20 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Marker, Popup, Polyline } from "react-leaflet";
 import L from "leaflet";
 
 const LocationMarker = ({ location }) => {
   const [trail, setTrail] = useState([]);
+  const [isActive, setIsActive] = useState(true);
+  const lastUpdateTime = useRef(Date.now());
 
   useEffect(() => {
     if (location.lat && location.lng) {
-      setTrail((prevTrail) => [...prevTrail.slice(-10), [location.lat, location.lng]]);
+      lastUpdateTime.current = Date.now();
+      setIsActive(true);
+      setTrail((prevTrail) => [...prevTrail.slice(-50), [location.lat, location.lng]]);
     }
   }, [location]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (Date.now() - lastUpdateTime.current > 60000) {
+        setIsActive(false);
+      }
+    }, 10000); // Проверяем каждые 10 секунд
+
+    return () => clearInterval(interval);
+  }, []);
+
   const icon = new L.DivIcon({
     html: `
-      <div class="custom-icon-wrapper">
-        <div class="pulse-ring"></div>
+      <div class="custom-icon-wrapper ${isActive ? "" : "inactive"}">
+        <div class="pulse-ring ${isActive ? "" : "hidden"}"></div>
         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
           <circle cx="12.5" cy="12.5" r="8" fill="red" stroke="black" strokeWidth="2"/>
         </svg>
@@ -28,10 +42,9 @@ const LocationMarker = ({ location }) => {
 
   return (
     <>
-      {/* Длинный и заметный шлейф */}
-      {trail.length > 1 && <Polyline positions={trail} color="red" weight={50} opacity={0.8} dashArray="1, 1" />}
+      {/* Шлейф пути */}
+      {trail.length > 5 && <Polyline positions={trail} color="red" weight={5} opacity={0.8} dashArray="5, 5" />}
 
-      {/* Маркер с анимацией */}
       <Marker position={[location.lat, location.lng]} icon={icon}>
         <Popup>
           <strong>Текущая позиция</strong>
