@@ -18,11 +18,16 @@ import MapFields from "./Fields/MapFields";
 import ToggleButtonGroup from "../buttons/ToogleButtons";
 import WebSocketComponent from "../location/WebsockerLocation";
 import LocationMarker from "../location/LocationMarker";
+import YearSelectionSidebar from "./YearSelectionSidebar";
+import useUniqueYears from "../../hook/useUniqueYears";
+
 
 
 const MapComponent = () => {
   const { listGeojsonFields } = useListFields();
+  const { listUniqueYears } = useUniqueYears();
   const [selectedFields, setSelectedFields] = useState(new Set());
+  const [selectedYears, setSelectedYears] = useState(new Set());
   const [cleanGeojsonData, setCleanGeojsonData] = useState(null);
   const [showGridCells, setShowGridCells] = useState(false);
   const [showMapPoints, setShowMapPoints] = useState(true);
@@ -37,6 +42,11 @@ const MapComponent = () => {
         selectedFields={selectedFields}
         onSelectionChange={setSelectedFields}
       />
+      <YearSelectionSidebar
+        years={listUniqueYears || []}
+        selectedYears={selectedYears}
+        onSelectionChange={setSelectedYears}
+      />
       <MapContainer
         bounds={config.defaultPosition}
         zoom={13}
@@ -47,9 +57,10 @@ const MapComponent = () => {
         <ZoomControl position="bottomright" />
         <ScaleControl position="bottomleft" imperial={false} />
         <LayersControlComponent />
-        {listGeojsonFields && <MapFields listGeojsonFields={listGeojsonFields} />}
         <DrawTools />
         <RulerControl />
+
+        {listGeojsonFields && <MapFields listGeojsonFields={listGeojsonFields} />}
         {showMapPoints && <MapPoints selectedFields={selectedFields} />}
         {showCleanPoints && <MapCleanPoints selectedFields={selectedFields} onDataLoaded={setCleanGeojsonData} />}
         {showHotMap && cleanGeojsonData && <HeatmapLayer data={cleanGeojsonData.features} />}

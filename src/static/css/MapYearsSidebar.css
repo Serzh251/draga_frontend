@@ -1,0 +1,40 @@
+.year-sidebar-wrapper {
+    position: absolute;
+    top: 515px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 1000;
+}
+.clean-points-sidebar-wrapper {
+    top: 170px;
+}
+.year-toggle-button {
+    width: 40px;
+    height: 40px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.year-sidebar {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    margin-top: 5px;
+}
+
+.year-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+}
