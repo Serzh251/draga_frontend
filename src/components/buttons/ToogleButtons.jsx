@@ -1,5 +1,5 @@
 import React from "react";
-import { AlignCenterOutlined, EnvironmentOutlined } from "@ant-design/icons";
+import { AlignCenterOutlined, EnvironmentOutlined, RadarChartOutlined } from "@ant-design/icons";
 import { Tooltip } from "antd";
 
 const ToggleButton = ({ title, icon: Icon, onClick, style }) => (
@@ -28,26 +28,35 @@ const ToggleButtonGroup = ({
                                setShowCleanPoints,
                                showGridCells,
                                setShowGridCells,
+                               showHotMap,
+                               setShowHotMap,
                            }) => (
   <>
+      <ToggleButton
+        title={showHotMap ? "Скрыть hot map" : "Показать hot map"}
+        icon={RadarChartOutlined}
+        onClick={() => setShowHotMap((prev) => !prev)}
+        style={{ top: 250, right: 10 }}
+      />
       <ToggleButton
         title={showMapPoints ? "Скрыть все точки" : "Показать все точки"}
         icon={EnvironmentOutlined}
         onClick={() => setShowMapPoints((prev) => !prev)}
-        style={{ top: 250, right: 10 }}
+        style={{ top: 320, right: 10 }}
       />
       <ToggleButton
         title={showCleanPoints ? "Скрыть clean точки" : "Показать clean точки"}
         icon={EnvironmentOutlined}
         onClick={() => setShowCleanPoints((prev) => !prev)}
-        style={{ top: 320, right: 10 }}
+        style={{ top: 390, right: 10 }}
       />
       <ToggleButton
         title={showGridCells ? "Скрыть сетку" : "Показать сетку"}
         icon={AlignCenterOutlined}
         onClick={() => setShowGridCells((prev) => !prev)}
-        style={{ top: 390, right: 10 }}
+        style={{ top: 460, right: 10 }}
       />
+
   </>
 );
 

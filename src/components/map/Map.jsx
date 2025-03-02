@@ -27,7 +27,8 @@ const MapComponent = () => {
   const [showGridCells, setShowGridCells] = useState(false);
   const [showMapPoints, setShowMapPoints] = useState(true);
   const [showCleanPoints, setShowCleanPoints] = useState(true);
-  const [location, setLocation] = useState(null); // Состояние для хранения местоположения
+  const [showHotMap, setShowHotMap] = useState(true);
+  const [location, setLocation] = useState(null);
 
   return (
     <div className="app-layout">
@@ -51,11 +52,12 @@ const MapComponent = () => {
         <RulerControl />
         {showMapPoints && <MapPoints selectedFields={selectedFields} />}
         {showCleanPoints && <MapCleanPoints selectedFields={selectedFields} onDataLoaded={setCleanGeojsonData} />}
-        {cleanGeojsonData && <HeatmapLayer data={cleanGeojsonData.features} />}
+        {showHotMap && cleanGeojsonData && <HeatmapLayer data={cleanGeojsonData.features} />}
         {showGridCells && <GridCells />}
         {location && <LocationMarker location={location} />}
       </MapContainer>
 
+      <WebSocketComponent setLocation={setLocation} />
       <ToggleButtonGroup
         showMapPoints={showMapPoints}
         setShowMapPoints={setShowMapPoints}
@@ -63,9 +65,10 @@ const MapComponent = () => {
         setShowCleanPoints={setShowCleanPoints}
         showGridCells={showGridCells}
         setShowGridCells={setShowGridCells}
+        showHotMap={showHotMap}
+        setShowHotMap={setShowHotMap}
       />
 
-      <WebSocketComponent setLocation={setLocation} />
     </div>
   );
 };
