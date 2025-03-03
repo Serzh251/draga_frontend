@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { axiosPrivate } from "../api/axois";
 import configApi from "../api/config-api";
 
-const useListFields = (endpoint) => {
+const useListFields = () => {
   const [listGeojsonFields, setListGeojsonFields] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,7 +21,7 @@ const useListFields = (endpoint) => {
     };
 
     fetchGeoData();
-  }, [endpoint, axiosPrivate]);
+  }, []);
 
   return { listGeojsonFields, loading, error };
 };

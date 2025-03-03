@@ -4,15 +4,8 @@ import L from "leaflet";
 import useCleanPoints from "../../hook/useCleanPoints";
 import { LoadingOutlined } from "@ant-design/icons";
 
-const MapCleanPoints = ({ selectedFields, onDataLoaded }) => {
+const MapCleanPoints = ({ geojsonData, loading, error }) => {
   const map = useMap();
-  const { geojsonData, loading, error } = useCleanPoints(selectedFields);
-
-  useEffect(() => {
-    if (geojsonData) {
-      onDataLoaded(geojsonData);
-    }
-  }, [geojsonData, onDataLoaded]);
 
   useEffect(() => {
     if (!geojsonData || !map) return;

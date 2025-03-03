@@ -20,20 +20,20 @@ import WebSocketComponent from "../location/WebsockerLocation";
 import LocationMarker from "../location/LocationMarker";
 import YearSelectionSidebar from "./YearSelectionSidebar";
 import useUniqueYears from "../../hook/useUniqueYears";
-
-
+import useCleanPoints from "../../hook/useCleanPoints";
 
 const MapComponent = () => {
   const { listGeojsonFields } = useListFields();
   const { listUniqueYears } = useUniqueYears();
   const [selectedFields, setSelectedFields] = useState(new Set());
   const [selectedYears, setSelectedYears] = useState(new Set());
-  const [cleanGeojsonData, setCleanGeojsonData] = useState(null);
   const [showGridCells, setShowGridCells] = useState(false);
   const [showMapPoints, setShowMapPoints] = useState(true);
   const [showCleanPoints, setShowCleanPoints] = useState(true);
   const [showHotMap, setShowHotMap] = useState(true);
   const [location, setLocation] = useState(null);
+
+  const { geojsonData: cleanGeojsonData, loading: cleanLoading, error: cleanError } = useCleanPoints(selectedFields, selectedYears);
 
   return (
     <div className="app-layout">
@@ -62,13 +62,18 @@ const MapComponent = () => {
 
         {listGeojsonFields && <MapFields listGeojsonFields={listGeojsonFields} />}
         {showMapPoints && <MapPoints selectedFields={selectedFields} />}
-        {showCleanPoints && <MapCleanPoints selectedFields={selectedFields} onDataLoaded={setCleanGeojsonData} />}
+        {showCleanPoints && cleanGeojsonData && (
+          <MapCleanPoints
+            geojsonData={cleanGeojsonData}
+            loading={cleanLoading}
+            error={cleanError}
+          />
+        )}
         {showHotMap && cleanGeojsonData && <HeatmapLayer data={cleanGeojsonData.features} />}
         {showGridCells && <GridCells />}
         {location && <LocationMarker location={location} />}
       </MapContainer>
 
-      <WebSocketComponent setLocation={setLocation} />
       <ToggleButtonGroup
         showMapPoints={showMapPoints}
         setShowMapPoints={setShowMapPoints}
@@ -80,6 +85,7 @@ const MapComponent = () => {
         setShowHotMap={setShowHotMap}
       />
 
+      <WebSocketComponent setLocation={setLocation} />
     </div>
   );
 };
