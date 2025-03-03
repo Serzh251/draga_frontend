@@ -1,6 +1,6 @@
 .year-sidebar-wrapper {
     position: absolute;
-    top: 515px;
+    top: 490px;
     right: 10px;
     display: flex;
     flex-direction: column;
@@ -11,8 +11,8 @@
     top: 170px;
 }
 .year-toggle-button {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     background: white;
     display: flex;
     align-items: center;

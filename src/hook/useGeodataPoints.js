@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { axiosPrivate } from "../api/axois";
-import configApi from "../api/config-api";
+import { useState, useEffect } from 'react';
+import { axiosPrivate } from '../api/axois';
+import configApi from '../api/config-api';
 
 const useGeoData = ({ selectedFields }) => {
   const [geojsonData, setGeojsonData] = useState(null);
@@ -18,7 +18,7 @@ const useGeoData = ({ selectedFields }) => {
       setError(null);
 
       try {
-        const fieldParam = Array.from(selectedFields).join(",");
+        const fieldParam = Array.from(selectedFields).join(',');
         const response = await axiosPrivate.get(
           `${configApi.GET_POINTS}?is_working=1&field=${encodeURIComponent(fieldParam)}`
         );

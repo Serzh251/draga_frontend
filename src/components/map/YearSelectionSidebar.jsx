@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Select } from "antd";
-import "antd/dist/reset.css";
-import "../../static/css/MapYearsSidebar.css";
+import React, { useState, useEffect } from 'react';
+import { Select } from 'antd';
+import { CalendarOutlined } from '@ant-design/icons';
+import 'antd/dist/reset.css';
+import '../../static/css/MapYearsSidebar.css';
 
 const { Option } = Select;
 
@@ -10,18 +11,17 @@ const YearSelectionSidebar = ({ years, onSelectionChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const savedYear = localStorage.getItem("selectedYears");
-    if (savedYear && savedYear !== "null") {
+    const savedYear = localStorage.getItem('selectedYears');
+    if (savedYear && savedYear !== 'null') {
       setSelectedYears(JSON.parse(savedYear));
     }
   }, []);
 
-  // Сохранение выбора и обновление данных
   useEffect(() => {
     if (selectedYears) {
-      localStorage.setItem("selectedYears", JSON.stringify(selectedYears));
+      localStorage.setItem('selectedYears', JSON.stringify(selectedYears));
     } else {
-      localStorage.removeItem("selectedYears"); // Удаляем null из localStorage
+      localStorage.removeItem('selectedYears');
     }
     onSelectionChange(selectedYears ? new Set([selectedYears]) : new Set());
   }, [selectedYears, onSelectionChange]);
@@ -32,12 +32,15 @@ const YearSelectionSidebar = ({ years, onSelectionChange }) => {
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
-      <div className="year-toggle-button">☰</div>
+      <div className="year-toggle-button">
+        <CalendarOutlined style={{ fontSize: 20 }} />
+      </div>
+
       {isOpen && (
         <div className="year-sidebar">
           <div className="year-sidebar-title">Год</div>
           <Select
-            style={{ width: "100%" }}
+            style={{ width: '100%' }}
             placeholder="Выберите год"
             value={selectedYears || undefined}
             onChange={(value) => setSelectedYears(value || null)}

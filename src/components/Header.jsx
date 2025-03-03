@@ -7,14 +7,13 @@ import {
   LogoutOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import config from "../config";
-import { useAuth } from "../hook/use-auth";
+import config from '../config';
+import { useAuth } from '../hook/use-auth';
 const { Header } = Layout;
 
-const AppHeader = (props) => {
-
+const AppHeader = () => {
   const apiAdmin = config.API_ADMIN;
-  const {isAuth, firstName } = useAuth();
+  const { isAuth, firstName } = useAuth();
   const menuItems = [
     {
       key: '1',
@@ -38,14 +37,16 @@ const AppHeader = (props) => {
     menuItems.push({
       key: '4',
       icon: <SettingOutlined />,
-      label: <a href={apiAdmin}rel="noopener noreferrer">Админ панель</a>,
+      label: (
+        <a href={apiAdmin} rel="noopener noreferrer">
+          Админ панель
+        </a>
+      ),
     });
     menuItems.push({
       key: '5',
       label: (
-        <div className="current-user text-decoration-none">
-          {firstName}
-        </div>
+        <div className="current-user text-decoration-none">{firstName}</div>
       ),
       style: { marginLeft: 'auto' },
     });

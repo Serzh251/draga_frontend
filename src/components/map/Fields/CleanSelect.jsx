@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Select } from "antd";
-import "antd/dist/reset.css";
-import "../../../static/css/MapFields.css";
+import React, { useState } from 'react';
+import { Select } from 'antd';
+import 'antd/dist/reset.css';
+import '../../../static/css/MapFields.css';
 
 const { Option } = Select;
 
@@ -20,7 +20,7 @@ const CleanSelectionSidebar = ({ fields }) => {
         <div className="field-sidebar">
           <div className="field-sidebar-title">Месторождения</div>
           <Select
-            style={{ width: "100%" }}
+            style={{ width: '100%' }}
             placeholder="Выберите месторождение"
             value={selectedField || undefined}
             onChange={(value) => setSelectedField(value || null)}

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Select } from "antd";
-import "antd/dist/reset.css";
-import "../../../static/css/MapFields.css";
+import React, { useState, useEffect } from 'react';
+import { Select } from 'antd';
+import 'antd/dist/reset.css';
+import '../../../static/css/MapFields.css';
 
 const { Option } = Select;
 
@@ -11,18 +11,17 @@ const FieldSelectionSidebar = ({ fields, onSelectionChange }) => {
 
   // Загрузка сохраненного значения из localStorage при монтировании
   useEffect(() => {
-    const savedField = localStorage.getItem("selectedField");
-    if (savedField && savedField !== "null") {
+    const savedField = localStorage.getItem('selectedField');
+    if (savedField && savedField !== 'null') {
       setSelectedField(JSON.parse(savedField));
     }
   }, []);
 
-  // Сохранение выбора и обновление данных
   useEffect(() => {
     if (selectedField) {
-      localStorage.setItem("selectedField", JSON.stringify(selectedField));
+      localStorage.setItem('selectedField', JSON.stringify(selectedField));
     } else {
-      localStorage.removeItem("selectedField"); // Удаляем null из localStorage
+      localStorage.removeItem('selectedField');
     }
     onSelectionChange(selectedField ? new Set([selectedField]) : new Set());
   }, [selectedField, onSelectionChange]);
@@ -38,7 +37,7 @@ const FieldSelectionSidebar = ({ fields, onSelectionChange }) => {
         <div className="field-sidebar">
           <div className="field-sidebar-title">Месторождения</div>
           <Select
-            style={{ width: "100%" }}
+            style={{ width: '100%' }}
             placeholder="Выберите месторождение"
             value={selectedField || undefined}
             onChange={(value) => setSelectedField(value || null)}

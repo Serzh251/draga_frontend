@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { axiosPrivate } from "../api/axois";
-import configApi from "../api/config-api";
+import { useState, useEffect } from 'react';
+import { axiosPrivate } from '../api/axois';
+import configApi from '../api/config-api';
 
 const useUniqueYears = () => {
   const [listUniqueYears, setListUniqueYears] = useState(null);
@@ -21,7 +21,7 @@ const useUniqueYears = () => {
     };
 
     fetchGeoData();
-  }, [axiosPrivate]);
+  }, []);
 
   return { listUniqueYears, loading, error };
 };

@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
-import { useMap } from "react-leaflet";
-import L from "leaflet";
-import useCleanPoints from "../../hook/useCleanPoints";
-import { LoadingOutlined } from "@ant-design/icons";
+import React, { useEffect } from 'react';
+import { useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { LoadingOutlined } from '@ant-design/icons';
 
-const MapCleanPoints = ({ geojsonData, loading, error }) => {
+const MapCleanPoints = ({ geojsonData, loading }) => {
   const map = useMap();
 
   useEffect(() => {
@@ -12,7 +11,7 @@ const MapCleanPoints = ({ geojsonData, loading, error }) => {
 
     function getFillColor(depth) {
       if (depth <= 0 || depth > 15) {
-        return "#aba9a9";
+        return '#aba9a9';
       }
 
       const maxDepth = 15;
@@ -30,13 +29,15 @@ const MapCleanPoints = ({ geojsonData, loading, error }) => {
           radius: 8,
           stroke: false,
           fillColor: getFillColor(depth),
-          color: "#000",
+          color: '#000',
           weight: 1,
           opacity: 1,
           fillOpacity: 0.8,
         });
 
-        circleMarker.bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
+        circleMarker.bindPopup(
+          `<strong>Глубина:</strong> ${depth.toFixed(2)} м`
+        );
         return circleMarker;
       },
     });
@@ -50,19 +51,19 @@ const MapCleanPoints = ({ geojsonData, loading, error }) => {
     return (
       <div
         style={{
-          position: "fixed",
+          position: 'fixed',
           bottom: 100,
-          left: "50%",
-          transform: "translateX(-50%)",
-          background: "rgba(255, 255, 255, 0.9)",
-          padding: "7px 10px",
-          borderRadius: "5px",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          fontSize: "12px",
-          fontWeight: "bold",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(255, 255, 255, 0.9)',
+          padding: '7px 10px',
+          borderRadius: '5px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
           zIndex: 1000,
         }}
       >

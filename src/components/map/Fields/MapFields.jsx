@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { useMap } from "react-leaflet";
-import L from "leaflet";
+import { useEffect, useState } from 'react';
+import { useMap } from 'react-leaflet';
+import L from 'leaflet';
 
 const MapFields = ({ listGeojsonFields }) => {
   const map = useMap();
@@ -8,7 +8,7 @@ const MapFields = ({ listGeojsonFields }) => {
 
   useEffect(() => {
     if (!listGeojsonFields || !Array.isArray(listGeojsonFields.features)) {
-      console.warn("Некорректные данные GeoJSON: отсутствует массив features");
+      console.warn('Некорректные данные GeoJSON: отсутствует массив features');
       return;
     }
 
@@ -20,25 +20,25 @@ const MapFields = ({ listGeojsonFields }) => {
     const newLayers = new Map();
 
     listGeojsonFields.features.forEach((feature) => {
-      if (feature.geometry.type === "Polygon") {
+      if (feature.geometry.type === 'Polygon') {
         const coordinates = feature.geometry.coordinates[0];
         const polygon = L.geoJSON(feature.geometry, {
           style: {
-            color: "#25282b",
+            color: '#25282b',
             weight: 2,
             fillOpacity: 0,
           },
         }).addTo(map);
 
         polygon.eachLayer((layer) => {
-          layer.on("click", (e) => {
+          layer.on('click', (e) => {
             e.originalEvent.stopPropagation(); // Блокируем всплытие события клика
           });
         });
 
         const border = L.geoJSON(feature.geometry, {
           style: {
-            color: "blue", // Цвет границы
+            color: 'blue', // Цвет границы
             weight: 3,
             fillOpacity: 0,
           },
@@ -50,7 +50,7 @@ const MapFields = ({ listGeojsonFields }) => {
         if (midPoint) {
           const label = L.marker([midPoint[1], midPoint[0]], {
             icon: L.divIcon({
-              className: "polygon-label",
+              className: 'polygon-label',
               html: `<div style="background: white; padding: 2px 5px; border-radius: 5px; font-size: 12px; font-weight: bold; border: 1px solid #ccc;">
                         ${feature.properties.name}
                      </div>`,

@@ -1,26 +1,26 @@
-import React, { useState } from "react";
-import { MapContainer, ScaleControl, ZoomControl } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet-draw/dist/leaflet.draw.css";
-import "leaflet-draw";
+import React, { useState } from 'react';
+import { MapContainer, ScaleControl, ZoomControl } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-draw/dist/leaflet.draw.css';
+import 'leaflet-draw';
 import '../../static/css/MapMain.css';
-import LayersControlComponent from "./LayersControlComponent";
-import RulerControl from "./RulerControl";
-import config from "../../config";
-import DrawTools from "./DrawTools";
-import MapPoints from "./MapPoints";
-import HeatmapLayer from "./HeatMapLayer";
-import GridCells from "./Fields/GridCells";
-import MapCleanPoints from "./MapCleanPoints";
-import FieldSelectionSidebar from "./Fields/FieldsList";
-import useListFields from "../../hook/useListFields";
-import MapFields from "./Fields/MapFields";
-import ToggleButtonGroup from "../buttons/ToogleButtons";
-import WebSocketComponent from "../location/WebsockerLocation";
-import LocationMarker from "../location/LocationMarker";
-import YearSelectionSidebar from "./YearSelectionSidebar";
-import useUniqueYears from "../../hook/useUniqueYears";
-import useCleanPoints from "../../hook/useCleanPoints";
+import LayersControlComponent from './LayersControlComponent';
+import RulerControl from './RulerControl';
+import config from '../../config';
+import DrawTools from './DrawTools';
+import MapPoints from './MapPoints';
+import HeatmapLayer from './HeatMapLayer';
+import GridCells from './Fields/GridCells';
+import MapCleanPoints from './MapCleanPoints';
+import FieldSelectionSidebar from './Fields/FieldsList';
+import useListFields from '../../hook/useListFields';
+import MapFields from './Fields/MapFields';
+import ToggleButtonGroup from '../buttons/ToogleButtons';
+import WebSocketComponent from '../location/WebsockerLocation';
+import LocationMarker from '../location/LocationMarker';
+import YearSelectionSidebar from './YearSelectionSidebar';
+import useUniqueYears from '../../hook/useUniqueYears';
+import useCleanPoints from '../../hook/useCleanPoints';
 
 const MapComponent = () => {
   const { listGeojsonFields } = useListFields();
@@ -33,7 +33,11 @@ const MapComponent = () => {
   const [showHotMap, setShowHotMap] = useState(true);
   const [location, setLocation] = useState(null);
 
-  const { geojsonData: cleanGeojsonData, loading: cleanLoading, error: cleanError } = useCleanPoints(selectedFields, selectedYears);
+  const {
+    geojsonData: cleanGeojsonData,
+    loading: cleanLoading,
+    error: cleanError,
+  } = useCleanPoints(selectedFields, selectedYears);
 
   return (
     <div className="app-layout">
@@ -50,7 +54,7 @@ const MapComponent = () => {
       <MapContainer
         bounds={config.defaultPosition}
         zoom={13}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: '100%', width: '100%' }}
         zoomControl={false}
         maxZoom={25}
       >
@@ -60,7 +64,9 @@ const MapComponent = () => {
         <DrawTools />
         <RulerControl />
 
-        {listGeojsonFields && <MapFields listGeojsonFields={listGeojsonFields} />}
+        {listGeojsonFields && (
+          <MapFields listGeojsonFields={listGeojsonFields} />
+        )}
         {showMapPoints && <MapPoints selectedFields={selectedFields} />}
         {showCleanPoints && cleanGeojsonData && (
           <MapCleanPoints
@@ -69,7 +75,9 @@ const MapComponent = () => {
             error={cleanError}
           />
         )}
-        {showHotMap && cleanGeojsonData && <HeatmapLayer data={cleanGeojsonData.features} />}
+        {showHotMap && cleanGeojsonData && (
+          <HeatmapLayer data={cleanGeojsonData.features} />
+        )}
         {showGridCells && <GridCells />}
         {location && <LocationMarker location={location} />}
       </MapContainer>

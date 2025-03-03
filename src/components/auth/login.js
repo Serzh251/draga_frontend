@@ -1,11 +1,11 @@
-import React, {useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import axios from '../../api/axois';
-import {Button, Form, Input} from "antd";
-import Cookies from "universal-cookie";
-import {setUser} from "../../store/slices/userSlice";
-import {useDispatch} from "react-redux";
+import { Button, Form, Input } from 'antd';
+import Cookies from 'universal-cookie';
+import { setUser } from '../../store/slices/userSlice';
+import { useDispatch } from 'react-redux';
 
 const LOGIN_URL = '/api/token/';
 
@@ -19,15 +19,16 @@ const Login = () => {
 
   useEffect(() => {
     setErrMsg('');
-  }, [username, password])
+  }, [username, password]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async () => {
     try {
-      const response = await axios.post(LOGIN_URL,
-        JSON.stringify({username, password}),
+      const response = await axios.post(
+        LOGIN_URL,
+        JSON.stringify({ username, password }),
         {
-          headers: {'Content-Type': 'application/json'},
-          withCredentials: true
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
         }
       );
       const access = response?.data?.access;
@@ -42,18 +43,18 @@ const Login = () => {
       localStorage.setItem('currentUser', currentUser);
       localStorage.setItem('firstName', firstName);
       localStorage.setItem('isAuth', 'true');
-      cookie.set("refresh", refresh,);
+      cookie.set('refresh', refresh);
       dispatch(
         setUser({
           firstName: firstName,
           currentUser: currentUser,
           token: access,
-          isAuth: true
+          isAuth: true,
         })
       );
       setUsername('');
       setPassword('');
-      navigate("/");
+      navigate('/');
       setErrMsg('');
     } catch (err) {
       if (!err?.response) {
@@ -66,18 +67,21 @@ const Login = () => {
         setErrMsg('Login Failed');
       }
     }
-  }
+  };
 
   return (
-
     <div className="container d-flex justify-content-center align-items-center flex-column vh-100">
-      <p className={errMsg ? "text-danger" : "offscreen"} aria-live="assertive">{errMsg}</p>
-      <Form onFinish={handleSubmit}
-            name="basic"
-            labelCol={{span: 8}}
-            wrapperCol={{span: 16}}
-            style={{maxWidth: 600}}
-            initialValues={{remember: true}}>
+      <p className={errMsg ? 'text-danger' : 'offscreen'} aria-live="assertive">
+        {errMsg}
+      </p>
+      <Form
+        onFinish={handleSubmit}
+        name="basic"
+        labelCol={{ span: 8 }}
+        wrapperCol={{ span: 16 }}
+        style={{ maxWidth: 600 }}
+        initialValues={{ remember: true }}
+      >
         <Form.Item
           label="username"
           id="username"
@@ -85,11 +89,11 @@ const Login = () => {
           rules={[
             {
               required: true,
-              message: "Please input your username!",
+              message: 'Please input your username!',
             },
           ]}
         >
-          <Input onChange={(e) => setUsername(e.target.value)}/>
+          <Input onChange={(e) => setUsername(e.target.value)} />
         </Form.Item>
         <Form.Item
           label="password"
@@ -97,20 +101,20 @@ const Login = () => {
           rules={[
             {
               required: true,
-              message: "Please input your password!",
+              message: 'Please input your password!',
             },
           ]}
         >
-          <Input.Password onChange={(e) => setPassword(e.target.value)}/>
+          <Input.Password onChange={(e) => setPassword(e.target.value)} />
         </Form.Item>
-        <Form.Item wrapperCol={{offset: 8, span: 16}}>
+        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
           <Button type="primary" htmlType="submit">
             Вход
           </Button>
         </Form.Item>
       </Form>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

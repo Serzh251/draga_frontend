@@ -1,6 +1,6 @@
-import { useMap } from "react-leaflet";
-import { useEffect } from "react";
-import L from "leaflet";
+import { useMap } from 'react-leaflet';
+import { useEffect } from 'react';
+import L from 'leaflet';
 
 const DrawTools = () => {
   const map = useMap();
@@ -12,7 +12,7 @@ const DrawTools = () => {
     map.addLayer(drawnItems);
 
     const drawControl = new L.Control.Draw({
-      position: "topleft",
+      position: 'topleft',
       edit: {
         featureGroup: drawnItems,
       },
@@ -35,5 +35,5 @@ const DrawTools = () => {
   }, [map]);
 
   return null;
-}
+};
 export default DrawTools;

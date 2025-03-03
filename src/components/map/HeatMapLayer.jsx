@@ -1,7 +1,7 @@
-import { useEffect } from "react";
-import { useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet.heat";
+import { useEffect } from 'react';
+import { useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet.heat';
 
 const HeatmapLayer = ({ data }) => {
   const map = useMap();
@@ -13,7 +13,12 @@ const HeatmapLayer = ({ data }) => {
       const { coordinates } = feature.geometry;
       const depth = feature.properties?.depth ?? 0;
       const normalizedDepth = Math.min(1, depth / 20);
-      return { lat: coordinates[1], lng: coordinates[0], depth, weight: normalizedDepth };
+      return {
+        lat: coordinates[1],
+        lng: coordinates[0],
+        depth,
+        weight: normalizedDepth,
+      };
     });
 
     const heatLayer = L.heatLayer(
@@ -25,10 +30,10 @@ const HeatmapLayer = ({ data }) => {
         minOpacity: 0.3,
         maxIntensity: 1,
         gradient: {
-          0.1: "#9ea4a6",
-          0.3: "#0000FF",
-          0.6: "#00008B",
-          1.0: "#00004B",
+          0.1: '#9ea4a6',
+          0.3: '#0000FF',
+          0.6: '#00008B',
+          1.0: '#00004B',
         },
       }
     );
@@ -48,17 +53,19 @@ const HeatmapLayer = ({ data }) => {
       if (closestPoint) {
         L.popup()
           .setLatLng([closestPoint.lat, closestPoint.lng])
-          .setContent(`<strong>Глубина:</strong> ${closestPoint.depth.toFixed(2)} м`)
+          .setContent(
+            `<strong>Глубина:</strong> ${closestPoint.depth.toFixed(2)} м`
+          )
           .openOn(map);
       }
     };
 
-    map.on("click", handleClick);
+    map.on('click', handleClick);
 
-    const legend = L.control({ position: "bottomleft" });
+    const legend = L.control({ position: 'bottomleft' });
 
     legend.onAdd = function () {
-      const div = L.DomUtil.create("div", "legend");
+      const div = L.DomUtil.create('div', 'legend');
       div.innerHTML = `
         <style>
           .legend {
@@ -100,7 +107,7 @@ const HeatmapLayer = ({ data }) => {
     legend.addTo(map);
     return () => {
       map.removeLayer(heatLayer);
-      map.off("click", handleClick);
+      map.off('click', handleClick);
       legend.remove();
     };
   }, [data, map]);
