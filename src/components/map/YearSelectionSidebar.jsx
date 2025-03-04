@@ -27,11 +27,7 @@ const YearSelectionSidebar = ({ years, onSelectionChange }) => {
   }, [selectedYears, onSelectionChange]);
 
   return (
-    <div
-      className="year-sidebar-wrapper"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-    >
+    <div className="year-sidebar-wrapper" onMouseEnter={() => setIsOpen(true)} onMouseLeave={() => setIsOpen(false)}>
       <div className="year-toggle-button">
         <CalendarOutlined style={{ fontSize: 20 }} />
       </div>

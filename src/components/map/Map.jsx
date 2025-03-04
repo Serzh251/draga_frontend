@@ -28,7 +28,7 @@ const MapComponent = () => {
   const [selectedFields, setSelectedFields] = useState(new Set());
   const [selectedYears, setSelectedYears] = useState(new Set());
   const [showGridCells, setShowGridCells] = usePersistentState('showGridCells', false);
-  const [showMapPoints, setShowMapPoints] = usePersistentState('showMapPoints', true);
+  const [showMapPoints, setShowMapPoints] = usePersistentState('showMapPoints', false);
   const [showCleanPoints, setShowCleanPoints] = usePersistentState('showCleanPoints', true);
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
   const [location, setLocation] = useState(null);
