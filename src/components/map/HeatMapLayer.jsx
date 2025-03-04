@@ -26,8 +26,8 @@ const HeatmapLayer = ({ data }) => {
       {
         radius: 15,
         blur: 10,
-        maxZoom: 10,
-        minOpacity: 0.3,
+        maxZoom: 15,
+        minOpacity: 0.1,
         maxIntensity: 1,
         gradient: {
           0.1: '#9ea4a6',
@@ -42,20 +42,19 @@ const HeatmapLayer = ({ data }) => {
 
     const handleClick = (e) => {
       const { lat, lng } = e.latlng;
-
-      // Ищем ближайшую точку с глубиной
+      const maxDistance = 0.00045;
       const closestPoint = heatData.reduce((prev, curr) => {
         const prevDist = Math.hypot(prev.lat - lat, prev.lng - lng);
         const currDist = Math.hypot(curr.lat - lat, curr.lng - lng);
         return currDist < prevDist ? curr : prev;
       });
 
-      if (closestPoint) {
+      const distanceToClosest = Math.hypot(closestPoint.lat - lat, closestPoint.lng - lng);
+
+      if (closestPoint && distanceToClosest <= maxDistance) {
         L.popup()
           .setLatLng([closestPoint.lat, closestPoint.lng])
-          .setContent(
-            `<strong>Глубина:</strong> ${closestPoint.depth.toFixed(2)} м`
-          )
+          .setContent(`<strong>Глубина:</strong> ${closestPoint.depth.toFixed(2)} м`)
           .openOn(map);
       }
     };
@@ -63,7 +62,6 @@ const HeatmapLayer = ({ data }) => {
     map.on('click', handleClick);
 
     const legend = L.control({ position: 'bottomleft' });
-
     legend.onAdd = function () {
       const div = L.DomUtil.create('div', 'legend');
       div.innerHTML = `
