@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import { MapContainer, ScaleControl, ZoomControl } from 'react-leaflet';
+import { MapContainer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw';
 import '../../static/css/MapMain.css';
-import LayersControlComponent from './LayersControlComponent';
-import RulerControl from './RulerControl';
 import config from '../../config';
-import DrawTools from './DrawTools';
 import MapPoints from './MapPoints';
 import HeatmapLayer from './HeatMapLayer';
 import GridCells from './Fields/GridCells';
@@ -22,6 +19,7 @@ import YearSelectionSidebar from './YearSelectionSidebar';
 import useUniqueYears from '../../hook/useUniqueYears';
 import useCleanPoints from '../../hook/useCleanPoints';
 import usePersistentState from '../../hook/usePersistentState';
+import MapInstruments from './Instruments/MapInstruments';
 
 const MapComponent = () => {
   const { listGeojsonFields } = useListFields();
@@ -60,11 +58,7 @@ const MapComponent = () => {
         zoomControl={false}
         maxZoom={25}
       >
-        <ZoomControl position="bottomright" />
-        <ScaleControl position="bottomleft" imperial={false} />
-        <LayersControlComponent />
-        <DrawTools />
-        <RulerControl />
+        <MapInstruments />
 
         {listGeojsonFields && <MapFields listGeojsonFields={listGeojsonFields} />}
         {showMapPoints && <MapPoints selectedFields={selectedFields} />}

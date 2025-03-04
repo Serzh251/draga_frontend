@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { LayersControl, TileLayer } from 'react-leaflet';
-import config from '../../config';
+import config from '../../../config';
 
 const LayersControlComponent = () => {
   const [selectedLayer, setSelectedLayer] = useState(() => {
@@ -14,11 +14,7 @@ const LayersControlComponent = () => {
   return (
     <LayersControl position="topright">
       {config.layers.map((layer) => (
-        <LayersControl.BaseLayer
-          key={layer.name}
-          name={layer.name}
-          checked={layer.name === selectedLayer}
-        >
+        <LayersControl.BaseLayer key={layer.name} name={layer.name} checked={layer.name === selectedLayer}>
           <TileLayer
             url={layer.url}
             attribution={layer.attribution}
