@@ -5,21 +5,21 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw';
 import '../../static/css/MapMain.css';
 import config from '../../config';
+
 import MapPoints from './MapPoints';
 import HeatmapLayer from './HeatMapLayer';
 import GridCells from './Fields/GridCells';
 import MapCleanPoints from './MapCleanPoints';
-import FieldSelectionSidebar from './Fields/FieldsList';
 import useListFields from '../../hook/useListFields';
 import MapFields from './Fields/MapFields';
 import ToggleButtonGroup from '../buttons/ToogleButtons';
 import WebSocketComponent from '../location/WebsockerLocation';
 import LocationMarker from '../location/LocationMarker';
-import YearSelectionSidebar from './YearSelectionSidebar';
 import useUniqueYears from '../../hook/useUniqueYears';
 import useCleanPoints from '../../hook/useCleanPoints';
 import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
+import SidebarSelections from './SidebarSelections';
 
 const MapComponent = () => {
   const { listGeojsonFields } = useListFields();
@@ -41,16 +41,15 @@ const MapComponent = () => {
 
   return (
     <div className="app-layout">
-      <FieldSelectionSidebar
-        fields={listGeojsonFields?.features || []}
+      <SidebarSelections
+        listGeojsonFields={listGeojsonFields}
+        listUniqueYears={listUniqueYears}
         selectedFields={selectedFields}
-        onSelectionChange={setSelectedFields}
-      />
-      <YearSelectionSidebar
-        years={listUniqueYears || []}
+        setSelectedFields={setSelectedFields}
         selectedYears={selectedYears}
-        onSelectionChange={setSelectedYears}
+        setSelectedYears={setSelectedYears}
       />
+
       <MapContainer
         bounds={config.defaultPosition}
         zoom={13}
