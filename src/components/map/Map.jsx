@@ -15,14 +15,13 @@ import ToggleButtonGroup from '../buttons/ToogleButtons';
 import WebSocketComponent from '../location/WebsockerLocation';
 import LocationMarker from '../location/LocationMarker';
 import YearSelectionSidebar from './YearSelectionSidebar';
-import useUniqueYears from '../../hook/useUniqueYears';
 import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
-import { useFetchCleanPointsQuery, useFetchFieldsQuery } from '../../api/api';
+import { useFetchCleanPointsQuery, useFetchFieldsQuery, useFetchYearsQuery } from '../../api/api';
 
 const MapComponent = () => {
   const { data: listGeojsonFields } = useFetchFieldsQuery();
-  const { listUniqueYears } = useUniqueYears();
+  const { data: listUniqueYears } = useFetchYearsQuery();
 
   const [selectedFields, setSelectedFields] = useState(new Set());
   const [selectedYears, setSelectedYears] = useState(new Set());
@@ -36,7 +35,8 @@ const MapComponent = () => {
     data: cleanGeojsonData,
     loading: cleanLoading,
     error: cleanError,
-  } = useFetchCleanPointsQuery({ field: Array.from(selectedFields) });
+  } = useFetchCleanPointsQuery({ year: Array.from(selectedYears), field: Array.from(selectedFields) });
+
   return (
     <div className="app-layout">
       <FieldSelectionSidebar

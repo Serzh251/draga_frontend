@@ -57,14 +57,17 @@ export const api = createApi({
     fetchCleanPoints: builder.query({
       query: ({ year, depth_min, depth_max, field }) => {
         const params = new URLSearchParams();
-        if (year) params.append('year', year);
+        if (year) params.append('year', Array.isArray(year) ? year.join(',') : year);
         if (depth_min) params.append('depth_min', depth_min);
         if (depth_max) params.append('depth_max', depth_max);
         if (field) params.append('field', Array.isArray(field) ? field.join(',') : field);
         return `${configApi.GET_CLEAN_POINTS}?${params.toString()}`;
       },
     }),
+    fetchYears: builder.query({
+      query: () => configApi.GET_UNIQUE_YEARS,
+    }),
   }),
 });
 
-export const { useLoginMutation, useFetchFieldsQuery, useFetchCleanPointsQuery } = api;
+export const { useLoginMutation, useFetchFieldsQuery, useFetchCleanPointsQuery, useFetchYearsQuery } = api;
