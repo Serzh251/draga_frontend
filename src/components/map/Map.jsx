@@ -31,11 +31,10 @@ const MapComponent = () => {
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
   const [location, setLocation] = useState(null);
 
-  const {
-    data: cleanGeojsonData,
-    loading: cleanLoading,
-    error: cleanError,
-  } = useFetchCleanPointsQuery({ year: Array.from(selectedYears), field: Array.from(selectedFields) });
+  const { data: cleanGeojsonData, isFetching: cleanLoading } = useFetchCleanPointsQuery({
+    year: Array.from(selectedYears),
+    field: Array.from(selectedFields),
+  });
 
   return (
     <div className="app-layout">
@@ -61,7 +60,7 @@ const MapComponent = () => {
         {listGeojsonFields && <MapFields listGeojsonFields={listGeojsonFields} />}
         {showMapPoints && <MapPoints selectedFields={selectedFields} />}
         {showCleanPoints && cleanGeojsonData && (
-          <MapCleanPoints geojsonData={cleanGeojsonData} loading={cleanLoading} error={cleanError} />
+          <MapCleanPoints geojsonData={cleanGeojsonData} isFetching={cleanLoading} />
         )}
         {showHotMap && cleanGeojsonData && <HeatmapLayer data={cleanGeojsonData.features} />}
         {showGridCells && <GridCells />}

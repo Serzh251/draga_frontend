@@ -3,7 +3,7 @@ import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { LoadingOutlined } from '@ant-design/icons';
 
-const MapCleanPoints = ({ geojsonData, loading }) => {
+const MapCleanPoints = ({ geojsonData, isFetching }) => {
   const map = useMap();
 
   useEffect(() => {
@@ -35,9 +35,7 @@ const MapCleanPoints = ({ geojsonData, loading }) => {
           fillOpacity: 0.8,
         });
 
-        circleMarker.bindPopup(
-          `<strong>Глубина:</strong> ${depth.toFixed(2)} м`
-        );
+        circleMarker.bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
         return circleMarker;
       },
     });
@@ -47,7 +45,7 @@ const MapCleanPoints = ({ geojsonData, loading }) => {
     return () => map.removeLayer(geoJsonLayer);
   }, [geojsonData, map]);
 
-  if (loading) {
+  if (isFetching) {
     return (
       <div
         style={{

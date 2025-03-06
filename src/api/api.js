@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: configApi.BASE_URL,
-  prepareHeaders: (headers, { getState }) => {
+  prepareHeaders: (headers, {}) => {
     const token = Cookies.get('accessToken');
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
@@ -54,6 +54,16 @@ export const api = createApi({
     fetchFields: builder.query({
       query: () => configApi.LIST_FIELDS,
     }),
+    fetchPoints: builder.query({
+      query: ({ year, depth_min, depth_max, field }) => {
+        const params = new URLSearchParams();
+        if (year) params.append('year', Array.isArray(year) ? year.join(',') : year);
+        if (depth_min) params.append('depth_min', depth_min);
+        if (depth_max) params.append('depth_max', depth_max);
+        if (field) params.append('field', Array.isArray(field) ? field.join(',') : field);
+        return `${configApi.GET_POINTS}?${params.toString()}`;
+      },
+    }),
     fetchCleanPoints: builder.query({
       query: ({ year, depth_min, depth_max, field }) => {
         const params = new URLSearchParams();
@@ -70,4 +80,10 @@ export const api = createApi({
   }),
 });
 
-export const { useLoginMutation, useFetchFieldsQuery, useFetchCleanPointsQuery, useFetchYearsQuery } = api;
+export const {
+  useLoginMutation,
+  useFetchFieldsQuery,
+  useFetchPointsQuery,
+  useFetchCleanPointsQuery,
+  useFetchYearsQuery,
+} = api;
