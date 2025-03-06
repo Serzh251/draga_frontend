@@ -16,10 +16,9 @@ import WebSocketComponent from '../location/WebsockerLocation';
 import LocationMarker from '../location/LocationMarker';
 import YearSelectionSidebar from './YearSelectionSidebar';
 import useUniqueYears from '../../hook/useUniqueYears';
-import useCleanPoints from '../../hook/useCleanPoints';
 import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
-import { useFetchFieldsQuery } from '../../api/api';
+import { useFetchCleanPointsQuery, useFetchFieldsQuery } from '../../api/api';
 
 const MapComponent = () => {
   const { data: listGeojsonFields } = useFetchFieldsQuery();
@@ -34,11 +33,10 @@ const MapComponent = () => {
   const [location, setLocation] = useState(null);
 
   const {
-    geojsonData: cleanGeojsonData,
+    data: cleanGeojsonData,
     loading: cleanLoading,
     error: cleanError,
-  } = useCleanPoints(selectedFields, selectedYears);
-
+  } = useFetchCleanPointsQuery({ field: Array.from(selectedFields) });
   return (
     <div className="app-layout">
       <FieldSelectionSidebar
