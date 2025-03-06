@@ -1,8 +1,7 @@
 import axios from 'axios';
-import config from '../config';
+import configApi from './config-api';
 
-const DOMAIN = config.API_URL;
-
+const DOMAIN = configApi.API_URL;
 export default axios.create({
   baseURL: DOMAIN,
 });

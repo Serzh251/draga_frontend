@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Form } from 'antd';
 import { removeUser } from '../../store/slices/userSlice';
-import Cookies from 'universal-cookie';
+import Cookies from 'js-cookie';
 import { useDispatch } from 'react-redux';
 
 const Logout = () => {

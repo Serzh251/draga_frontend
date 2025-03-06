@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { useLoginMutation } from '../../api/api';
 import { useNavigate } from 'react-router-dom';
-
-import axios from '../../api/axois';
-import { Button, Form, Input } from 'antd';
-import Cookies from 'universal-cookie';
-import { setUser } from '../../store/slices/userSlice';
 import { useDispatch } from 'react-redux';
-
-const LOGIN_URL = '/api/token/';
+import { setUser } from '../../store/slices/userSlice';
+import { parseJwt } from '../../utils/token';
+import { Button, Form, Input } from 'antd';
 
 const Login = () => {
+  const [login, { isLoading }] = useLoginMutation();
   const navigate = useNavigate();
-  const cookie = new Cookies();
   const dispatch = useDispatch();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -21,51 +18,29 @@ const Login = () => {
     setErrMsg('');
   }, [username, password]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (values) => {
     try {
-      const response = await axios.post(
-        LOGIN_URL,
-        JSON.stringify({ username, password }),
-        {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
-        }
-      );
-      const access = response?.data?.access;
-      const refresh = response?.data?.refresh;
-      const tokenParts = access.split('.');
-      const payloadBase64 = tokenParts[1];
-      const payloadJSON = atob(payloadBase64);
-      const payloadData = JSON.parse(payloadJSON);
+      const user = await login(values).unwrap();
+      const accessToken = user.access;
+      const refreshToken = user.refresh;
+      const payloadData = parseJwt(accessToken);
       const currentUser = payloadData?.user_id;
       const firstName = payloadData?.first_name;
-      localStorage.setItem('token', `${access}`);
-      localStorage.setItem('currentUser', currentUser);
-      localStorage.setItem('firstName', firstName);
-      localStorage.setItem('isAuth', 'true');
-      cookie.set('refresh', refresh);
+
       dispatch(
         setUser({
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          isAuth: true,
           firstName: firstName,
           currentUser: currentUser,
-          token: access,
-          isAuth: true,
         })
       );
-      setUsername('');
-      setPassword('');
+
       navigate('/');
-      setErrMsg('');
-    } catch (err) {
-      if (!err?.response) {
-        setErrMsg('No Server Response');
-      } else if (err.response?.status === 400) {
-        setErrMsg('Missing Username or Password');
-      } else if (err.response?.status === 401) {
-        setErrMsg('Unauthorized');
-      } else {
-        setErrMsg('Login Failed');
-      }
+    } catch (error) {
+      setErrMsg('Login failed');
+      console.error('Login failed:', error);
     }
   };
 
