@@ -5,31 +5,31 @@ import { removeUser } from '../../store/slices/userSlice';
 import Cookies from 'js-cookie';
 import { useDispatch } from 'react-redux';
 
-const Logout = () => {
+const Logout = ({ onLogoutSuccess }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const onFinish = () => {
     dispatch(removeUser());
-    const cookie = new Cookies();
-    cookie.remove('refresh');
-    localStorage.setItem('token', ``);
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
     navigate('/');
+    onLogoutSuccess(); // Закрыть модальное окно после успешного выхода
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
+    <div>
       <Form
         name="basic"
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
-        style={{ maxWidth: 600 }}
         initialValues={{ remember: true }}
         onFinish={onFinish}
         autoComplete="off"
       >
-        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+        <Form.Item wrapperCol={{ offset: 10, span: 16 }}>
           <Button type="primary" htmlType="submit">
-            Log out
+            Выйти
           </Button>
         </Form.Item>
       </Form>

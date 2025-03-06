@@ -79,7 +79,7 @@ const Login = ({ onLoginSuccess }) => {
         >
           <Input.Password onChange={(e) => setPassword(e.target.value)} />
         </Form.Item>
-        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+        <Form.Item wrapperCol={{ span: 24 }} style={{ textAlign: 'right' }}>
           <Button type="primary" htmlType="submit" disabled={isLoading}>
             Вход
           </Button>

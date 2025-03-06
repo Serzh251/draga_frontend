@@ -2,27 +2,41 @@ import React, { useState } from 'react';
 import { Layout, Menu, Modal } from 'antd';
 import { NavLink, Outlet } from 'react-router-dom';
 import { HomeOutlined, LoginOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
+import config from '../config';
 import { useAuth } from '../hook/use-auth';
-import configApi from '../api/config-api';
 import Login from './auth/login';
+import Logout from './auth/logout';
 
 const { Header } = Layout;
 
 const AppHeader = () => {
-  const apiAdmin = configApi.API_ADMIN;
+  const apiAdmin = config.API_ADMIN;
   const { isAuth, firstName } = useAuth();
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
-  const showModal = () => {
-    setIsModalVisible(true);
+  const showLoginModal = () => {
+    setIsLoginModalVisible(true);
   };
 
-  const handleOk = () => {
-    setIsModalVisible(false);
+  const handleLoginOk = () => {
+    setIsLoginModalVisible(false);
   };
 
-  const handleCancel = () => {
-    setIsModalVisible(false);
+  const handleLoginCancel = () => {
+    setIsLoginModalVisible(false);
+  };
+
+  const showLogoutModal = () => {
+    setIsLogoutModalVisible(true);
+  };
+
+  const handleLogoutOk = () => {
+    setIsLogoutModalVisible(false);
+  };
+
+  const handleLogoutCancel = () => {
+    setIsLogoutModalVisible(false);
   };
 
   const menuItems = [
@@ -38,7 +52,7 @@ const AppHeader = () => {
       key: '2',
       icon: <LoginOutlined />,
       label: (
-        <span onClick={showModal} style={{ cursor: 'pointer' }}>
+        <span onClick={showLoginModal} style={{ cursor: 'pointer' }}>
           Вход
         </span>
       ),
@@ -47,7 +61,11 @@ const AppHeader = () => {
     menuItems.push({
       key: '3',
       icon: <LogoutOutlined />,
-      label: <NavLink to="logout">Выход</NavLink>,
+      label: (
+        <span onClick={showLogoutModal} style={{ cursor: 'pointer' }}>
+          Выход
+        </span>
+      ),
     });
     menuItems.push({
       key: '4',
@@ -70,8 +88,17 @@ const AppHeader = () => {
       <Header>
         <Menu theme="dark" mode="horizontal" selectable={false} style={{ marginRight: 15 }} items={menuItems} />
       </Header>
-      <Modal title="Вход" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} footer={null}>
-        <Login onLoginSuccess={handleOk} />
+      <Modal title="Вход" open={isLoginModalVisible} onOk={handleLoginOk} onCancel={handleLoginCancel} footer={null}>
+        <Login onLoginSuccess={handleLoginOk} />
+      </Modal>
+      <Modal
+        title="Выход"
+        open={isLogoutModalVisible}
+        onOk={handleLogoutOk}
+        onCancel={handleLogoutCancel}
+        footer={null}
+      >
+        <Logout onLogoutSuccess={handleLogoutOk} />
       </Modal>
       <Outlet />
     </>
