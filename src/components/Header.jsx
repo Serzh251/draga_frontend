@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { Layout, Menu, Modal } from 'antd';
 import { NavLink, Outlet } from 'react-router-dom';
 import { HomeOutlined, LoginOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
-import config from '../config';
 import { useAuth } from '../hook/use-auth';
 import Login from './auth/login';
 import Logout from './auth/logout';
+import configApi from '../api/config-api';
 
 const { Header } = Layout;
 
 const AppHeader = () => {
-  const apiAdmin = config.API_ADMIN;
+  const apiAdmin = configApi.API_ADMIN;
   const { isAuth, firstName } = useAuth();
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);

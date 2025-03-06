@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 const baseQuery = fetchBaseQuery({
   baseUrl: configApi.BASE_URL,
   prepareHeaders: (headers, { getState }) => {
-    const token = Cookies.get('token');
+    const token = Cookies.get('accessToken');
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
     }
@@ -17,7 +17,7 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  if (result?.error?.originalStatus === 401) {
+  if (result?.error?.status === 401) {
     const refreshToken = Cookies.get('refreshToken');
     const refreshResult = await baseQuery(
       {
@@ -51,10 +51,10 @@ export const api = createApi({
         body: credentials,
       }),
     }),
-    getPoints: builder.query({
-      query: () => '/points',
+    fetchFields: builder.query({
+      query: () => configApi.LIST_FIELDS,
     }),
   }),
 });
 
-export const { useLoginMutation, useGetPointsQuery } = api;
+export const { useLoginMutation, useFetchFieldsQuery } = api;

@@ -9,8 +9,7 @@ import MapPoints from './MapPoints';
 import HeatmapLayer from './HeatMapLayer';
 import GridCells from './Fields/GridCells';
 import MapCleanPoints from './MapCleanPoints';
-import FieldSelectionSidebar from './Fields/FieldsList';
-import useListFields from '../../hook/useListFields';
+import FieldSelectionSidebar from './Fields/FieldSelectionSidebar';
 import MapFields from './Fields/MapFields';
 import ToggleButtonGroup from '../buttons/ToogleButtons';
 import WebSocketComponent from '../location/WebsockerLocation';
@@ -20,9 +19,10 @@ import useUniqueYears from '../../hook/useUniqueYears';
 import useCleanPoints from '../../hook/useCleanPoints';
 import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
+import { useFetchFieldsQuery } from '../../api/api';
 
 const MapComponent = () => {
-  const { listGeojsonFields } = useListFields();
+  const { data: listGeojsonFields } = useFetchFieldsQuery();
   const { listUniqueYears } = useUniqueYears();
 
   const [selectedFields, setSelectedFields] = useState(new Set());

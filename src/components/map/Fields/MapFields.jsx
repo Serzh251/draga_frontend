@@ -38,7 +38,7 @@ const MapFields = ({ listGeojsonFields }) => {
 
         const border = L.geoJSON(feature.geometry, {
           style: {
-            color: 'blue', // Цвет границы
+            color: 'blue',
             weight: 3,
             fillOpacity: 0,
           },
