@@ -77,6 +77,13 @@ export const api = createApi({
     fetchYears: builder.query({
       query: () => configApi.GET_UNIQUE_YEARS,
     }),
+    fetchGridCells: builder.query({
+      query: (page = 1) => `${configApi.GET_GRID_CELLS}?page=${page}`,
+      transformResponse: (response) => ({
+        features: response.results?.features || [],
+        hasMore: !!response.next_page,
+      }),
+    }),
   }),
 });
 
@@ -86,4 +93,5 @@ export const {
   useFetchPointsQuery,
   useFetchCleanPointsQuery,
   useFetchYearsQuery,
+  useLazyFetchGridCellsQuery,
 } = api;
