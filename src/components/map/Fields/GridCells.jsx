@@ -8,7 +8,7 @@ const GridCells = () => {
   const map = useMap();
   const [allCells, setAllCells] = useState([]);
   const [error, setError] = useState(null);
-  const [fetchCells, { data, isFetching, isError, error: fetchError }] = useLazyFetchGridCellsQuery();
+  const [fetchCells, { isFetching, isError }] = useLazyFetchGridCellsQuery();
 
   useEffect(() => {
     const loadAllPages = async () => {

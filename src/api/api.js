@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: configApi.BASE_URL,
-  prepareHeaders: (headers, {}) => {
+  prepareHeaders: (headers) => {
     const token = Cookies.get('accessToken');
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
