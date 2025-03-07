@@ -13,7 +13,7 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={<RouteLayout isAuth={isAuth} />}>
-        <Route index element={<MapComponent />} />
+        <Route index element={<MapComponent isAuth={isAuth} />} />
       </Route>
     </Routes>
   );

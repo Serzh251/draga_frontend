@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -19,9 +19,9 @@ import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
 import { useFetchCleanPointsQuery, useFetchFieldsQuery, useFetchYearsQuery } from '../../api/api';
 
-const MapComponent = () => {
-  const { data: listGeojsonFields } = useFetchFieldsQuery();
-  const { data: listUniqueYears } = useFetchYearsQuery();
+const MapComponent = (isAuth) => {
+  const { data: listGeojsonFields, refetch: refetchFields } = useFetchFieldsQuery();
+  const { data: listUniqueYears, refetch: refetchYears } = useFetchYearsQuery();
 
   const [selectedFields, setSelectedFields] = useState(new Set());
   const [selectedYears, setSelectedYears] = useState(new Set());
@@ -31,11 +31,21 @@ const MapComponent = () => {
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
   const [location, setLocation] = useState(null);
 
-  const { data: cleanGeojsonData, isFetching: cleanLoading } = useFetchCleanPointsQuery({
+  const {
+    data: cleanGeojsonData,
+    isFetching: cleanLoading,
+    refetch: refetchCleanPoints,
+  } = useFetchCleanPointsQuery({
     year: Array.from(selectedYears),
     field: Array.from(selectedFields),
   });
-
+  useEffect(() => {
+    if (isAuth) {
+      refetchFields();
+      refetchYears();
+      refetchCleanPoints();
+    }
+  }, [isAuth, refetchFields, refetchYears, refetchCleanPoints]);
   return (
     <div className="app-layout">
       <FieldSelectionSidebar
