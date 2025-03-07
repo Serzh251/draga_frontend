@@ -23,9 +23,15 @@ const mapDataSlice = createSlice({
     setYearsData(state, action) {
       state.yearsData = action.payload;
     },
+    removeMapData(state) {
+      state.points = null;
+      state.cleanPoints = null;
+      state.fieldsData = null;
+      state.cleanPoints = null;
+    },
   },
 });
 
-export const { setPoints, setCleanPoints, setFieldsData, setYearsData } = mapDataSlice.actions;
+export const { setPoints, setCleanPoints, setFieldsData, setYearsData, removeMapData } = mapDataSlice.actions;
 
 export default mapDataSlice.reducer;

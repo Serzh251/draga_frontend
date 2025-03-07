@@ -32,8 +32,8 @@ const MapCleanPoints = ({ isFetching }) => {
           fillColor: getFillColor(depth),
           color: '#000',
           weight: 1,
-          opacity: 1,
-          fillOpacity: 0.8,
+          opacity: 0.1,
+          fillOpacity: 1,
         });
 
         circleMarker.bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);

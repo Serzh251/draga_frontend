@@ -63,16 +63,20 @@ const MapComponent = () => {
 
   return (
     <div className="app-layout">
-      <FieldSelectionSidebar
-        fields={fieldsData?.features || []}
-        selectedFields={selectedFields}
-        onSelectionChange={setSelectedFields}
-      />
-      <YearSelectionSidebar
-        years={yearsData || []}
-        selectedYears={selectedYears}
-        onSelectionChange={setSelectedYears}
-      />
+      {isAuth && (
+        <>
+          <FieldSelectionSidebar
+            fields={fieldsData?.features || []}
+            selectedFields={selectedFields}
+            onSelectionChange={setSelectedFields}
+          />
+          <YearSelectionSidebar
+            years={yearsData || []}
+            selectedYears={selectedYears}
+            onSelectionChange={setSelectedYears}
+          />
+        </>
+      )}
       <MapContainer
         bounds={config.defaultPosition}
         zoom={13}
@@ -81,25 +85,29 @@ const MapComponent = () => {
         maxZoom={25}
       >
         <MapInstruments />
-
-        {fieldsData && <MapFields />}
-        {showMapPoints && <MapPoints selectedFields={selectedFields} />}
-        {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />}
-        {showHotMap && cleanPoints && <HeatmapLayer />}
-        {showGridCells && <GridCells />}
-        {location && <LocationMarker location={location} />}
+        {isAuth && (
+          <>
+            {fieldsData && <MapFields />}
+            {showMapPoints && <MapPoints selectedFields={selectedFields} />}
+            {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />}
+            {showHotMap && cleanPoints && <HeatmapLayer />}
+            {showGridCells && <GridCells />}
+            {location && <LocationMarker location={location} />}
+          </>
+        )}
       </MapContainer>
-
-      <ToggleButtonGroup
-        showMapPoints={showMapPoints}
-        setShowMapPoints={setShowMapPoints}
-        showCleanPoints={showCleanPoints}
-        setShowCleanPoints={setShowCleanPoints}
-        showGridCells={showGridCells}
-        setShowGridCells={setShowGridCells}
-        showHotMap={showHotMap}
-        setShowHotMap={setShowHotMap}
-      />
+      {isAuth && (
+        <ToggleButtonGroup
+          showMapPoints={showMapPoints}
+          setShowMapPoints={setShowMapPoints}
+          showCleanPoints={showCleanPoints}
+          setShowCleanPoints={setShowCleanPoints}
+          showGridCells={showGridCells}
+          setShowGridCells={setShowGridCells}
+          showHotMap={showHotMap}
+          setShowHotMap={setShowHotMap}
+        />
+      )}
 
       <WebSocketComponent setLocation={setLocation} />
     </div>

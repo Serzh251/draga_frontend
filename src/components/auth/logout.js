@@ -4,6 +4,7 @@ import { Button, Form } from 'antd';
 import { removeUser } from '../../store/slices/userSlice';
 import Cookies from 'js-cookie';
 import { useDispatch } from 'react-redux';
+import { removeMapData } from '../../store/slices/mapDataSlice';
 
 const Logout = ({ onLogoutSuccess }) => {
   const dispatch = useDispatch();
@@ -11,6 +12,7 @@ const Logout = ({ onLogoutSuccess }) => {
 
   const onFinish = () => {
     dispatch(removeUser());
+    dispatch(removeMapData());
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');
     navigate('/');
