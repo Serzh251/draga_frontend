@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { useMapData } from '../../../hook/useDataMap';
 
-const MapFields = ({ listGeojsonFields }) => {
+const MapFields = () => {
   const map = useMap();
   const [layers, setLayers] = useState(new Map());
-
+  const { fieldsData } = useMapData();
   useEffect(() => {
-    if (!listGeojsonFields || !Array.isArray(listGeojsonFields.features)) {
+    if (!fieldsData || !Array.isArray(fieldsData.features)) {
       console.warn('Некорректные данные GeoJSON: отсутствует массив features');
       return;
     }
@@ -19,7 +20,7 @@ const MapFields = ({ listGeojsonFields }) => {
     });
     const newLayers = new Map();
 
-    listGeojsonFields.features.forEach((feature) => {
+    fieldsData.features.forEach((feature) => {
       if (feature.geometry.type === 'Polygon') {
         const coordinates = feature.geometry.coordinates[0];
         const polygon = L.geoJSON(feature.geometry, {
@@ -74,7 +75,7 @@ const MapFields = ({ listGeojsonFields }) => {
         if (label) map.removeLayer(label);
       });
     };
-  }, [listGeojsonFields, map]);
+  }, [fieldsData, map]);
 
   return null;
 };

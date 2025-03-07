@@ -2,12 +2,13 @@ import React, { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { LoadingOutlined } from '@ant-design/icons';
+import { useMapData } from '../../hook/useDataMap';
 
-const MapCleanPoints = ({ geojsonData, isFetching }) => {
+const MapCleanPoints = ({ isFetching }) => {
   const map = useMap();
-
+  const { cleanPoints } = useMapData();
   useEffect(() => {
-    if (!geojsonData || !map) return;
+    if (!cleanPoints || !map) return;
 
     function getFillColor(depth) {
       if (depth <= 0 || depth > 15) {
@@ -22,7 +23,7 @@ const MapCleanPoints = ({ geojsonData, isFetching }) => {
       return `rgb(0, ${green}, ${blue})`;
     }
 
-    const geoJsonLayer = L.geoJSON(geojsonData, {
+    const geoJsonLayer = L.geoJSON(cleanPoints, {
       pointToLayer: (feature, latlng) => {
         const depth = feature.properties?.depth ?? 0;
         const circleMarker = L.circleMarker(latlng, {
@@ -43,7 +44,7 @@ const MapCleanPoints = ({ geojsonData, isFetching }) => {
     geoJsonLayer.addTo(map);
 
     return () => map.removeLayer(geoJsonLayer);
-  }, [geojsonData, map]);
+  }, [cleanPoints, map]);
 
   if (isFetching) {
     return (

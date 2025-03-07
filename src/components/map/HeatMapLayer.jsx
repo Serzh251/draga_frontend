@@ -2,14 +2,16 @@ import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.heat';
+import { useMapData } from '../../hook/useDataMap';
 
-const HeatmapLayer = ({ data }) => {
+const HeatmapLayer = () => {
   const map = useMap();
+  const { cleanPoints } = useMapData();
 
   useEffect(() => {
-    if (!data || data.length === 0) return;
+    if (!cleanPoints || cleanPoints.length === 0) return;
 
-    const heatData = data.map((feature) => {
+    const heatData = cleanPoints.features.map((feature) => {
       const { coordinates } = feature.geometry;
       const depth = feature.properties?.depth ?? 0;
       const normalizedDepth = Math.min(1, depth / 20);
@@ -53,9 +55,7 @@ const HeatmapLayer = ({ data }) => {
       if (closestPoint) {
         L.popup()
           .setLatLng([closestPoint.lat, closestPoint.lng])
-          .setContent(
-            `<strong>Глубина:</strong> ${closestPoint.depth.toFixed(2)} м`
-          )
+          .setContent(`<strong>Глубина:</strong> ${closestPoint.depth.toFixed(2)} м`)
           .openOn(map);
       }
     };
@@ -110,7 +110,7 @@ const HeatmapLayer = ({ data }) => {
       map.off('click', handleClick);
       legend.remove();
     };
-  }, [data, map]);
+  }, [cleanPoints, map]);
 
   return null;
 };

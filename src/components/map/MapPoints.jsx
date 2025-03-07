@@ -2,20 +2,33 @@ import React, { useEffect, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { LoadingOutlined } from '@ant-design/icons';
+import { useDispatch } from 'react-redux';
 import { useFetchPointsQuery } from '../../api/api';
+import { setPoints } from '../../store/slices/mapDataSlice';
+import { useMapData } from '../../hook/useDataMap';
 
 const MapPoints = ({ selectedFields }) => {
   const map = useMap();
+  const dispatch = useDispatch();
   const [queryParams, setQueryParams] = useState(null);
+  const { points } = useMapData();
 
   useEffect(() => {
     setQueryParams({ field: Array.from(selectedFields) });
   }, [selectedFields]);
 
-  const { data, isFetching } = useFetchPointsQuery(queryParams, { skip: !queryParams });
+  const { data, isFetching } = useFetchPointsQuery(queryParams, {
+    skip: !queryParams,
+  });
 
   useEffect(() => {
-    if (!data || !map) return;
+    if (data) {
+      dispatch(setPoints(data));
+    }
+  }, [data, isFetching, dispatch]);
+
+  useEffect(() => {
+    if (!points || !map) return;
 
     function getFillColor(depth) {
       if (depth > 15) return '#aba9a9';
@@ -27,7 +40,7 @@ const MapPoints = ({ selectedFields }) => {
       return `rgb(${red}, ${green}, ${blue})`;
     }
 
-    const geoJsonLayer = L.geoJSON(data, {
+    const geoJsonLayer = L.geoJSON(points, {
       pointToLayer: (feature, latlng) => {
         const depth = feature.properties?.depth ?? 0;
         const circleMarker = L.circleMarker(latlng, {
@@ -48,7 +61,7 @@ const MapPoints = ({ selectedFields }) => {
     geoJsonLayer.addTo(map);
 
     return () => map.removeLayer(geoJsonLayer);
-  }, [data, map]);
+  }, [points, map]);
 
   return isFetching ? (
     <div

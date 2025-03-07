@@ -17,11 +17,16 @@ import LocationMarker from '../location/LocationMarker';
 import YearSelectionSidebar from './YearSelectionSidebar';
 import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
+import { useDispatch } from 'react-redux';
+import { setFieldsData, setYearsData, setCleanPoints } from '../../store/slices/mapDataSlice';
 import { useFetchCleanPointsQuery, useFetchFieldsQuery, useFetchYearsQuery } from '../../api/api';
+import { useAuth } from '../../hook/use-auth';
+import { useMapData } from '../../hook/useDataMap';
 
-const MapComponent = (isAuth) => {
-  const { data: listGeojsonFields, refetch: refetchFields } = useFetchFieldsQuery();
-  const { data: listUniqueYears, refetch: refetchYears } = useFetchYearsQuery();
+const MapComponent = () => {
+  const dispatch = useDispatch();
+  const { isAuth } = useAuth();
+  const { fieldsData, yearsData, cleanPoints } = useMapData();
 
   const [selectedFields, setSelectedFields] = useState(new Set());
   const [selectedYears, setSelectedYears] = useState(new Set());
@@ -31,6 +36,8 @@ const MapComponent = (isAuth) => {
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
   const [location, setLocation] = useState(null);
 
+  const { data: listGeojsonFields, refetch: refetchFields } = useFetchFieldsQuery();
+  const { data: listUniqueYears, refetch: refetchYears } = useFetchYearsQuery();
   const {
     data: cleanGeojsonData,
     isFetching: cleanLoading,
@@ -39,6 +46,7 @@ const MapComponent = (isAuth) => {
     year: Array.from(selectedYears),
     field: Array.from(selectedFields),
   });
+
   useEffect(() => {
     if (isAuth) {
       refetchFields();
@@ -46,15 +54,22 @@ const MapComponent = (isAuth) => {
       refetchCleanPoints();
     }
   }, [isAuth, refetchFields, refetchYears, refetchCleanPoints]);
+
+  useEffect(() => {
+    if (listGeojsonFields) dispatch(setFieldsData(listGeojsonFields));
+    if (listUniqueYears) dispatch(setYearsData(listUniqueYears));
+    if (cleanGeojsonData) dispatch(setCleanPoints(cleanGeojsonData));
+  }, [listGeojsonFields, listUniqueYears, cleanGeojsonData, dispatch]);
+
   return (
     <div className="app-layout">
       <FieldSelectionSidebar
-        fields={listGeojsonFields?.features || []}
+        fields={fieldsData?.features || []}
         selectedFields={selectedFields}
         onSelectionChange={setSelectedFields}
       />
       <YearSelectionSidebar
-        years={listUniqueYears || []}
+        years={yearsData || []}
         selectedYears={selectedYears}
         onSelectionChange={setSelectedYears}
       />
@@ -67,12 +82,10 @@ const MapComponent = (isAuth) => {
       >
         <MapInstruments />
 
-        {listGeojsonFields && <MapFields listGeojsonFields={listGeojsonFields} />}
+        {fieldsData && <MapFields />}
         {showMapPoints && <MapPoints selectedFields={selectedFields} />}
-        {showCleanPoints && cleanGeojsonData && (
-          <MapCleanPoints geojsonData={cleanGeojsonData} isFetching={cleanLoading} />
-        )}
-        {showHotMap && cleanGeojsonData && <HeatmapLayer data={cleanGeojsonData.features} />}
+        {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />}
+        {showHotMap && cleanPoints && <HeatmapLayer />}
         {showGridCells && <GridCells />}
         {location && <LocationMarker location={location} />}
       </MapContainer>
