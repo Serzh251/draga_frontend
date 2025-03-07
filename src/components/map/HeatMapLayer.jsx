@@ -44,15 +44,18 @@ const HeatmapLayer = () => {
 
     const handleClick = (e) => {
       const { lat, lng } = e.latlng;
+      const clickThreshold = 0.0002;
+      let closestPoint = null;
+      let minDistance = Infinity;
 
-      // Ищем ближайшую точку с глубиной
-      const closestPoint = heatData.reduce((prev, curr) => {
-        const prevDist = Math.hypot(prev.lat - lat, prev.lng - lng);
-        const currDist = Math.hypot(curr.lat - lat, curr.lng - lng);
-        return currDist < prevDist ? curr : prev;
+      heatData.forEach((point) => {
+        const dist = Math.hypot(point.lat - lat, point.lng - lng);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestPoint = point;
+        }
       });
-
-      if (closestPoint) {
+      if (closestPoint && minDistance <= clickThreshold) {
         L.popup()
           .setLatLng([closestPoint.lat, closestPoint.lng])
           .setContent(`<strong>Глубина:</strong> ${closestPoint.depth.toFixed(2)} м`)
