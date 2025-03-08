@@ -14,7 +14,7 @@ const HeatmapLayer = () => {
     const heatData = cleanPoints.features.map((feature) => {
       const { coordinates } = feature.geometry;
       const depth = feature.properties?.depth ?? 0;
-      const normalizedDepth = Math.min(1, depth / 20);
+      const normalizedDepth = Math.min(1, depth / 15);
       return {
         lat: coordinates[1],
         lng: coordinates[0],
@@ -30,12 +30,17 @@ const HeatmapLayer = () => {
         blur: 10,
         maxZoom: 10,
         minOpacity: 0.3,
-        maxIntensity: 1,
+        maxIntensity: 0.1,
+        max: 1,
         gradient: {
           0.1: '#9ea4a6',
-          0.3: '#0000FF',
-          0.6: '#00008B',
-          1.0: '#00004B',
+          0.2: '#0080ff',
+          0.3: '#0059ff',
+          0.4: '#2200ff',
+          0.5: '#2200ff',
+          0.6: '#1053b3',
+          0.7: '#0015ff',
+          1.0: '#0f0fb3',
         },
       }
     );
@@ -89,7 +94,7 @@ const HeatmapLayer = () => {
           .legend-bar {
             width: 20px;
             height: 80px;
-            background: linear-gradient(to top, #00004B, #00008B, #0000FF, #9ea4a6);
+            background: linear-gradient(to top,#0f0fb3, #0015ff, #1053b3, #2200ff, #2200ff, #0059ff, #0080ff, #9ea4a6);
           }
           .depth {
             font-size: 11px;
