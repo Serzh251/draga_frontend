@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 
 export function useMapData() {
-  const { points, cleanPoints, fieldsData, yearsData } = useSelector((state) => state.mapData);
+  const { points, cleanPoints, cleanPointsPrev, fieldsData, yearsData } = useSelector((state) => state.mapData);
 
-  return { points, cleanPoints, fieldsData, yearsData };
+  return { points, cleanPoints, cleanPointsPrev, fieldsData, yearsData };
 }

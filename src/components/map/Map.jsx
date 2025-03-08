@@ -18,7 +18,7 @@ import YearSelectionSidebar from './YearSelectionSidebar';
 import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
 import { useDispatch } from 'react-redux';
-import { setFieldsData, setYearsData, setCleanPoints } from '../../store/slices/mapDataSlice';
+import { setFieldsData, setYearsData, setCleanPoints, setCleanPointsPrev } from '../../store/slices/mapDataSlice';
 import { useFetchCleanPointsQuery, useFetchFieldsQuery, useFetchYearsQuery } from '../../api/api';
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
@@ -26,10 +26,11 @@ import { useMapData } from '../../hook/useDataMap';
 const MapComponent = () => {
   const dispatch = useDispatch();
   const { isAuth } = useAuth();
-  const { fieldsData, yearsData, cleanPoints } = useMapData();
+  const { fieldsData, yearsData, cleanPoints, cleanPointsPrev } = useMapData();
 
   const [selectedFields, setSelectedFields] = useState(new Set());
   const [selectedYears, setSelectedYears] = useState(new Set());
+  const [selectedYearsPrev, setSelectedYearsPrev] = useState(new Set());
   const [showGridCells, setShowGridCells] = usePersistentState('showGridCells', false);
   const [showMapPoints, setShowMapPoints] = usePersistentState('showMapPoints', false);
   const [showCleanPoints, setShowCleanPoints] = usePersistentState('showCleanPoints', true);
@@ -46,20 +47,30 @@ const MapComponent = () => {
     year: Array.from(selectedYears),
     field: Array.from(selectedFields),
   });
+  const {
+    data: cleanGeojsonDataPrev,
+    isFetching: cleanLoadingPrev,
+    refetch: refetchCleanPointsPrev,
+  } = useFetchCleanPointsQuery({
+    year: Array.from(selectedYearsPrev),
+    field: Array.from(selectedFields),
+  });
 
   useEffect(() => {
     if (isAuth) {
       refetchFields();
       refetchYears();
       refetchCleanPoints();
+      refetchCleanPointsPrev();
     }
-  }, [isAuth, refetchFields, refetchYears, refetchCleanPoints]);
+  }, [isAuth, refetchFields, refetchYears, refetchCleanPoints, refetchCleanPointsPrev]);
 
   useEffect(() => {
+    if (cleanGeojsonData) dispatch(setCleanPoints(cleanGeojsonData));
+    if (cleanGeojsonDataPrev) dispatch(setCleanPointsPrev(cleanGeojsonDataPrev));
     if (listGeojsonFields) dispatch(setFieldsData(listGeojsonFields));
     if (listUniqueYears) dispatch(setYearsData(listUniqueYears));
-    if (cleanGeojsonData) dispatch(setCleanPoints(cleanGeojsonData));
-  }, [listGeojsonFields, listUniqueYears, cleanGeojsonData, dispatch]);
+  }, [listGeojsonFields, listUniqueYears, cleanGeojsonData, cleanGeojsonDataPrev, dispatch]);
 
   return (
     <div className="app-layout">
@@ -74,6 +85,12 @@ const MapComponent = () => {
             years={yearsData || []}
             selectedYears={selectedYears}
             onSelectionChange={setSelectedYears}
+          />
+          <YearSelectionSidebar
+            years={yearsData || []}
+            selectedYears={selectedYearsPrev}
+            onSelectionChange={setSelectedYearsPrev}
+            isPrev={true}
           />
         </>
       )}
@@ -90,6 +107,9 @@ const MapComponent = () => {
             {fieldsData && <MapFields />}
             {showMapPoints && <MapPoints selectedFields={selectedFields} />}
             {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />}
+            {showCleanPoints && cleanPointsPrev && selectedYearsPrev && (
+              <MapCleanPoints isFetching={cleanLoadingPrev} isPrev={true} />
+            )}
             {showHotMap && cleanPoints && <HeatmapLayer />}
             {showGridCells && <GridCells />}
             {location && <LocationMarker location={location} />}

@@ -4,11 +4,13 @@ import L from 'leaflet';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useMapData } from '../../hook/useDataMap';
 
-const MapCleanPoints = ({ isFetching }) => {
+const MapCleanPoints = ({ isFetching, isPrev }) => {
   const map = useMap();
-  const { cleanPoints } = useMapData();
+  const { cleanPoints, cleanPointsPrev } = useMapData();
+
   useEffect(() => {
-    if (!cleanPoints || !map) return;
+    const pointsData = isPrev ? cleanPointsPrev : cleanPoints; // Выбор данных в зависимости от isPrev
+    if (!pointsData || !map) return;
 
     function getFillColor(depth) {
       if (depth <= 0 || depth > 15) {
@@ -23,7 +25,7 @@ const MapCleanPoints = ({ isFetching }) => {
       return `rgb(0, ${green}, ${blue})`;
     }
 
-    const geoJsonLayer = L.geoJSON(cleanPoints, {
+    const geoJsonLayer = L.geoJSON(pointsData, {
       pointToLayer: (feature, latlng) => {
         const depth = feature.properties?.depth ?? 0;
         const circleMarker = L.circleMarker(latlng, {
@@ -33,7 +35,7 @@ const MapCleanPoints = ({ isFetching }) => {
           color: '#000',
           weight: 1,
           opacity: 0.1,
-          fillOpacity: 1,
+          fillOpacity: isPrev ? 0.2 : 1,
         });
 
         circleMarker.bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
@@ -44,7 +46,7 @@ const MapCleanPoints = ({ isFetching }) => {
     geoJsonLayer.addTo(map);
 
     return () => map.removeLayer(geoJsonLayer);
-  }, [cleanPoints, map]);
+  }, [cleanPoints, cleanPointsPrev, map, isPrev]); // Добавлено isPrev в зависимости
 
   if (isFetching) {
     return (
