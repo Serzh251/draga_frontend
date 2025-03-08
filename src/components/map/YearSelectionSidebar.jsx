@@ -52,7 +52,7 @@ const YearSelectionSidebar = ({ years, onSelectionChange, isPrev = false }) => {
           <Select
             style={{ width: '100%' }}
             placeholder="Выберите год"
-            value={selectedYears || undefined}
+            value={selectedYears || 'Не выбрано'}
             onChange={(value) => setSelectedYears(value || null)}
             allowClear
           >

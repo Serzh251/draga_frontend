@@ -107,7 +107,7 @@ const MapComponent = () => {
             {fieldsData && <MapFields />}
             {showMapPoints && <MapPoints selectedFields={selectedFields} />}
             {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />}
-            {showCleanPoints && cleanPointsPrev && selectedYearsPrev && (
+            {showCleanPoints && cleanPointsPrev && selectedYearsPrev.size && (
               <MapCleanPoints isFetching={cleanLoadingPrev} isPrev={true} />
             )}
             {showHotMap && cleanPoints && <HeatmapLayer />}
