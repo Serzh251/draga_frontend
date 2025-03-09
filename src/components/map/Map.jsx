@@ -111,6 +111,7 @@ const MapComponent = () => {
               <MapCleanPoints isFetching={cleanLoadingPrev} isPrev={true} />
             )}
             {showHotMap && cleanPoints && <HeatmapLayer />}
+            {showHotMap && cleanPointsPrev && selectedYearsPrev.size && <HeatmapLayer isPrev={true} />}
             {showGridCells && <GridCells />}
             {location && <LocationMarker location={location} />}
           </>

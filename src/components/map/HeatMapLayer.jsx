@@ -1,17 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.heat';
 import { useMapData } from '../../hook/useDataMap';
 
-const HeatmapLayer = () => {
+const HeatmapLayer = ({ isPrev = false }) => {
   const map = useMap();
-  const { cleanPoints } = useMapData();
+  const { cleanPoints, cleanPointsPrev } = useMapData();
+  const heatLayerRef = useRef(null); // Реф для хранения слоя
+
+  const points = isPrev ? cleanPointsPrev : cleanPoints;
 
   useEffect(() => {
-    if (!cleanPoints || cleanPoints.length === 0) return;
+    if (!points || points.length === 0) return;
 
-    const heatData = cleanPoints.features.map((feature) => {
+    const heatData = points.features.map((feature) => {
       const { coordinates } = feature.geometry;
       const depth = feature.properties?.depth ?? 0;
       const normalizedDepth = Math.min(1, depth / 15);
@@ -46,6 +49,17 @@ const HeatmapLayer = () => {
     );
 
     heatLayer.addTo(map);
+    heatLayerRef.current = heatLayer; // Сохраняем слой
+
+    setTimeout(() => {
+      const heatmapCanvases = document.querySelectorAll('.leaflet-heatmap-layer');
+      if (heatmapCanvases.length) {
+        const targetCanvas = heatmapCanvases[heatmapCanvases.length - 1];
+        if (isPrev) {
+          targetCanvas.style.opacity = '0.2';
+        }
+      }
+    }, 500);
 
     const handleClick = (e) => {
       const { lat, lng } = e.latlng;
@@ -60,6 +74,7 @@ const HeatmapLayer = () => {
           closestPoint = point;
         }
       });
+
       if (closestPoint && minDistance <= clickThreshold) {
         L.popup()
           .setLatLng([closestPoint.lat, closestPoint.lng])
@@ -70,55 +85,14 @@ const HeatmapLayer = () => {
 
     map.on('click', handleClick);
 
-    const legend = L.control({ position: 'bottomleft' });
-
-    legend.onAdd = function () {
-      const div = L.DomUtil.create('div', 'legend');
-      div.innerHTML = `
-        <style>
-          .legend {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            font-size: 12px;
-            font-weight: bold;
-            line-height: 14px;
-          }
-          .legend-scale {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-          }
-          .legend-bar {
-            width: 20px;
-            height: 80px;
-            background: linear-gradient(to top,#0f0fb3, #0015ff, #1053b3, #2200ff, #2200ff, #0059ff, #0080ff, #9ea4a6);
-          }
-          .depth {
-            font-size: 11px;
-          }
-        </style>
-        <div class="legend-scale">
-          <div class="legend-bar"></div>
-          <div class="depth">Глубина</div>
-          <div>20+</div>
-          <div>10</div>
-          <div>5</div>
-          <div>0</div>
-        </div>
-      `;
-      return div;
-    };
-
-    legend.addTo(map);
     return () => {
-      map.removeLayer(heatLayer);
+      if (heatLayerRef.current) {
+        map.removeLayer(heatLayerRef.current);
+        heatLayerRef.current = null;
+      }
       map.off('click', handleClick);
-      legend.remove();
     };
-  }, [cleanPoints, map]);
+  }, [points, map, isPrev]);
 
   return null;
 };
