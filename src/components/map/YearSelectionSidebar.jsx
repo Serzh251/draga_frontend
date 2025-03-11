@@ -32,7 +32,7 @@ const YearSelectionSidebar = ({ years, onSelectionChange, isPrev = false }) => {
       }
     }
     onSelectionChange(selectedYears ? new Set([selectedYears]) : new Set());
-  }, [selectedYears, onSelectionChange]);
+  }, [selectedYears, onSelectionChange, isPrev]);
 
   return (
     <div

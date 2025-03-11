@@ -61,7 +61,7 @@ export const api = createApi({
         if (depth_min) params.append('depth_min', depth_min);
         if (depth_max) params.append('depth_max', depth_max);
         if (field) params.append('field', Array.isArray(field) ? field.join(',') : field);
-        return `${configApi.GET_POINTS}?${params.toString()}`;
+        return `${configApi.GET_POINTS}?is_working=true&${params.toString()}`;
       },
     }),
     fetchCleanPoints: builder.query({
