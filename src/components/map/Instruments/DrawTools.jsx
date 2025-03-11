@@ -35,16 +35,23 @@ const DrawTools = () => {
       let tooltipContent = '';
 
       if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-        const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]); // Площадь в м²
+        // Рассчитываем площадь полигона
+        const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
         tooltipContent = `Площадь: ${area.toFixed(2)} м²`;
       } else if (layer instanceof L.Polyline) {
+        // Рассчитываем длину линии
         const latLngs = layer.getLatLngs();
-        const length = L.GeometryUtil.length(latLngs);
+        const length = latLngs.reduce((sum, latLng, index, array) => {
+          if (index === 0) return sum;
+          const prevLatLng = array[index - 1];
+          return sum + map.distance(prevLatLng, latLng); // Рассчитываем расстояние
+        }, 0);
         tooltipContent = `Длина: ${length.toFixed(2)} м`;
       } else if (layer instanceof L.Circle) {
+        // Рассчитываем радиус и площадь круга
         const radius = layer.getRadius();
-        if (typeof radius === 'number') {
-          const circleArea = Math.PI * radius * radius; // Площадь круга = π * r²
+        if (!isNaN(radius)) {
+          const circleArea = Math.PI * radius * radius; // Площадь круга: π * r^2
           tooltipContent = `Радиус: ${radius.toFixed(2)} м, Площадь: ${circleArea.toFixed(2)} м²`;
         } else {
           console.error('Invalid radius value:', radius);
@@ -63,15 +70,17 @@ const DrawTools = () => {
       }
     };
 
+    // Событие создания нового объекта
     map.on(L.Draw.Event.CREATED, (event) => {
       const layer = event.layer;
       drawnItems.addLayer(layer);
       updateMeasurements(layer);
     });
 
+    // Событие редактирования объектов
     map.on(L.Draw.Event.EDITED, (event) => {
       event.layers.eachLayer((layer) => {
-        updateMeasurements(layer); // Обновление измерений
+        updateMeasurements(layer);
       });
     });
   }, [map]);
