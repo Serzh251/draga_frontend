@@ -1,9 +1,20 @@
 import { useMap } from 'react-leaflet';
 import { useEffect } from 'react';
 import L from 'leaflet';
-import 'leaflet-draw'; // Подключаем инструменты рисования
+import 'leaflet-draw';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
+
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 const DrawTools = () => {
   const map = useMap();
@@ -35,23 +46,20 @@ const DrawTools = () => {
       let tooltipContent = '';
 
       if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-        // Рассчитываем площадь полигона
         const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
         tooltipContent = `Площадь: ${area.toFixed(2)} м²`;
       } else if (layer instanceof L.Polyline) {
-        // Рассчитываем длину линии
         const latLngs = layer.getLatLngs();
         const length = latLngs.reduce((sum, latLng, index, array) => {
           if (index === 0) return sum;
           const prevLatLng = array[index - 1];
-          return sum + map.distance(prevLatLng, latLng); // Рассчитываем расстояние
+          return sum + map.distance(prevLatLng, latLng);
         }, 0);
         tooltipContent = `Длина: ${length.toFixed(2)} м`;
       } else if (layer instanceof L.Circle) {
-        // Рассчитываем радиус и площадь круга
         const radius = layer.getRadius();
         if (!isNaN(radius)) {
-          const circleArea = Math.PI * radius * radius; // Площадь круга: π * r^2
+          const circleArea = Math.PI * radius * radius;
           tooltipContent = `Радиус: ${radius.toFixed(2)} м, Площадь: ${circleArea.toFixed(2)} м²`;
         } else {
           console.error('Invalid radius value:', radius);
@@ -70,14 +78,12 @@ const DrawTools = () => {
       }
     };
 
-    // Событие создания нового объекта
     map.on(L.Draw.Event.CREATED, (event) => {
       const layer = event.layer;
       drawnItems.addLayer(layer);
       updateMeasurements(layer);
     });
 
-    // Событие редактирования объектов
     map.on(L.Draw.Event.EDITED, (event) => {
       event.layers.eachLayer((layer) => {
         updateMeasurements(layer);

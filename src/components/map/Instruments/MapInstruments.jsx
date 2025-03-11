@@ -2,7 +2,7 @@ import React from 'react';
 import { ZoomControl, ScaleControl } from 'react-leaflet';
 import LayersControlComponent from './LayersControlComponent';
 import DrawTools from './DrawTools';
-import RulerControl from './RulerControl';
+import MeasureControl from './MeasureControl';
 
 const MapInstruments = () => {
   return (
@@ -10,8 +10,8 @@ const MapInstruments = () => {
       <ZoomControl position="bottomright" />
       <ScaleControl position="bottomleft" imperial={false} />
       <LayersControlComponent />
+      <MeasureControl />
       <DrawTools />
-      <RulerControl />
     </>
   );
 };
