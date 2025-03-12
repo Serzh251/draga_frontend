@@ -45,3 +45,8 @@
   border-radius: 4px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
+.leaflet-control-measure-toggle {
+  width: 43px !important;
+  height: 43px !important;
+  background-size: 25px !important;
+}

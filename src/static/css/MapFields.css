@@ -1,6 +1,6 @@
 .field-sidebar-wrapper {
     position: absolute;
-    top: 115px;
+    top: 125px;
     right: 10px;
     display: flex;
     flex-direction: column;
@@ -11,8 +11,8 @@
     top: 170px;
 }
 .field-toggle-button {
-    width: 40px;
-    height: 40px;
+    width: 43px;
+    height: 43px;
     background: white;
     display: flex;
     align-items: center;

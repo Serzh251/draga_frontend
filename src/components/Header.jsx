@@ -43,7 +43,7 @@ const AppHeader = () => {
     {
       key: '1',
       icon: <HomeOutlined />,
-      label: <NavLink to="/">Home</NavLink>,
+      label: <NavLink to="/">Главная</NavLink>,
     },
   ];
 

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
-import 'leaflet-measure';
+import 'leaflet-measure/dist/leaflet-measure.ru';
 import 'leaflet-measure/dist/leaflet-measure.css';
 import L from 'leaflet';
 
