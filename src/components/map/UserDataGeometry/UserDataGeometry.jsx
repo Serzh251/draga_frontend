@@ -34,7 +34,7 @@ const UserDataGeometry = () => {
       name: feature.properties?.name || '-',
       description: feature.properties?.description || '-',
       color: feature.properties?.color || '#000000',
-      created_at: new Date(feature.properties?.created_at || Date.now()).toLocaleString(),
+      created_at: feature.properties?.created_at || null,
       has_point: hasPoint,
       has_line: hasLine,
       has_polygon: hasPolygon,
@@ -47,7 +47,8 @@ const UserDataGeometry = () => {
       dataIndex: 'created_at',
       key: 'created_at',
       align: 'center',
-      render: (text) => <div style={{ textAlign: 'left' }}>{text}</div>,
+      sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at), // Сортировка по оригинальным значениям
+      render: (text) => <div style={{ textAlign: 'left' }}>{new Date(text).toLocaleString()}</div>, // Отображение форматированной даты
     },
     {
       title: 'Название',
