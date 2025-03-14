@@ -47,8 +47,9 @@ const UserDataGeometry = () => {
       dataIndex: 'created_at',
       key: 'created_at',
       align: 'center',
-      sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at), // Сортировка по оригинальным значениям
-      render: (text) => <div style={{ textAlign: 'left' }}>{new Date(text).toLocaleString()}</div>, // Отображение форматированной даты
+      sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
+      render: (text) => <div style={{ textAlign: 'left' }}>{new Date(text).toLocaleString()}</div>,
+      width: 200,
     },
     {
       title: 'Название',
@@ -56,6 +57,7 @@ const UserDataGeometry = () => {
       key: 'name',
       align: 'center',
       render: (text) => <div style={{ textAlign: 'left' }}>{text}</div>,
+      width: 300,
     },
     {
       title: 'Описание',
@@ -63,6 +65,7 @@ const UserDataGeometry = () => {
       key: 'description',
       align: 'center',
       render: (text) => <div style={{ textAlign: 'left' }}>{text}</div>,
+      width: 500,
     },
     {
       title: 'Цвет',
@@ -80,24 +83,28 @@ const UserDataGeometry = () => {
           }}
         />
       ),
+      width: 60,
     },
     {
       title: 'Точка',
       key: 'has_point',
       align: 'center',
       render: (_, record) => (record.has_point ? <CheckSquareOutlined style={{ color: 'green' }} /> : null),
+      width: 60,
     },
     {
       title: 'Линия',
       key: 'has_line',
       align: 'center',
       render: (_, record) => (record.has_line ? <CheckSquareOutlined style={{ color: 'green' }} /> : null),
+      width: 60,
     },
     {
       title: 'Полигон',
       key: 'has_polygon',
       align: 'center',
       render: (_, record) => (record.has_polygon ? <CheckSquareOutlined style={{ color: 'green' }} /> : null),
+      width: 60,
     },
   ];
 
@@ -134,7 +141,7 @@ const UserDataGeometry = () => {
         onCancel={toggleModal}
         footer={null}
         width="80%"
-        style={{ maxHeight: '80vh' }}
+        style={{ maxHeight: '90vh' }}
       >
         <Table
           dataSource={dataSource}
@@ -142,7 +149,7 @@ const UserDataGeometry = () => {
           pagination={dataSource.length > 12 ? { pageSize: 12 } : false}
           bordered
           size="middle"
-          scroll={{ y: 'calc(80vh - 150px)' }}
+          scroll={{ y: 'calc(90vh - 150px)' }}
         />
       </Modal>
     </>
