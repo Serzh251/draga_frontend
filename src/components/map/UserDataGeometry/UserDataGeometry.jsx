@@ -1,39 +1,112 @@
 import React, { useState } from 'react';
 import { Modal, Table } from 'antd';
-import { MonitorOutlined, SaveOutlined } from '@ant-design/icons';
-import 'leaflet/dist/leaflet.css';
+import { CheckSquareOutlined, MonitorOutlined } from '@ant-design/icons';
+import { useFetchUserGeoDataQuery } from '../../../api/api';
 
 const UserDataGeometry = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { data: listUserGeoData, refetch: refetchUserGeoData } = useFetchUserGeoDataQuery();
 
-  const dataSource = [
-    {
-      key: '1',
-      name: 'Элемент 1',
-      value: 'Значение 1',
-    },
-    {
-      key: '2',
-      name: 'Элемент 2',
-      value: 'Значение 2',
-    },
-  ];
+  const dataSource = (listUserGeoData?.features || []).map((feature) => {
+    const geometry = feature.geometry || {};
+    const geometries = geometry.geometries || [];
+
+    const hasPoint =
+      geometry.type === 'Point' ||
+      (geometry.type === 'GeometryCollection' &&
+        Array.isArray(geometries) &&
+        geometries.some((g) => g.type === 'Point'));
+
+    const hasLine =
+      geometry.type === 'LineString' ||
+      (geometry.type === 'GeometryCollection' &&
+        Array.isArray(geometries) &&
+        geometries.some((g) => g.type === 'LineString'));
+
+    const hasPolygon =
+      geometry.type === 'Polygon' ||
+      (geometry.type === 'GeometryCollection' &&
+        Array.isArray(geometries) &&
+        geometries.some((g) => g.type === 'Polygon'));
+
+    return {
+      key: feature.id,
+      name: feature.properties?.name || '-',
+      description: feature.properties?.description || '-',
+      color: feature.properties?.color || '#000000',
+      created_at: new Date(feature.properties?.created_at || Date.now()).toLocaleString(),
+      has_point: hasPoint,
+      has_line: hasLine,
+      has_polygon: hasPolygon,
+    };
+  });
 
   const columns = [
+    {
+      title: 'Время создания',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      align: 'center',
+      render: (text) => <div style={{ textAlign: 'left' }}>{text}</div>,
+    },
     {
       title: 'Название',
       dataIndex: 'name',
       key: 'name',
+      align: 'center',
+      render: (text) => <div style={{ textAlign: 'left' }}>{text}</div>,
     },
     {
-      title: 'Значение',
-      dataIndex: 'value',
-      key: 'value',
+      title: 'Описание',
+      dataIndex: 'description',
+      key: 'description',
+      align: 'center',
+      render: (text) => <div style={{ textAlign: 'left' }}>{text}</div>,
+    },
+    {
+      title: 'Цвет',
+      dataIndex: 'color',
+      key: 'color',
+      align: 'center',
+      render: (color) => (
+        <div
+          style={{
+            width: '20px',
+            height: '20px',
+            backgroundColor: color,
+            borderRadius: '2px',
+            display: 'inline-block',
+          }}
+        />
+      ),
+    },
+    {
+      title: 'Точка',
+      key: 'has_point',
+      align: 'center',
+      render: (_, record) => (record.has_point ? <CheckSquareOutlined style={{ color: 'green' }} /> : null),
+    },
+    {
+      title: 'Линия',
+      key: 'has_line',
+      align: 'center',
+      render: (_, record) => (record.has_line ? <CheckSquareOutlined style={{ color: 'green' }} /> : null),
+    },
+    {
+      title: 'Полигон',
+      key: 'has_polygon',
+      align: 'center',
+      render: (_, record) => (record.has_polygon ? <CheckSquareOutlined style={{ color: 'green' }} /> : null),
     },
   ];
 
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
+  const toggleModal = async () => {
+    try {
+      await refetchUserGeoData();
+      setIsModalOpen(!isModalOpen);
+    } catch (error) {
+      console.error('Ошибка загрузки данных геоJSON:', error);
+    }
   };
 
   return (
@@ -54,8 +127,22 @@ const UserDataGeometry = () => {
         onClick={toggleModal}
       />
 
-      <Modal title="Таблица данных" visible={isModalVisible} onCancel={toggleModal} footer={null}>
-        <Table dataSource={dataSource} columns={columns} pagination={false} />
+      <Modal
+        title="Таблица данных"
+        open={isModalOpen}
+        onCancel={toggleModal}
+        footer={null}
+        width="80%"
+        style={{ maxHeight: '80vh' }}
+      >
+        <Table
+          dataSource={dataSource}
+          columns={columns}
+          pagination={dataSource.length > 12 ? { pageSize: 12 } : false}
+          bordered
+          size="middle"
+          scroll={{ y: 'calc(80vh - 150px)' }}
+        />
       </Modal>
     </>
   );

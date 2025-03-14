@@ -10,6 +10,7 @@ const api = {
   GET_GRID_CELLS: '/fields/grid-cells/',
   LOGIN_URL: '/token/',
   TOKEN_REFRESH: '/token/refresh/',
+  LIST_USER_GEO_DATA: '/user-data/geo-data/',
 };
 
 export default api;

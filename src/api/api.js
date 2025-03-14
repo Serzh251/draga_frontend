@@ -84,6 +84,9 @@ export const api = createApi({
         hasMore: !!response.next_page,
       }),
     }),
+    fetchUserGeoData: builder.query({
+      query: () => configApi.LIST_USER_GEO_DATA,
+    }),
   }),
 });
 
@@ -94,4 +97,5 @@ export const {
   useFetchCleanPointsQuery,
   useFetchYearsQuery,
   useLazyFetchGridCellsQuery,
+  useFetchUserGeoDataQuery,
 } = api;
