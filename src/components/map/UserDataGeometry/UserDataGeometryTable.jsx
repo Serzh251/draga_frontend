@@ -1,8 +1,8 @@
 import { Modal, Table, Button } from 'antd';
-import { CheckSquareOutlined, MonitorOutlined } from '@ant-design/icons';
-import { useFetchUserGeoDataQuery } from '../../../api/api';
+import { CheckSquareOutlined, DeleteOutlined, MonitorOutlined } from '@ant-design/icons';
+import { useFetchUserGeoDataQuery, useDeleteUserGeoDataMutation } from '../../../api/api';
 import { useDispatch } from 'react-redux';
-import { setUserGeoData } from '../../../store/slices/userGeoDataSlice';
+import { setUserGeoData, removeUserGeoData } from '../../../store/slices/userGeoDataSlice';
 import { useState } from 'react';
 
 const UserDataGeometryTable = () => {
@@ -10,6 +10,7 @@ const UserDataGeometryTable = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const dispatch = useDispatch();
   const { data: listUserGeoData, refetch: refetchUserGeoData } = useFetchUserGeoDataQuery();
+  const [deleteUserGeoData] = useDeleteUserGeoDataMutation();
 
   const dataSource = (listUserGeoData?.features || []).map((feature) => {
     const geometry = feature.geometry || {};
@@ -37,7 +38,7 @@ const UserDataGeometryTable = () => {
       key: feature.id,
       name: feature.properties?.name || '-',
       description: feature.properties?.description || '-',
-      color: feature.properties?.color || '#0051ff',
+      color: feature.properties?.color || '#000000',
       created_at: feature.properties?.created_at || null,
       has_point: hasPoint,
       has_line: hasLine,
@@ -108,7 +109,27 @@ const UserDataGeometryTable = () => {
       key: 'has_polygon',
       align: 'center',
       render: (_, record) => (record.has_polygon ? <CheckSquareOutlined style={{ color: 'green' }} /> : null),
-      width: 60,
+      width: 70,
+    },
+    {
+      title: 'Удалить',
+      key: 'delete',
+      align: 'center',
+      render: (_, record) => (
+        <Button
+          type="text"
+          icon={<DeleteOutlined style={{ color: 'red' }} />}
+          onClick={async () => {
+            try {
+              await deleteUserGeoData(record.key);
+              await refetchUserGeoData();
+            } catch (error) {
+              console.error('Ошибка при удалении записи:', error);
+            }
+          }}
+        />
+      ),
+      width: 70,
     },
   ];
 
@@ -123,10 +144,11 @@ const UserDataGeometryTable = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    dispatch(removeUserGeoData());
   };
-
   const handleSave = () => {
     const selectedData = (listUserGeoData?.features || []).filter((feature) => selectedRowKeys.includes(feature.id));
+
     dispatch(setUserGeoData(selectedData));
     setIsModalOpen(false);
   };
@@ -153,13 +175,13 @@ const UserDataGeometryTable = () => {
           boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
           zIndex: 1000,
         }}
-        onClick={handleOpenModal} // Открытие модального окна
+        onClick={handleOpenModal}
       />
 
       <Modal
         title="Таблица данных"
         open={isModalOpen}
-        onCancel={handleCloseModal} // Закрытие модального окна
+        onCancel={handleCloseModal}
         footer={[
           <Button key="save" type="primary" onClick={handleSave} disabled={selectedRowKeys.length === 0}>
             Показать
