@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
-import { Modal, Table } from 'antd';
+import { Modal, Table, Button } from 'antd';
 import { CheckSquareOutlined, MonitorOutlined } from '@ant-design/icons';
 import { useFetchUserGeoDataQuery } from '../../../api/api';
+import { useDispatch } from 'react-redux';
+import { setUserGeoData } from '../../../store/slices/userGeoDataSlice';
+import { useState } from 'react';
 
-const UserDataGeometry = () => {
+const UserDataGeometryTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const dispatch = useDispatch();
   const { data: listUserGeoData, refetch: refetchUserGeoData } = useFetchUserGeoDataQuery();
 
   const dataSource = (listUserGeoData?.features || []).map((feature) => {
@@ -33,7 +37,7 @@ const UserDataGeometry = () => {
       key: feature.id,
       name: feature.properties?.name || '-',
       description: feature.properties?.description || '-',
-      color: feature.properties?.color || '#000000',
+      color: feature.properties?.color || '#0051ff',
       created_at: feature.properties?.created_at || null,
       has_point: hasPoint,
       has_line: hasLine,
@@ -108,13 +112,30 @@ const UserDataGeometry = () => {
     },
   ];
 
-  const toggleModal = async () => {
+  const handleOpenModal = async () => {
     try {
       await refetchUserGeoData();
-      setIsModalOpen(!isModalOpen);
+      setIsModalOpen(true);
     } catch (error) {
       console.error('Ошибка загрузки данных геоJSON:', error);
     }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSave = () => {
+    const selectedData = (listUserGeoData?.features || []).filter((feature) => selectedRowKeys.includes(feature.id));
+    dispatch(setUserGeoData(selectedData));
+    setIsModalOpen(false);
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys) => {
+      setSelectedRowKeys(newSelectedRowKeys);
+    },
   };
 
   return (
@@ -132,28 +153,33 @@ const UserDataGeometry = () => {
           boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
           zIndex: 1000,
         }}
-        onClick={toggleModal}
+        onClick={handleOpenModal} // Открытие модального окна
       />
 
       <Modal
         title="Таблица данных"
         open={isModalOpen}
-        onCancel={toggleModal}
-        footer={null}
+        onCancel={handleCloseModal} // Закрытие модального окна
+        footer={[
+          <Button key="save" type="primary" onClick={handleSave} disabled={selectedRowKeys.length === 0}>
+            Показать
+          </Button>,
+        ]}
         width="80%"
-        style={{ maxHeight: '90vh' }}
+        style={{ maxHeight: '80vh' }}
       >
         <Table
+          rowSelection={rowSelection}
           dataSource={dataSource}
           columns={columns}
-          pagination={dataSource.length > 12 ? { pageSize: 12 } : false}
+          pagination={dataSource.length > 10 ? { pageSize: 10 } : false}
           bordered
           size="middle"
-          scroll={{ y: 'calc(90vh - 150px)' }}
+          scroll={{ y: 'calc(80vh - 150px)' }}
         />
       </Modal>
     </>
   );
 };
 
-export default UserDataGeometry;
+export default UserDataGeometryTable;
