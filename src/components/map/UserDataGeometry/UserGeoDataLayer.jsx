@@ -31,7 +31,7 @@ const UserGeoDataLayer = () => {
             return (
               <Polyline
                 key={feature.id}
-                positions={geometry.coordinates.map((coord) => [coord[1], coord[0]])} // Лат, Лон
+                positions={geometry.coordinates.map((coord) => [coord[1], coord[0]])}
                 pathOptions={{ color }}
               >
                 <Popup>

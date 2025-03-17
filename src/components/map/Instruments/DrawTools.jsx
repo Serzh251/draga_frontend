@@ -1,14 +1,17 @@
 import { useMap } from 'react-leaflet';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
+import { Modal, Form, Input, message, ColorPicker } from 'antd';
+import { SaveOutlined } from '@ant-design/icons';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
+import 'antd/dist/reset.css'; // Для Ant Design v5
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -16,32 +19,34 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+message.config({
+  top: 1500, // Расстояние от верхнего края страницы
+  duration: 3, // Время отображения (секунд)
+});
 const DrawTools = () => {
   const map = useMap();
+  const [showModal, setShowModal] = useState(false);
+  const [drawnItems, setDrawnItems] = useState(null);
+  const [layerColor, setLayerColor] = useState('#0015ff');
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     if (map.drawControl) return;
-
-    const drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
-
+    const items = new L.FeatureGroup();
+    map.addLayer(items);
+    setDrawnItems(items);
     const drawControl = new L.Control.Draw({
       position: 'topleft',
-      edit: {
-        featureGroup: drawnItems,
-      },
+      edit: { featureGroup: items, remove: true },
       draw: {
         polygon: true,
         polyline: true,
-        rectangle: true,
-        circle: true,
         marker: true,
+        rectangle: false,
+        circle: false,
+        circlemarker: false,
       },
     });
-
-    map.addControl(drawControl);
-    map.drawControl = drawControl;
-
     const updateMeasurements = (layer) => {
       let tooltipContent = '';
 
@@ -78,12 +83,27 @@ const DrawTools = () => {
       }
     };
 
+    map.addControl(drawControl);
+    map.drawControl = drawControl;
     map.on(L.Draw.Event.CREATED, (event) => {
-      const layer = event.layer;
-      drawnItems.addLayer(layer);
+      const { layerType, layer } = event;
+
+      if (layerType === 'marker') {
+        items.eachLayer((l) => {
+          if (l instanceof L.Marker) items.removeLayer(l);
+        });
+      } else if (layerType === 'polyline') {
+        items.eachLayer((l) => {
+          if (l instanceof L.Polyline) items.removeLayer(l);
+        });
+      } else if (layerType === 'polygon') {
+        items.eachLayer((l) => {
+          if (l instanceof L.Polygon) items.removeLayer(l);
+        });
+      }
+      items.addLayer(layer);
       updateMeasurements(layer);
     });
-
     map.on(L.Draw.Event.EDITED, (event) => {
       event.layers.eachLayer((layer) => {
         updateMeasurements(layer);
@@ -91,7 +111,102 @@ const DrawTools = () => {
     });
   }, [map]);
 
-  return null;
+  const [form] = Form.useForm();
+
+  const saveGeoData = () => {
+    form
+      .validateFields()
+      .then(() => {
+        if (!drawnItems || !drawnItems.getLayers().length) {
+          messageApi.open({
+            type: 'error',
+            content: 'Вы должны нарисовать хотя бы один объект чтобы сохранить!',
+          });
+          return;
+        }
+
+        const geojsonData = drawnItems.toGeoJSON();
+        const geoFields = { point: null, line: null, polygon: null };
+
+        geojsonData.features.forEach((feature) => {
+          if (feature.geometry.type === 'Point') {
+            geoFields.point = feature.geometry;
+          } else if (feature.geometry.type === 'LineString') {
+            geoFields.line = feature.geometry;
+          } else if (feature.geometry.type === 'Polygon') {
+            geoFields.polygon = feature.geometry;
+          }
+        });
+
+        const formData = form.getFieldsValue();
+        const payload = {
+          name: formData.name,
+          description: formData.description,
+          color: '#ff0000',
+          ...geoFields,
+        };
+        console.log('Payload для сохранения:', payload);
+        messageApi.open({
+          type: 'success',
+          content: 'Данные успешно сохранены!',
+          style: {
+            marginTop: '20vh',
+          },
+        });
+        setShowModal(false);
+      })
+      .catch(() => {
+        message.error('Заполните все обязательные поля!');
+      });
+  };
+
+  return (
+    <>
+      {contextHolder}
+      <SaveOutlined
+        onClick={() => setShowModal(true)}
+        style={{
+          position: 'absolute',
+          top: '200px',
+          left: '10px',
+          fontSize: '24px',
+          color: '#007bff',
+          cursor: 'pointer',
+          zIndex: 1000,
+        }}
+      />
+
+      <Modal
+        title="Сохранение геоданных"
+        open={showModal}
+        onOk={saveGeoData}
+        onCancel={() => setShowModal(false)}
+        okText="Сохранить"
+        cancelText="Отмена"
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            name="name"
+            label="Название:"
+            rules={[{ required: true, message: 'Поле "Название" обязательно!' }]}
+          >
+            <Input placeholder="Введите название" />
+          </Form.Item>
+
+          <Form.Item name="description" label="Описание:">
+            <Input.TextArea placeholder="Введите описание" />
+          </Form.Item>
+          <Form.Item label="Выберите цвет:">
+            <ColorPicker
+              value={layerColor}
+              onChange={(color) => setLayerColor(color.toHexString())}
+              style={{ width: '100%', height: '40px', marginTop: '5px' }}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
+  );
 };
 
 export default DrawTools;
