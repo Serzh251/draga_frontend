@@ -27,7 +27,6 @@ const DrawTools = () => {
   const map = useMap();
   const [showModal, setShowModal] = useState(false);
   const [drawnItems, setDrawnItems] = useState(null);
-  const [layerColor, setLayerColor] = useState('#0015ff');
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
@@ -141,7 +140,7 @@ const DrawTools = () => {
         const payload = {
           name: formData.name,
           description: formData.description,
-          color: '#ff0000',
+          color: formData.color,
           ...geoFields,
         };
         console.log('Payload для сохранения:', payload);
@@ -195,11 +194,11 @@ const DrawTools = () => {
           <Form.Item name="description" label="Описание:">
             <Input.TextArea placeholder="Введите описание" />
           </Form.Item>
-          <Form.Item label="Выберите цвет:">
+          <Form.Item label="Выберите цвет:" name="color" initialValue="0015ff" style={{ textAlign: 'center' }}>
             <ColorPicker
-              value={layerColor}
-              onChange={(color) => setLayerColor(color.toHexString())}
-              style={{ width: '100%', height: '40px', marginTop: '5px' }}
+              value={form.getFieldValue('color')}
+              onChange={(color) => form.setFieldsValue({ color: color.toHexString() })}
+              style={{ width: '50%', height: '40px', marginTop: '0px', alignItems: 'center' }}
             />
           </Form.Item>
         </Form>
