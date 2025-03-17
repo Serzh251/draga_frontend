@@ -87,18 +87,17 @@ const DrawTools = () => {
     map.drawControl = drawControl;
     map.on(L.Draw.Event.CREATED, (event) => {
       const { layerType, layer } = event;
-
       if (layerType === 'marker') {
         items.eachLayer((l) => {
           if (l instanceof L.Marker) items.removeLayer(l);
         });
       } else if (layerType === 'polyline') {
         items.eachLayer((l) => {
-          if (l instanceof L.Polyline) items.removeLayer(l);
+          if (l instanceof L.Polyline && !(l instanceof L.Polygon)) items.removeLayer(l);
         });
       } else if (layerType === 'polygon') {
         items.eachLayer((l) => {
-          if (l instanceof L.Polygon) items.removeLayer(l);
+          if (l instanceof L.Polygon && !(l instanceof L.Rectangle)) items.removeLayer(l);
         });
       }
       items.addLayer(layer);
