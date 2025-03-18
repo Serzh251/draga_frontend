@@ -11,7 +11,9 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-import 'antd/dist/reset.css'; // Для Ant Design v5
+import { useCreateUserGeoDataMutation } from '../../../api/api';
+
+// Исправляем иконку маркера
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -19,21 +21,20 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-message.config({
-  top: 1500, // Расстояние от верхнего края страницы
-  duration: 3, // Время отображения (секунд)
-});
 const DrawTools = () => {
   const map = useMap();
   const [showModal, setShowModal] = useState(false);
   const [drawnItems, setDrawnItems] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
+  const [createUserGeoData, { isLoading }] = useCreateUserGeoDataMutation();
 
   useEffect(() => {
     if (map.drawControl) return;
+
     const items = new L.FeatureGroup();
     map.addLayer(items);
     setDrawnItems(items);
+
     const drawControl = new L.Control.Draw({
       position: 'topleft',
       edit: { featureGroup: items, remove: true },
@@ -84,6 +85,7 @@ const DrawTools = () => {
 
     map.addControl(drawControl);
     map.drawControl = drawControl;
+
     map.on(L.Draw.Event.CREATED, (event) => {
       const { layerType, layer } = event;
       if (layerType === 'marker') {
@@ -111,51 +113,44 @@ const DrawTools = () => {
 
   const [form] = Form.useForm();
 
-  const saveGeoData = () => {
-    form
-      .validateFields()
-      .then(() => {
-        if (!drawnItems || !drawnItems.getLayers().length) {
-          messageApi.open({
-            type: 'error',
-            content: 'Вы должны нарисовать хотя бы один объект чтобы сохранить!',
-          });
-          return;
+  const saveGeoData = async () => {
+    try {
+      await form.validateFields();
+
+      if (!drawnItems || !drawnItems.getLayers().length) {
+        messageApi.error('Вы должны нарисовать хотя бы один объект, чтобы сохранить!');
+        return;
+      }
+
+      const geojsonData = drawnItems.toGeoJSON();
+      const geoFields = { point: null, line: null, polygon: null };
+
+      geojsonData.features.forEach((feature) => {
+        if (feature.geometry.type === 'Point') {
+          geoFields.point = feature.geometry;
+        } else if (feature.geometry.type === 'LineString') {
+          geoFields.line = feature.geometry;
+        } else if (feature.geometry.type === 'Polygon') {
+          geoFields.polygon = feature.geometry;
         }
-
-        const geojsonData = drawnItems.toGeoJSON();
-        const geoFields = { point: null, line: null, polygon: null };
-
-        geojsonData.features.forEach((feature) => {
-          if (feature.geometry.type === 'Point') {
-            geoFields.point = feature.geometry;
-          } else if (feature.geometry.type === 'LineString') {
-            geoFields.line = feature.geometry;
-          } else if (feature.geometry.type === 'Polygon') {
-            geoFields.polygon = feature.geometry;
-          }
-        });
-
-        const formData = form.getFieldsValue();
-        const payload = {
-          name: formData.name,
-          description: formData.description,
-          color: formData.color,
-          ...geoFields,
-        };
-        console.log('Payload для сохранения:', payload);
-        messageApi.open({
-          type: 'success',
-          content: 'Данные успешно сохранены!',
-          style: {
-            marginTop: '20vh',
-          },
-        });
-        setShowModal(false);
-      })
-      .catch(() => {
-        message.error('Заполните все обязательные поля!');
       });
+
+      const formData = form.getFieldsValue();
+      const payload = {
+        name: formData.name,
+        description: formData.description,
+        color: formData.color,
+        ...geoFields,
+      };
+
+      await createUserGeoData(payload).unwrap();
+
+      messageApi.success('✅ Данные успешно сохранены!');
+      form.resetFields();
+      setShowModal(false);
+    } catch (error) {
+      messageApi.error(`❌ Ошибка при сохранении: ${error.data?.detail || 'Неизвестная ошибка'}`);
+    }
   };
 
   return (
@@ -181,6 +176,7 @@ const DrawTools = () => {
         onCancel={() => setShowModal(false)}
         okText="Сохранить"
         cancelText="Отмена"
+        confirmLoading={isLoading}
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -194,11 +190,12 @@ const DrawTools = () => {
           <Form.Item name="description" label="Описание:">
             <Input.TextArea placeholder="Введите описание" />
           </Form.Item>
-          <Form.Item label="Выберите цвет:" name="color" initialValue="0015ff" style={{ textAlign: 'center' }}>
+
+          <Form.Item label="Выберите цвет:" name="color" initialValue="#0015ff">
             <ColorPicker
               value={form.getFieldValue('color')}
               onChange={(color) => form.setFieldsValue({ color: color.toHexString() })}
-              style={{ width: '50%', height: '40px', marginTop: '0px', alignItems: 'center' }}
+              style={{ width: '100%', height: '40px', marginTop: '5px' }}
             />
           </Form.Item>
         </Form>

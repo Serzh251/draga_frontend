@@ -11,6 +11,7 @@ const api = {
   LOGIN_URL: '/token/',
   TOKEN_REFRESH: '/token/refresh/',
   LIST_USER_GEO_DATA: '/user-data/geo-data/',
+  CREATE_USER_GEO_DATA: '/user-data/geo-data-create/',
 };
 
 export default api;

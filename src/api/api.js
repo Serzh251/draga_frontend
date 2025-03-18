@@ -87,6 +87,13 @@ export const api = createApi({
     fetchUserGeoData: builder.query({
       query: () => configApi.LIST_USER_GEO_DATA,
     }),
+    createUserGeoData: builder.mutation({
+      query: (newGeoData) => ({
+        url: configApi.CREATE_USER_GEO_DATA,
+        method: 'POST',
+        body: newGeoData,
+      }),
+    }),
     deleteUserGeoData: builder.mutation({
       query: (id) => ({
         url: `${configApi.LIST_USER_GEO_DATA}${id}/`,
@@ -104,5 +111,6 @@ export const {
   useFetchYearsQuery,
   useLazyFetchGridCellsQuery,
   useFetchUserGeoDataQuery,
+  useCreateUserGeoDataMutation,
   useDeleteUserGeoDataMutation,
 } = api;
