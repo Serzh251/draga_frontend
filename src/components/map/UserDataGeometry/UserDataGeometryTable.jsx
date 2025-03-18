@@ -1,13 +1,13 @@
 import React from 'react';
 import { Modal, Table, Button } from 'antd';
 import { CheckSquareOutlined, DeleteOutlined, MonitorOutlined } from '@ant-design/icons';
-import { useState } from 'react';
 
 const UserDataGeometryTable = ({
   isModalOpen,
   onOpenModal,
   onCloseModal,
   onSave,
+  onClear,
   onDelete,
   data,
   selectedRowKeys,
@@ -125,6 +125,11 @@ const UserDataGeometryTable = ({
     selectedRowKeys,
     onChange: (newSelectedRowKeys) => {
       setSelectedRowKeys(newSelectedRowKeys);
+      if (newSelectedRowKeys.length === 0) {
+        localStorage.removeItem('userGeoDataIds');
+      } else {
+        localStorage.setItem('userGeoDataIds', JSON.stringify(newSelectedRowKeys));
+      }
     },
   };
 
@@ -151,8 +156,11 @@ const UserDataGeometryTable = ({
         open={isModalOpen}
         onCancel={onCloseModal}
         footer={[
-          <Button key="save" type="primary" onClick={onSave} disabled={selectedRowKeys.length === 0}>
+          <Button key="save" type="primary" onClick={onSave}>
             Показать
+          </Button>,
+          <Button key="save" type="primary" onClick={onClear} disabled={selectedRowKeys.length === 0}>
+            Очистить
           </Button>,
         ]}
         width="80%"

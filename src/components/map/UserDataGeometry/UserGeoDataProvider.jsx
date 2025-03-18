@@ -10,14 +10,26 @@ const UserGeoDataProvider = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const dispatch = useDispatch();
 
+  const storedIds = (() => {
+    try {
+      const data = localStorage.getItem('userGeoDataIds');
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('Ошибка парсинга localStorage:', error);
+      return [];
+    }
+  })();
+
   const { data: listUserGeoData, refetch: refetchUserGeoData } = useFetchUserGeoDataQuery();
   const [deleteUserGeoData] = useDeleteUserGeoDataMutation();
 
   useEffect(() => {
-    if (listUserGeoData) {
-      dispatch(setUserGeoData(listUserGeoData.features || [])); // Сохраняем данные в Redux
+    if (listUserGeoData && Array.isArray(storedIds) && storedIds.length > 0 && !selectedRowKeys.length) {
+      const filteredData = listUserGeoData.features.filter((feature) => storedIds.includes(feature.id));
+      dispatch(setUserGeoData(filteredData));
+      setSelectedRowKeys(storedIds);
     }
-  }, [listUserGeoData, dispatch]);
+  }, [listUserGeoData, storedIds, selectedRowKeys, dispatch]);
 
   const handleDelete = async (id) => {
     try {
@@ -45,9 +57,14 @@ const UserGeoDataProvider = () => {
   const handleSave = () => {
     const selectedData = (listUserGeoData?.features || []).filter((feature) => selectedRowKeys.includes(feature.id));
     dispatch(setUserGeoData(selectedData));
+    localStorage.setItem('userGeoDataIds', JSON.stringify(selectedRowKeys));
     setIsModalOpen(false);
   };
-
+  const handleClear = () => {
+    setSelectedRowKeys([]);
+    dispatch(removeUserGeoData());
+    localStorage.removeItem('userGeoDataIds');
+  };
   return (
     <>
       <UserDataGeometryTable
@@ -55,6 +72,7 @@ const UserGeoDataProvider = () => {
         onOpenModal={handleOpenModal}
         onCloseModal={handleCloseModal}
         onSave={handleSave}
+        onClear={handleClear}
         onDelete={handleDelete}
         data={listUserGeoData?.features || []}
         selectedRowKeys={selectedRowKeys}
