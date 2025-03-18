@@ -11,11 +11,9 @@ const UserGeoDataLayer = () => {
       {Array.isArray(userGeoData) &&
         userGeoData.map((feature) => {
           const { geometry, properties } = feature;
-
           if (!geometry) {
             return null;
           }
-
           const color = properties?.color || '#3388ff';
           if (geometry.type === 'Point') {
             return (
@@ -26,7 +24,6 @@ const UserGeoDataLayer = () => {
               </Marker>
             );
           }
-
           if (geometry.type === 'LineString') {
             return (
               <Polyline
@@ -40,7 +37,6 @@ const UserGeoDataLayer = () => {
               </Polyline>
             );
           }
-
           if (geometry.type === 'Polygon') {
             return (
               <Polygon
@@ -54,7 +50,6 @@ const UserGeoDataLayer = () => {
               </Polygon>
             );
           }
-
           if (geometry.type === 'GeometryCollection') {
             return geometry.geometries.map((geo, index) => {
               if (geo.type === 'Point') {
@@ -98,7 +93,6 @@ const UserGeoDataLayer = () => {
               return null;
             });
           }
-
           return null;
         })}
     </>

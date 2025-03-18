@@ -1,18 +1,19 @@
+import React from 'react';
 import { Modal, Table, Button } from 'antd';
 import { CheckSquareOutlined, DeleteOutlined, MonitorOutlined } from '@ant-design/icons';
-import { useFetchUserGeoDataQuery, useDeleteUserGeoDataMutation } from '../../../api/api';
-import { useDispatch } from 'react-redux';
-import { setUserGeoData, removeUserGeoData } from '../../../store/slices/userGeoDataSlice';
 import { useState } from 'react';
 
-const UserDataGeometryTable = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const dispatch = useDispatch();
-  const { data: listUserGeoData, refetch: refetchUserGeoData } = useFetchUserGeoDataQuery();
-  const [deleteUserGeoData] = useDeleteUserGeoDataMutation();
-
-  const dataSource = (listUserGeoData?.features || []).map((feature) => {
+const UserDataGeometryTable = ({
+  isModalOpen,
+  onOpenModal,
+  onCloseModal,
+  onSave,
+  onDelete,
+  data,
+  selectedRowKeys,
+  setSelectedRowKeys,
+}) => {
+  const dataSource = data.map((feature) => {
     const geometry = feature.geometry || {};
     const geometries = geometry.geometries || [];
 
@@ -52,7 +53,6 @@ const UserDataGeometryTable = () => {
       dataIndex: 'created_at',
       key: 'created_at',
       align: 'center',
-      sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
       render: (text) => <div style={{ textAlign: 'left' }}>{new Date(text).toLocaleString()}</div>,
       width: 200,
     },
@@ -95,7 +95,6 @@ const UserDataGeometryTable = () => {
       key: 'has_point',
       align: 'center',
       render: (_, record) => (record.has_point ? <CheckSquareOutlined style={{ color: 'green' }} /> : null),
-      width: 60,
     },
     {
       title: 'Линия',
@@ -109,49 +108,18 @@ const UserDataGeometryTable = () => {
       key: 'has_polygon',
       align: 'center',
       render: (_, record) => (record.has_polygon ? <CheckSquareOutlined style={{ color: 'green' }} /> : null),
-      width: 70,
+      width: 80,
     },
     {
       title: 'Удалить',
       key: 'delete',
       align: 'center',
       render: (_, record) => (
-        <Button
-          type="text"
-          icon={<DeleteOutlined style={{ color: 'red' }} />}
-          onClick={async () => {
-            try {
-              await deleteUserGeoData(record.key);
-              await refetchUserGeoData();
-            } catch (error) {
-              console.error('Ошибка при удалении записи:', error);
-            }
-          }}
-        />
+        <Button type="text" icon={<DeleteOutlined style={{ color: 'red' }} />} onClick={() => onDelete(record.key)} />
       ),
       width: 70,
     },
   ];
-
-  const handleOpenModal = async () => {
-    try {
-      await refetchUserGeoData();
-      setIsModalOpen(true);
-    } catch (error) {
-      console.error('Ошибка загрузки данных геоJSON:', error);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    dispatch(removeUserGeoData());
-  };
-  const handleSave = () => {
-    const selectedData = (listUserGeoData?.features || []).filter((feature) => selectedRowKeys.includes(feature.id));
-
-    dispatch(setUserGeoData(selectedData));
-    setIsModalOpen(false);
-  };
 
   const rowSelection = {
     selectedRowKeys,
@@ -175,15 +143,15 @@ const UserDataGeometryTable = () => {
           boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
           zIndex: 1000,
         }}
-        onClick={handleOpenModal}
+        onClick={onOpenModal}
       />
 
       <Modal
         title="Таблица данных"
         open={isModalOpen}
-        onCancel={handleCloseModal}
+        onCancel={onCloseModal}
         footer={[
-          <Button key="save" type="primary" onClick={handleSave} disabled={selectedRowKeys.length === 0}>
+          <Button key="save" type="primary" onClick={onSave} disabled={selectedRowKeys.length === 0}>
             Показать
           </Button>,
         ]}
@@ -195,9 +163,8 @@ const UserDataGeometryTable = () => {
           dataSource={dataSource}
           columns={columns}
           pagination={dataSource.length > 10 ? { pageSize: 10 } : false}
-          bordered
-          size="middle"
           scroll={{ y: 'calc(80vh - 150px)' }}
+          size="small"
         />
       </Modal>
     </>

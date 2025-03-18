@@ -22,8 +22,7 @@ import { setFieldsData, setYearsData, setCleanPoints, setCleanPointsPrev } from 
 import { useFetchCleanPointsQuery, useFetchFieldsQuery, useFetchYearsQuery } from '../../api/api';
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
-import UserDataGeometryTable from './UserDataGeometry/UserDataGeometryTable';
-import UserGeoDataLayer from './UserDataGeometry/UserGeoDataLayer';
+import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -116,8 +115,7 @@ const MapComponent = () => {
             {showHotMap && cleanPointsPrev && selectedYearsPrev.size && <HeatmapLayer isPrev={true} />}
             {showGridCells && <GridCells />}
             {location && <LocationMarker location={location} />}
-            <UserDataGeometryTable />
-            <UserGeoDataLayer />
+            <UserGeoDataProvider />
           </>
         )}
       </MapContainer>
