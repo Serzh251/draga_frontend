@@ -193,11 +193,11 @@ const DrawTools = () => {
             <Input.TextArea placeholder="Введите описание" />
           </Form.Item>
 
-          <Form.Item label="Выберите цвет:" name="color" initialValue="#0015ff">
+          <Form.Item label="Выберите цвет:" name="color" initialValue="#0015ff" style={{ justifyContent: 'center' }}>
             <ColorPicker
               value={form.getFieldValue('color')}
               onChange={(color) => form.setFieldsValue({ color: color.toHexString() })}
-              style={{ width: '100%', height: '40px', marginTop: '5px' }}
+              style={{ width: '20%', height: '40px', marginTop: '5px', display: 'flex', alignItems: 'center' }}
             />
           </Form.Item>
         </Form>
