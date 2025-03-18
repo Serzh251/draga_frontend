@@ -144,10 +144,12 @@ const DrawTools = () => {
       };
 
       await createUserGeoData(payload).unwrap();
-
       messageApi.success('✅ Данные успешно сохранены!');
       form.resetFields();
       setShowModal(false);
+      if (drawnItems) {
+        drawnItems.clearLayers();
+      }
     } catch (error) {
       messageApi.error(`❌ Ошибка при сохранении: ${error.data?.detail || 'Неизвестная ошибка'}`);
     }
