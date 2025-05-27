@@ -1,9 +1,10 @@
 const api = {
-  BASE_URL: 'http://localhost:2025/api/',
-  API_URL: 'http://localhost:2025/',
-  API_ADMIN: 'http://localhost/admin/',
-  WS_API_HOST: 'ws://localhost:2025/ws',
+  BASE_URL: '/api/',
+  API_URL: '/',
+  API_ADMIN: '/admin/',
+  WS_API_HOST: `ws://${window.location.host}/ws/last-location/`,
   GET_POINTS: '/points/',
+
   GET_CLEAN_POINTS: '/clean/points/',
   GET_UNIQUE_YEARS: '/clean/unique-years/',
   LIST_FIELDS: '/fields/',

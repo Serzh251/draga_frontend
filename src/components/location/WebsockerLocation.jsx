@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
+import configApi from '../../api/config-api';
 
 const WebSocketComponent = ({ setLocation }) => {
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:2025/ws/last-location/');
-
+    const ws = new WebSocket(configApi.WS_API_HOST);
     ws.onopen = () => {};
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data).message;
