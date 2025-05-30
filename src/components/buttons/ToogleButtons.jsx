@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  EnvironmentFilled,
-  EnvironmentOutlined,
-  FileExcelOutlined,
-  RadarChartOutlined,
-} from '@ant-design/icons';
+import { EnvironmentFilled, EnvironmentOutlined, FileExcelOutlined, RadarChartOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 
 const ToggleButton = ({ title, icon: Icon, onClick, style }) => (
@@ -31,8 +26,8 @@ const ToggleButtonGroup = ({
   setShowMapPoints,
   showCleanPoints,
   setShowCleanPoints,
-  showGridCells,
-  setShowGridCells,
+  // showGridCells,
+  // setShowGridCells,
   showHotMap,
   setShowHotMap,
 }) => (
@@ -55,12 +50,12 @@ const ToggleButtonGroup = ({
       onClick={() => setShowCleanPoints((prev) => !prev)}
       style={{ top: 370, right: 10, color: 'green' }}
     />
-    <ToggleButton
-      title={showGridCells ? 'Скрыть сетку' : 'Показать сетку'}
-      icon={FileExcelOutlined}
-      onClick={() => setShowGridCells((prev) => !prev)}
-      style={{ top: 430, right: 10 }}
-    />
+    {/*<ToggleButton*/}
+    {/*  title={showGridCells ? 'Скрыть сетку' : 'Показать сетку'}*/}
+    {/*  icon={FileExcelOutlined}*/}
+    {/*  onClick={() => setShowGridCells((prev) => !prev)}*/}
+    {/*  style={{ top: 430, right: 10 }}*/}
+    {/*/>*/}
   </>
 );
 
