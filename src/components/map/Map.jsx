@@ -113,7 +113,7 @@ const MapComponent = () => {
             )}
             {showHotMap && cleanPoints && <HeatmapLayer />}
             {showHotMap && cleanPointsPrev && selectedYearsPrev.size && <HeatmapLayer isPrev={true} />}
-            {/*{showGridCells && <GridCells />}*/}
+            {showGridCells && <GridCells />}
             {location && <LocationMarker location={location} />}
             <UserGeoDataProvider />
           </>
@@ -125,8 +125,8 @@ const MapComponent = () => {
           setShowMapPoints={setShowMapPoints}
           showCleanPoints={showCleanPoints}
           setShowCleanPoints={setShowCleanPoints}
-          // showGridCells={showGridCells}
-          // setShowGridCells={setShowGridCells}
+          showGridCells={showGridCells}
+          setShowGridCells={setShowGridCells}
           showHotMap={showHotMap}
           setShowHotMap={setShowHotMap}
         />

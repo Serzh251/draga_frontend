@@ -24,6 +24,7 @@ const Login = ({ onLoginSuccess }) => {
       const payloadData = parseJwt(accessToken);
       const currentUser = payloadData?.user_id;
       const firstName = payloadData?.first_name;
+      const isAdmin = payloadData?.is_admin;
 
       dispatch(
         setUser({
@@ -32,6 +33,7 @@ const Login = ({ onLoginSuccess }) => {
           isAuth: true,
           firstName: firstName,
           currentUser: currentUser,
+          isAdmin: isAdmin,
         })
       );
 
