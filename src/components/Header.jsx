@@ -11,7 +11,7 @@ const { Header } = Layout;
 
 const AppHeader = () => {
   const apiAdmin = configApi.API_ADMIN;
-  const { isAuth, firstName } = useAuth();
+  const { isAuth, isAdmin, firstName } = useAuth();
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
@@ -67,15 +67,18 @@ const AppHeader = () => {
         </span>
       ),
     });
-    menuItems.push({
-      key: '4',
-      icon: <SettingOutlined />,
-      label: (
-        <a href={apiAdmin} rel="noopener noreferrer">
-          Админ панель
-        </a>
-      ),
-    });
+
+    if (isAdmin) {
+      menuItems.push({
+        key: '4',
+        icon: <SettingOutlined />,
+        label: (
+          <a href={apiAdmin} rel="noopener noreferrer">
+            Админ панель
+          </a>
+        ),
+      });
+    }
     menuItems.push({
       key: '5',
       label: <div className="current-user text-decoration-none">{firstName}</div>,
