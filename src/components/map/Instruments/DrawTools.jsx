@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Modal, Form, Input, message, ColorPicker } from 'antd';
+import { Modal, Form, Input, message, ColorPicker, Tooltip } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -158,19 +158,20 @@ const DrawTools = () => {
   return (
     <>
       {contextHolder}
-      <SaveOutlined
-        onClick={() => setShowModal(true)}
-        style={{
-          position: 'absolute',
-          top: '200px',
-          left: '10px',
-          fontSize: '24px',
-          color: '#007bff',
-          cursor: 'pointer',
-          zIndex: 1000,
-        }}
-      />
-
+      <Tooltip title="Сохранить данные" placement="right">
+        <SaveOutlined
+          onClick={() => setShowModal(true)}
+          style={{
+            position: 'absolute',
+            top: '190px',
+            left: '10px',
+            fontSize: '30px',
+            color: '#007bff',
+            cursor: 'pointer',
+            zIndex: 1000,
+          }}
+        />
+      </Tooltip>
       <Modal
         title="Сохранение геоданных"
         open={showModal}

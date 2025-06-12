@@ -1,6 +1,6 @@
 import React from 'react';
-import { Modal, Table, Button } from 'antd';
-import { CheckSquareOutlined, DeleteOutlined, MonitorOutlined } from '@ant-design/icons';
+import { Modal, Table, Button, Tooltip } from 'antd';
+import { CheckSquareOutlined, DeleteOutlined, MonitorOutlined, SearchOutlined } from '@ant-design/icons';
 
 const UserDataGeometryTable = ({
   isModalOpen,
@@ -135,22 +135,23 @@ const UserDataGeometryTable = ({
 
   return (
     <>
-      <MonitorOutlined
-        style={{
-          position: 'absolute',
-          top: 280,
-          left: 10,
-          background: 'rgba(255, 255, 255, 0.9)',
-          padding: '7px 10px',
-          borderRadius: '5px',
-          fontSize: '24px',
-          cursor: 'pointer',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-          zIndex: 1000,
-        }}
-        onClick={onOpenModal}
-      />
-
+      <Tooltip title="Показать данные" placement="right">
+        <SearchOutlined
+          style={{
+            position: 'absolute',
+            top: 230,
+            left: 10,
+            background: 'rgba(255, 255, 255, 0.9)',
+            padding: '3px',
+            borderRadius: '5px',
+            fontSize: '24px',
+            cursor: 'pointer',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+            zIndex: 1000,
+          }}
+          onClick={onOpenModal}
+        />
+      </Tooltip>
       <Modal
         title="Таблица данных"
         open={isModalOpen}
