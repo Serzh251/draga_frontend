@@ -12,6 +12,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 import { useCreateUserGeoDataMutation } from '../../../api/api';
+import VirtualKeyboard from '../../tolls/VirtualKeyboard';
 
 // Исправляем иконку маркера
 delete L.Icon.Default.prototype._getIconUrl;
@@ -27,6 +28,14 @@ const DrawTools = () => {
   const [drawnItems, setDrawnItems] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [createUserGeoData, { isLoading }] = useCreateUserGeoDataMutation();
+
+  const [formValues, setFormValues] = useState({
+    name: '',
+    description: '',
+    color: '#0015ff',
+  });
+  const [activeField, setActiveField] = useState(null); // Текущее активное поле
+  const [showKeyboard, setShowKeyboard] = useState(false);
 
   useEffect(() => {
     if (map.drawControl) return;
@@ -47,6 +56,7 @@ const DrawTools = () => {
         circlemarker: false,
       },
     });
+
     const updateMeasurements = (layer) => {
       let tooltipContent = '';
 
@@ -104,6 +114,7 @@ const DrawTools = () => {
       items.addLayer(layer);
       updateMeasurements(layer);
     });
+
     map.on(L.Draw.Event.EDITED, (event) => {
       event.layers.eachLayer((layer) => {
         updateMeasurements(layer);
@@ -112,6 +123,36 @@ const DrawTools = () => {
   }, [map]);
 
   const [form] = Form.useForm();
+
+  const handleFocus = (field) => {
+    setActiveField(field); // Устанавливаем активное поле
+    setShowKeyboard(true); // Показываем клавиатуру
+  };
+
+  const handleKeyPress = (key) => {
+    if (!activeField) return;
+
+    let newValue = formValues[activeField];
+
+    if (key === 'Backspace') {
+      newValue = newValue.slice(0, -1); // Удаляем последний символ
+    } else if (key === 'Space') {
+      newValue += ' '; // Добавляем пробел
+    } else {
+      newValue += key; // Добавляем символ
+    }
+
+    // Обновляем состояние
+    setFormValues((prev) => ({
+      ...prev,
+      [activeField]: newValue,
+    }));
+
+    // Обновляем значения формы
+    form.setFieldsValue({
+      [activeField]: newValue,
+    });
+  };
 
   const saveGeoData = async () => {
     try {
@@ -147,12 +188,17 @@ const DrawTools = () => {
       messageApi.success('✅ Данные успешно сохранены!');
       form.resetFields();
       setShowModal(false);
+      setShowKeyboard(false); // Сбрасываем состояние клавиатуры
       if (drawnItems) {
         drawnItems.clearLayers();
       }
     } catch (error) {
       messageApi.error(`❌ Ошибка при сохранении: ${error.data?.detail || 'Неизвестная ошибка'}`);
     }
+  };
+
+  const handleKeyboardClick = (e) => {
+    e.stopPropagation(); // Останавливаем распространение события
   };
 
   return (
@@ -176,7 +222,10 @@ const DrawTools = () => {
         title="Сохранение геоданных"
         open={showModal}
         onOk={saveGeoData}
-        onCancel={() => setShowModal(false)}
+        onCancel={() => {
+          setShowModal(false);
+          setShowKeyboard(false); // Сбрасываем состояние клавиатуры
+        }}
         okText="Сохранить"
         cancelText="Отмена"
         confirmLoading={isLoading}
@@ -187,11 +236,19 @@ const DrawTools = () => {
             label="Название:"
             rules={[{ required: true, message: 'Поле "Название" обязательно!' }]}
           >
-            <Input placeholder="Введите название" />
+            <Input
+              placeholder="Введите название"
+              onFocus={() => handleFocus('name')} // Устанавливаем активное поле
+              value={formValues.name}
+            />
           </Form.Item>
 
           <Form.Item name="description" label="Описание:">
-            <Input.TextArea placeholder="Введите описание" />
+            <Input.TextArea
+              placeholder="Введите описание"
+              onFocus={() => handleFocus('description')} // Устанавливаем активное поле
+              value={formValues.description}
+            />
           </Form.Item>
 
           <Form.Item label="Выберите цвет:" name="color" initialValue="#0015ff" style={{ justifyContent: 'center' }}>
@@ -203,6 +260,14 @@ const DrawTools = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+      {showKeyboard && (
+        <VirtualKeyboard
+          onKeyPress={handleKeyPress}
+          onClose={() => setShowKeyboard(false)}
+          onClick={handleKeyboardClick} // Предотвращаем закрытие модального окна
+        />
+      )}
     </>
   );
 };

@@ -1,23 +1,45 @@
 import '../../static/css/tools/VirtualKeyboard.css';
 import React, { useState } from 'react';
 
-const layout = [
-  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Backspace'],
-  ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-  ['CapsLock', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-  ['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '.'],
-  ['Space'],
-];
+// Английская и русская раскладки
+const layouts = {
+  en: [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Backspace'],
+    ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+    ['CapsLock', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+    ['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '.'],
+    ['Space'],
+  ],
+  ru: [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Backspace'],
+    ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з'],
+    ['CapsLock', 'ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д'],
+    ['Shift', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', '.'],
+    ['Space'],
+  ],
+};
 
 const VirtualKeyboard = ({ onKeyPress, onClose }) => {
   const [shift, setShift] = useState(false);
   const [caps, setCaps] = useState(false);
+  const [lang, setLang] = useState('en'); // Текущая раскладка
 
-  const getKey = (key) => {
-    const upperCase = (shift && !caps) || (!shift && caps);
-    return key.length === 1 ? (upperCase ? key.toUpperCase() : key) : key;
+  // Переключение раскладки
+  const toggleLang = () => {
+    setLang((currentLang) => (currentLang === 'en' ? 'ru' : 'en'));
   };
 
+  // Получение символа с учетом регистра и раскладки
+  const getKey = (key) => {
+    if (key.length === 1) {
+      const upperCase = (shift && !caps) || (!shift && caps);
+      const layoutKey = layouts[lang].flat().includes(key) ? key : key;
+      return upperCase ? layoutKey.toUpperCase() : layoutKey;
+    }
+    return key;
+  };
+
+  // Обработка нажатия кнопки
   const handleClick = (key) => {
     if (key === 'Shift') {
       setShift((s) => !s); // Переключаем Shift
@@ -39,6 +61,11 @@ const VirtualKeyboard = ({ onKeyPress, onClose }) => {
       return;
     }
 
+    if (key === 'Lang') {
+      toggleLang(); // Переключаем раскладку
+      return;
+    }
+
     const char = getKey(key); // Получаем символ с учетом регистра
     onKeyPress(char, (shift && !caps) || (!shift && caps)); // Передаем символ и флаг верхнего регистра
   };
@@ -51,7 +78,7 @@ const VirtualKeyboard = ({ onKeyPress, onClose }) => {
           ✕
         </button>
       </div>
-      {layout.map((row, i) => (
+      {layouts[lang].map((row, i) => (
         <div key={i} className="vk-row">
           {row.map((key) => (
             <button
@@ -62,6 +89,11 @@ const VirtualKeyboard = ({ onKeyPress, onClose }) => {
               {getKey(key)}
             </button>
           ))}
+          {i === layouts[lang].length - 1 && (
+            <button className="vk-key vk-modifier" onClick={() => handleClick('Lang')}>
+              {lang === 'en' ? 'Ru' : 'En'}
+            </button>
+          )}
         </div>
       ))}
     </div>
