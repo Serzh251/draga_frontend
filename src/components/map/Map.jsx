@@ -19,7 +19,13 @@ import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
 import { useDispatch } from 'react-redux';
 import { setFieldsData, setYearsData, setCleanPoints, setCleanPointsPrev } from '../../store/slices/mapDataSlice';
-import { useFetchCleanPointsQuery, useFetchFieldsQuery, useFetchYearsQuery } from '../../api/api';
+import {
+  useFetchCleanPointsQuery,
+  useFetchFieldsQuery,
+  useFetchYearsQuery,
+  useFetchDefaultMapCenterQuery,
+  useCreateDefaultMapCenterMutation,
+} from '../../api/api';
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
 import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
@@ -37,6 +43,19 @@ const MapComponent = () => {
   const [showCleanPoints, setShowCleanPoints] = usePersistentState('showCleanPoints', true);
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
   const [location, setLocation] = useState(null);
+
+  const { data: mapData, error, isLoading } = useFetchDefaultMapCenterQuery();
+  const [createDefaultMapCenter] = useCreateDefaultMapCenterMutation();
+
+  // useEffect(() => {
+  //   if (!isLoading && !error && !mapData) {
+  //     const defaultMapData = {
+  //       center: { type: 'Point', coordinates: config.defaultPosition },
+  //       zoom: config.defaultZoom || 13,
+  //     };
+  //     createDefaultMapCenter(defaultMapData);
+  //   }
+  // }, [mapData, error, isLoading, createDefaultMapCenter]);
 
   const { data: listGeojsonFields, refetch: refetchFields } = useFetchFieldsQuery();
   const { data: listUniqueYears, refetch: refetchYears } = useFetchYearsQuery();
@@ -96,8 +115,9 @@ const MapComponent = () => {
         </>
       )}
       <MapContainer
-        bounds={config.defaultPosition}
-        zoom={13}
+        bounds={mapData?.center?.coordinates ? mapData.center.coordinates : config.defaultPosition}
+        // bounds={config.defaultPosition}
+        zoom={mapData?.zoom || config.defaultZoom}
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
         maxZoom={25}

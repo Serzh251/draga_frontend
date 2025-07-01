@@ -4,6 +4,7 @@ const config = {
     [64.56, 40.485],
     [64.5569, 40.48],
   ],
+  defaultZoom: 13,
   layers: [
     {
       name: 'OpenStreetMap',

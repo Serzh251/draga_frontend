@@ -1,8 +1,9 @@
 const isSecure = window.location.protocol === 'https:';
 const WS_API_HOST = `${isSecure ? 'wss' : 'ws'}://${window.location.host}/ws/last-location/`;
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 const api = {
-  BASE_URL: '/api/',
+  BASE_URL: isDevelopment ? 'http://localhost:2025/api/' : '/api/',
   API_URL: '/',
   API_ADMIN: '/admin/',
   WS_API_HOST,
@@ -15,6 +16,7 @@ const api = {
   TOKEN_REFRESH: '/token/refresh/',
   LIST_USER_GEO_DATA: '/user-data/geo-data/',
   CREATE_USER_GEO_DATA: '/user-data/geo-data-create/',
+  SETUP_DEFAULT_MAP_CENTER: '/setup/default-center/',
 };
 
 export default api;
