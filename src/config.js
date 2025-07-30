@@ -1,8 +1,8 @@
 const config = {
   timeZone: 'Europe/Moscow',
   defaultPosition: [
-    [64.56, 40.55],
-    [64.55, 40.42],
+    [64.56, 40.485],
+    [64.5569, 40.48],
   ],
   layers: [
     {
