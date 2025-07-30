@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { setUser } from '../../store/slices/userSlice';
 import { parseJwt } from '../../utils/token';
 import VirtualKeyboard from '../tolls/VirtualKeyboard';
+import { shouldUseVirtualKeyboard } from '../../utils/getTypePlarform';
 
 const Login = ({ onLoginSuccess }) => {
   const [login, { isLoading }] = useLoginMutation();
@@ -13,13 +14,15 @@ const Login = ({ onLoginSuccess }) => {
     username: '',
     password: '',
   });
-  const [activeField, setActiveField] = useState(null); // Текущее активное поле
+  const [activeField, setActiveField] = useState(null);
   const [showKeyboard, setShowKeyboard] = useState(false);
-  const [errMsg, setErrMsg] = useState(''); // Сообщение об ошибке
+  const [errMsg, setErrMsg] = useState('');
 
   const handleFocus = (field) => {
-    setActiveField(field); // Устанавливаем активное поле
-    setShowKeyboard(true); // Показываем клавиатуру
+    setActiveField(field);
+    if (shouldUseVirtualKeyboard()) {
+      setShowKeyboard(true);
+    }
   };
 
   const handleKeyPress = (key) => {
@@ -28,14 +31,13 @@ const Login = ({ onLoginSuccess }) => {
     let newValue = formValues[activeField];
 
     if (key === 'Backspace') {
-      newValue = newValue.slice(0, -1); // Удаляем последний символ
+      newValue = newValue.slice(0, -1);
     } else if (key === 'Space') {
-      newValue += ' '; // Добавляем пробел
+      newValue += ' ';
     } else {
-      newValue += key; // Добавляем символ
+      newValue += key;
     }
 
-    // Обновляем состояние
     setFormValues((prev) => ({
       ...prev,
       [activeField]: newValue,
@@ -52,8 +54,8 @@ const Login = ({ onLoginSuccess }) => {
 
   const handleSubmit = async () => {
     try {
-      const user = await login(formValues).unwrap(); // Отправляем данные на сервер
-      const data = parseJwt(user.access); // Парсим JWT-токен
+      const user = await login(formValues).unwrap();
+      const data = parseJwt(user.access);
       dispatch(
         setUser({
           accessToken: user.access,
@@ -64,10 +66,10 @@ const Login = ({ onLoginSuccess }) => {
           isAdmin: data?.is_admin,
         })
       );
-      setErrMsg(''); // Очищаем сообщение об ошибке
-      onLoginSuccess(); // Вызываем колбэк для уведомления родительского компонента
+      setErrMsg('');
+      onLoginSuccess();
     } catch (error) {
-      setErrMsg('Login failed'); // Устанавливаем сообщение об ошибке
+      setErrMsg('Login failed');
       console.error('Login failed:', error);
     }
   };
@@ -78,17 +80,17 @@ const Login = ({ onLoginSuccess }) => {
       <Form onFinish={handleSubmit}>
         <Form.Item label="Username">
           <Input
-            value={formValues.username} // Привязываем значение к состоянию
-            onChange={(e) => handleChange(e, 'username')} // Обработка ввода с обычной клавиатуры
-            onFocus={() => handleFocus('username')} // Устанавливаем активное поле
+            value={formValues.username}
+            onChange={(e) => handleChange(e, 'username')}
+            onFocus={() => handleFocus('username')}
           />
         </Form.Item>
 
         <Form.Item label="Password">
           <Input.Password
-            value={formValues.password} // Привязываем значение к состоянию
-            onChange={(e) => handleChange(e, 'password')} // Обработка ввода с обычной клавиатуры
-            onFocus={() => handleFocus('password')} // Устанавливаем активное поле
+            value={formValues.password}
+            onChange={(e) => handleChange(e, 'password')}
+            onFocus={() => handleFocus('password')}
           />
         </Form.Item>
 
@@ -99,7 +101,10 @@ const Login = ({ onLoginSuccess }) => {
         </Form.Item>
       </Form>
 
-      {showKeyboard && <VirtualKeyboard onKeyPress={handleKeyPress} onClose={() => setShowKeyboard(false)} />}
+      {/* Показываем виртуальную клавиатуру только если нужно */}
+      {shouldUseVirtualKeyboard() && showKeyboard && (
+        <VirtualKeyboard onKeyPress={handleKeyPress} onClose={() => setShowKeyboard(false)} />
+      )}
     </div>
   );
 };

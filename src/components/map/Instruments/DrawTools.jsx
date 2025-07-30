@@ -1,5 +1,5 @@
 import { useMap } from 'react-leaflet';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet/dist/leaflet.css';
@@ -13,6 +13,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 import { useCreateUserGeoDataMutation } from '../../../api/api';
 import VirtualKeyboard from '../../tolls/VirtualKeyboard';
+import { shouldUseVirtualKeyboard } from '../../../utils/getTypePlarform';
 
 // Исправляем иконку маркера
 delete L.Icon.Default.prototype._getIconUrl;
@@ -35,7 +36,9 @@ const DrawTools = () => {
     color: '#0015ff',
   });
   const [activeField, setActiveField] = useState(null); // Текущее активное поле
-  const [showKeyboard, setShowKeyboard] = useState(false);
+
+  // --- НОВОЕ: Проверяем, нужно ли вообще показывать виртуальную клавиатуру ---
+  const showVirtualKeyboard = shouldUseVirtualKeyboard(); // true только на ПК/ноуте без touch
 
   useEffect(() => {
     if (map.drawControl) return;
@@ -124,9 +127,11 @@ const DrawTools = () => {
 
   const [form] = Form.useForm();
 
+  // --- ОБНОВЛЕНО: Устанавливаем активное поле ТОЛЬКО если нужна виртуальная клавиатура ---
   const handleFocus = (field) => {
-    setActiveField(field); // Устанавливаем активное поле
-    setShowKeyboard(true); // Показываем клавиатуру
+    if (showVirtualKeyboard) {
+      setActiveField(field);
+    }
   };
 
   const handleKeyPress = (key) => {
@@ -135,20 +140,18 @@ const DrawTools = () => {
     let newValue = formValues[activeField];
 
     if (key === 'Backspace') {
-      newValue = newValue.slice(0, -1); // Удаляем последний символ
+      newValue = newValue.slice(0, -1);
     } else if (key === 'Space') {
-      newValue += ' '; // Добавляем пробел
+      newValue += ' ';
     } else {
-      newValue += key; // Добавляем символ
+      newValue += key;
     }
 
-    // Обновляем состояние
     setFormValues((prev) => ({
       ...prev,
       [activeField]: newValue,
     }));
 
-    // Обновляем значения формы
     form.setFieldsValue({
       [activeField]: newValue,
     });
@@ -188,7 +191,7 @@ const DrawTools = () => {
       messageApi.success('✅ Данные успешно сохранены!');
       form.resetFields();
       setShowModal(false);
-      setShowKeyboard(false); // Сбрасываем состояние клавиатуры
+      setActiveField(null); // Сбрасываем активное поле
       if (drawnItems) {
         drawnItems.clearLayers();
       }
@@ -198,7 +201,7 @@ const DrawTools = () => {
   };
 
   const handleKeyboardClick = (e) => {
-    e.stopPropagation(); // Останавливаем распространение события
+    e.stopPropagation();
   };
 
   return (
@@ -218,13 +221,14 @@ const DrawTools = () => {
           }}
         />
       </Tooltip>
+
       <Modal
         title="Сохранение геоданных"
         open={showModal}
         onOk={saveGeoData}
         onCancel={() => {
           setShowModal(false);
-          setShowKeyboard(false); // Сбрасываем состояние клавиатуры
+          setActiveField(null); // Сбрасываем поле
         }}
         okText="Сохранить"
         cancelText="Отмена"
@@ -236,17 +240,13 @@ const DrawTools = () => {
             label="Название:"
             rules={[{ required: true, message: 'Поле "Название" обязательно!' }]}
           >
-            <Input
-              placeholder="Введите название"
-              onFocus={() => handleFocus('name')} // Устанавливаем активное поле
-              value={formValues.name}
-            />
+            <Input placeholder="Введите название" onFocus={() => handleFocus('name')} value={formValues.name} />
           </Form.Item>
 
           <Form.Item name="description" label="Описание:">
             <Input.TextArea
               placeholder="Введите описание"
-              onFocus={() => handleFocus('description')} // Устанавливаем активное поле
+              onFocus={() => handleFocus('description')}
               value={formValues.description}
             />
           </Form.Item>
@@ -261,11 +261,12 @@ const DrawTools = () => {
         </Form>
       </Modal>
 
-      {showKeyboard && (
+      {/* --- ПОКАЗЫВАЕМ КЛАВИАТУРУ ТОЛЬКО ЕСЛИ НУЖНА И ЕСТЬ АКТИВНОЕ ПОЛЕ --- */}
+      {showVirtualKeyboard && activeField && (
         <VirtualKeyboard
           onKeyPress={handleKeyPress}
-          onClose={() => setShowKeyboard(false)}
-          onClick={handleKeyboardClick} // Предотвращаем закрытие модального окна
+          onClose={() => setActiveField(null)}
+          onClick={handleKeyboardClick}
         />
       )}
     </>
