@@ -1,10 +1,7 @@
 const config = {
   timeZone: 'Europe/Moscow',
-  defaultPosition: [
-    [64.56, 40.485],
-    [64.5569, 40.48],
-  ],
-  defaultZoom: 13,
+  defaultCenter: [64.558, 40.482],
+  defaultZoom: 15,
   layers: [
     {
       name: 'OpenStreetMap',

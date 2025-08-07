@@ -103,18 +103,12 @@ export const api = createApi({
     fetchDefaultMapCenter: builder.query({
       query: () => configApi.SETUP_DEFAULT_MAP_CENTER,
     }),
-    createDefaultMapCenter: builder.mutation({
-      query: (defaultData) => ({
-        url: configApi.SETUP_DEFAULT_MAP_CENTER, // '/setup/default-center/'
-        method: 'POST',
-        body: defaultData,
-      }),
-    }),
-    updateDefaultMapCenter: builder.mutation({
-      query: (updatedData) => ({
+
+    createOrUpdateDefaultMapCenter: builder.mutation({
+      query: (data) => ({
         url: configApi.SETUP_DEFAULT_MAP_CENTER,
-        method: 'PUT',
-        body: updatedData,
+        method: 'POST',
+        body: data,
       }),
     }),
   }),
@@ -131,6 +125,5 @@ export const {
   useCreateUserGeoDataMutation,
   useDeleteUserGeoDataMutation,
   useFetchDefaultMapCenterQuery,
-  useCreateDefaultMapCenterMutation,
-  useUpdateDefaultMapCenterMutation,
+  useCreateOrUpdateDefaultMapCenterMutation,
 } = api;

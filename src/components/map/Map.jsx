@@ -24,7 +24,7 @@ import {
   useFetchFieldsQuery,
   useFetchYearsQuery,
   useFetchDefaultMapCenterQuery,
-  useCreateDefaultMapCenterMutation,
+  useCreateOrUpdateDefaultMapCenterMutation,
 } from '../../api/api';
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
@@ -45,7 +45,7 @@ const MapComponent = () => {
   const [location, setLocation] = useState(null);
 
   const { data: mapData, error, isLoading } = useFetchDefaultMapCenterQuery();
-  const [createDefaultMapCenter] = useCreateDefaultMapCenterMutation();
+  const [createDefaultMapCenter] = useCreateOrUpdateDefaultMapCenterMutation();
 
   // useEffect(() => {
   //   if (!isLoading && !error && !mapData) {
@@ -115,8 +115,7 @@ const MapComponent = () => {
         </>
       )}
       <MapContainer
-        bounds={mapData?.center?.coordinates ? mapData.center.coordinates : config.defaultPosition}
-        // bounds={config.defaultPosition}
+        center={config.defaultCenter}
         zoom={mapData?.zoom || config.defaultZoom}
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
