@@ -1,8 +1,10 @@
+// api/api.js
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import configApi from './config-api';
 import logout from '../components/auth/logout';
 import Cookies from 'js-cookie';
 
+// Базовый запрос с авторизацией
 const baseQuery = fetchBaseQuery({
   baseUrl: configApi.BASE_URL,
   prepareHeaders: (headers) => {
@@ -14,6 +16,7 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
+// Автоматическое обновление токена при 401
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
@@ -41,9 +44,12 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
   return result;
 };
 
+// Определяем теги для кэширования и инвалидации
 export const api = createApi({
   baseQuery: baseQueryWithReauth,
+  tagTypes: ['Fields', 'Points', 'CleanPoints', 'Years', 'GridCells', 'UserGeoData', 'DefaultMapCenter'],
   endpoints: (builder) => ({
+    // 🔐 Login
     login: builder.mutation({
       query: (credentials) => ({
         url: configApi.LOGIN_URL,
@@ -51,9 +57,14 @@ export const api = createApi({
         body: credentials,
       }),
     }),
+
+    // 🗺️ Поля
     fetchFields: builder.query({
       query: () => configApi.LIST_FIELDS,
+      providesTags: ['Fields'],
     }),
+
+    // 📍 Точки (сырые)
     fetchPoints: builder.query({
       query: ({ year, depth_min, depth_max, field }) => {
         const params = new URLSearchParams();
@@ -63,7 +74,10 @@ export const api = createApi({
         if (field) params.append('field', Array.isArray(field) ? field.join(',') : field);
         return `${configApi.GET_POINTS}?is_working=true&${params.toString()}`;
       },
+      providesTags: ['Points'],
     }),
+
+    // 🧹 Очищенные точки
     fetchCleanPoints: builder.query({
       query: ({ year, depth_min, depth_max, field }) => {
         const params = new URLSearchParams();
@@ -73,36 +87,64 @@ export const api = createApi({
         if (field) params.append('field', Array.isArray(field) ? field.join(',') : field);
         return `${configApi.GET_CLEAN_POINTS}?${params.toString()}`;
       },
+      providesTags: ['CleanPoints'],
     }),
+
+    // 📅 Уникальные годы
     fetchYears: builder.query({
       query: () => configApi.GET_UNIQUE_YEARS,
+      providesTags: ['Years'],
     }),
+
+    // 🟨 Ячейки сетки (пагинация)
     fetchGridCells: builder.query({
       query: (page = 1) => `${configApi.GET_GRID_CELLS}?page=${page}`,
       transformResponse: (response) => ({
         features: response.results?.features || [],
         hasMore: !!response.next_page,
       }),
+      providesTags: ['GridCells'],
     }),
+
+    // 📦 Геоданные пользователя
     fetchUserGeoData: builder.query({
       query: () => configApi.LIST_USER_GEO_DATA,
+      providesTags: ['UserGeoData'],
     }),
+
     createUserGeoData: builder.mutation({
       query: (newGeoData) => ({
         url: configApi.CREATE_USER_GEO_DATA,
         method: 'POST',
         body: newGeoData,
       }),
+      invalidatesTags: ['UserGeoData'],
     }),
+
     deleteUserGeoData: builder.mutation({
       query: (id) => ({
         url: `${configApi.LIST_USER_GEO_DATA}${id}/`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['UserGeoData'],
+    }),
+
+    fetchDefaultMapCenter: builder.query({
+      query: () => configApi.SETUP_DEFAULT_MAP_CENTER,
+    }),
+
+    createOrUpdateDefaultMapCenter: builder.mutation({
+      query: (data) => ({
+        url: configApi.SETUP_DEFAULT_MAP_CENTER,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['DefaultMapCenter'],
     }),
   }),
 });
 
+// Экспортируем хуки
 export const {
   useLoginMutation,
   useFetchFieldsQuery,
@@ -113,4 +155,6 @@ export const {
   useFetchUserGeoDataQuery,
   useCreateUserGeoDataMutation,
   useDeleteUserGeoDataMutation,
+  useFetchDefaultMapCenterQuery,
+  useCreateOrUpdateDefaultMapCenterMutation,
 } = api;

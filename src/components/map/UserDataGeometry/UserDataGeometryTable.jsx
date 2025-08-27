@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, Table, Button, Tooltip } from 'antd';
-import { CheckSquareOutlined, DeleteOutlined, MonitorOutlined, SearchOutlined } from '@ant-design/icons';
+import { CheckSquareOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 
 const UserDataGeometryTable = ({
   isModalOpen,
