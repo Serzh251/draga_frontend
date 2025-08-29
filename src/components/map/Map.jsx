@@ -85,28 +85,6 @@ const MapComponent = () => {
 
   return (
     <div className="app-layout">
-      {/* Сайдбары (только для авторизованных) */}
-      {isAuth && (
-        <>
-          <FieldSelectionSidebar
-            fields={fieldsData?.features || []}
-            selectedFields={selectedFields}
-            onSelectionChange={setSelectedFields}
-          />
-          <YearSelectionSidebar
-            years={yearsData || []}
-            selectedYears={selectedYears}
-            onSelectionChange={setSelectedYears}
-          />
-          <YearSelectionSidebar
-            years={yearsData || []}
-            selectedYears={selectedYearsPrev}
-            onSelectionChange={setSelectedYearsPrev}
-            isPrev={true}
-          />
-        </>
-      )}
-
       {/* Карта */}
       <MapContainer
         center={config.defaultCenter}
@@ -124,6 +102,24 @@ const MapComponent = () => {
 
         {isAuth && (
           <>
+            {/* Сайдбары */}
+            <FieldSelectionSidebar
+              fields={fieldsData?.features || []}
+              selectedFields={selectedFields}
+              onSelectionChange={setSelectedFields}
+            />
+            <YearSelectionSidebar
+              years={yearsData || []}
+              selectedYears={selectedYears}
+              onSelectionChange={setSelectedYears}
+            />
+            <YearSelectionSidebar
+              years={yearsData || []}
+              selectedYears={selectedYearsPrev}
+              onSelectionChange={setSelectedYearsPrev}
+              isPrev={true}
+            />
+
             {fieldsData && <MapFields />}
             {showMapPoints && <MapPoints selectedFields={selectedFields} />}
             {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />}
@@ -137,12 +133,9 @@ const MapComponent = () => {
             <UserGeoDataProvider />
           </>
         )}
-
-        {/* Кнопка сохранения центра — только для авторизованных */}
-        {isAuth && <SaveMapCenterButton />}
       </MapContainer>
 
-      {/* Группа переключателей */}
+      {/* Группа кнопок */}
       {isAuth && (
         <ToggleButtonGroup
           showMapPoints={showMapPoints}

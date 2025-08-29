@@ -14,6 +14,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useCreateUserGeoDataMutation } from '../../../api/api';
 import VirtualKeyboard from '../../tolls/VirtualKeyboard';
 import { shouldUseVirtualKeyboard } from '../../../utils/getTypePlarform';
+import SaveMapCenterButton from '../../buttons/SaveMapCenterButton';
 
 // Исправляем иконку маркера
 delete L.Icon.Default.prototype._getIconUrl;
@@ -127,7 +128,6 @@ const DrawTools = () => {
 
   const [form] = Form.useForm();
 
-  // --- ОБНОВЛЕНО: Устанавливаем активное поле ТОЛЬКО если нужна виртуальная клавиатура ---
   const handleFocus = (field) => {
     if (showVirtualKeyboard) {
       setActiveField(field);
@@ -230,7 +230,7 @@ const DrawTools = () => {
           setShowModal(false);
           setActiveField(null); // Сбрасываем поле
         }}
-        okText="Сохранить"
+        okText="Сохранить геоданные"
         cancelText="Отмена"
         confirmLoading={isLoading}
       >
@@ -259,9 +259,9 @@ const DrawTools = () => {
             />
           </Form.Item>
         </Form>
+        <SaveMapCenterButton onSaveSuccess={() => setShowModal(false)} />
       </Modal>
 
-      {/* --- ПОКАЗЫВАЕМ КЛАВИАТУРУ ТОЛЬКО ЕСЛИ НУЖНА И ЕСТЬ АКТИВНОЕ ПОЛЕ --- */}
       {showVirtualKeyboard && activeField && (
         <VirtualKeyboard
           onKeyPress={handleKeyPress}

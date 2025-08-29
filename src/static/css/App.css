@@ -50,3 +50,6 @@
   height: 43px !important;
   background-size: 25px !important;
 }
+.ant-message {
+  z-index: 999999 !important;
+}

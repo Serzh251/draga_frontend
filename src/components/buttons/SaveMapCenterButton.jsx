@@ -1,11 +1,12 @@
-// components/buttons/SaveMapCenterButton.jsx
+// SaveMapCenterButton.jsx
 import React from 'react';
-import { Button } from 'antd';
+import { Button, notification } from 'antd';
 import { AimOutlined } from '@ant-design/icons';
 import { useMap } from 'react-leaflet';
 import { useCreateOrUpdateDefaultMapCenterMutation } from '../../api/api';
+import { message } from 'antd'; // ✅ Импортируем message
 
-export default function SaveMapCenterButton() {
+export default function SaveMapCenterButton({ onSaveSuccess }) {
   const map = useMap();
   const [saveMapCenter] = useCreateOrUpdateDefaultMapCenterMutation();
 
@@ -20,11 +21,19 @@ export default function SaveMapCenterButton() {
     })
       .unwrap()
       .then(() => {
-        alert('Центр и масштаб карты сохранены!');
+        notification.success({
+          message: 'Успешно',
+          description: 'Центр и масштаб сохранены',
+          duration: 2,
+        });
+
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
       })
       .catch((err) => {
         console.error('Ошибка сохранения настроек карты:', err);
-        alert('Не удалось сохранить настройки');
+        message.error('Не удалось сохранить настройки');
       });
   };
 
@@ -35,12 +44,13 @@ export default function SaveMapCenterButton() {
       onClick={handleSave}
       style={{
         position: 'absolute',
-        top: 70,
-        right: 10,
+        bottom: 20,
+        left: 25,
         zIndex: 1000,
+        padding: 10,
       }}
     >
-      Сохранить центр
+      Сохранить центр и zoom
     </Button>
   );
 }
