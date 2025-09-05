@@ -1,4 +1,3 @@
-// api/api.js
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import configApi from './config-api';
 import logout from '../components/auth/logout';

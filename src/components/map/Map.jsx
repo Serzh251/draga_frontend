@@ -29,10 +29,9 @@ import {
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
 import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
-
-// Импорт новой кнопки
 import SaveMapCenterButton from '../buttons/SaveMapCenterButton';
 import MapSyncCenter from './MapSyncCenter';
+
 const MapComponent = () => {
   const dispatch = useDispatch();
   const { isAuth } = useAuth();
@@ -47,7 +46,7 @@ const MapComponent = () => {
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
   const [location, setLocation] = useState(null);
 
-  // Загружаем настройки карты (центр и зум)
+  // Загружаем настройки карты
   const { data: mapData } = useFetchDefaultMapCenterQuery(undefined, {
     skip: !isAuth,
   });
@@ -59,21 +58,47 @@ const MapComponent = () => {
   const { data: listUniqueYears } = useFetchYearsQuery(undefined, {
     skip: !isAuth,
   });
-  const { data: cleanGeojsonData, isFetching: cleanLoading } = useFetchCleanPointsQuery(
+
+  // === Запрос для текущих чистых точек ===
+  const {
+    data: cleanGeojsonData,
+    isFetching: cleanLoading,
+    refetch: refetchCleanPoints,
+  } = useFetchCleanPointsQuery(
     {
-      year: Array.from(selectedYears),
+      year: selectedYears.size > 0 ? Array.from(selectedYears) : [], // [] — все года
       field: Array.from(selectedFields),
     },
-    { skip: !isAuth || selectedFields.size === 0 || selectedYears.size === 0 }
+    {
+      skip: !isAuth || selectedFields.size === 0, // Убрали проверку на selectedYears.size === 0
+      refetchOnMountOrArgChange: true,
+    }
   );
 
-  const { data: cleanGeojsonDataPrev, isFetching: cleanLoadingPrev } = useFetchCleanPointsQuery(
+  // === Запрос для предыдущих чистых точек ===
+  const {
+    data: cleanGeojsonDataPrev,
+    isFetching: cleanLoadingPrev,
+    refetch: refetchCleanPointsPrev,
+  } = useFetchCleanPointsQuery(
     {
-      year: Array.from(selectedYearsPrev),
+      year: selectedYearsPrev.size > 0 ? Array.from(selectedYearsPrev) : [],
       field: Array.from(selectedFields),
     },
-    { skip: !isAuth || selectedFields.size === 0 || selectedYearsPrev.size === 0 }
+    {
+      skip: !isAuth || selectedFields.size === 0,
+      refetchOnMountOrArgChange: true,
+    }
   );
+
+  // === Ключевой эффект: принудительный refetch при изменении showCleanPoints ===
+  useEffect(() => {
+    if (isAuth && selectedFields.size > 0) {
+      // Принудительно запрашиваем данные при изменении showCleanPoints
+      refetchCleanPoints();
+      refetchCleanPointsPrev();
+    }
+  }, [showCleanPoints, refetchCleanPoints, refetchCleanPointsPrev, isAuth, selectedFields]);
 
   // Сохраняем данные в Redux
   useEffect(() => {
@@ -85,7 +110,6 @@ const MapComponent = () => {
 
   return (
     <div className="app-layout">
-      {/* Карта */}
       <MapContainer
         center={config.defaultCenter}
         zoom={config.defaultZoom}
@@ -93,16 +117,14 @@ const MapComponent = () => {
         zoomControl={false}
         maxZoom={25}
       >
-        {/* Синхронизация центра после получения данных */}
         {mapData?.center?.coordinates && (
           <MapSyncCenter center={[mapData.center.coordinates[1], mapData.center.coordinates[0]]} zoom={mapData.zoom} />
         )}
-        {/* Инструменты и слои */}
+
         <MapInstruments />
 
         {isAuth && (
           <>
-            {/* Сайдбары */}
             <FieldSelectionSidebar
               fields={fieldsData?.features || []}
               selectedFields={selectedFields}
@@ -123,11 +145,11 @@ const MapComponent = () => {
             {fieldsData && <MapFields />}
             {showMapPoints && <MapPoints selectedFields={selectedFields} />}
             {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />}
-            {showCleanPoints && cleanPointsPrev && selectedYearsPrev.size && (
+            {showCleanPoints && cleanPointsPrev && selectedYearsPrev.size > 0 && (
               <MapCleanPoints isFetching={cleanLoadingPrev} isPrev={true} />
             )}
             {showHotMap && cleanPoints && <HeatmapLayer />}
-            {showHotMap && cleanPointsPrev && selectedYearsPrev.size && <HeatmapLayer isPrev={true} />}
+            {showHotMap && cleanPointsPrev && selectedYearsPrev.size > 0 && <HeatmapLayer isPrev={true} />}
             {showGridCells && <GridCells />}
             {location && <LocationMarker location={location} />}
             <UserGeoDataProvider />
@@ -135,7 +157,6 @@ const MapComponent = () => {
         )}
       </MapContainer>
 
-      {/* Группа кнопок */}
       {isAuth && (
         <ToggleButtonGroup
           showMapPoints={showMapPoints}
@@ -149,7 +170,6 @@ const MapComponent = () => {
         />
       )}
 
-      {/* WebSocket для получения локации */}
       <WebSocketComponent setLocation={setLocation} />
     </div>
   );
