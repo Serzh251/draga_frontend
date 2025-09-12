@@ -1,4 +1,3 @@
-// components/map/MapComponent.jsx
 import React, { useEffect, useState } from 'react';
 import { MapContainer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -29,8 +28,8 @@ import {
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
 import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
-import SaveMapCenterButton from '../buttons/SaveMapCenterButton';
 import MapSyncCenter from './MapSyncCenter';
+import MyLocationMarker from '../location/MyLocationMarker';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -42,6 +41,7 @@ const MapComponent = () => {
   const [selectedYearsPrev, setSelectedYearsPrev] = useState(new Set());
   const [showGridCells, setShowGridCells] = usePersistentState('showGridCells', false);
   const [showMapPoints, setShowMapPoints] = usePersistentState('showMapPoints', false);
+  const [showMyLocation, setShowMyLocation] = usePersistentState('showMyLocation', false);
   const [showCleanPoints, setShowCleanPoints] = usePersistentState('showCleanPoints', true);
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
   const [location, setLocation] = useState(null);
@@ -149,6 +149,7 @@ const MapComponent = () => {
               <MapCleanPoints isFetching={cleanLoadingPrev} isPrev={true} />
             )}
             {showHotMap && cleanPoints && <HeatmapLayer />}
+            {showMyLocation && <MyLocationMarker />}
             {showHotMap && cleanPointsPrev && selectedYearsPrev.size > 0 && <HeatmapLayer isPrev={true} />}
             {showGridCells && <GridCells />}
             {location && <LocationMarker location={location} />}
@@ -167,6 +168,7 @@ const MapComponent = () => {
           setShowGridCells={setShowGridCells}
           showHotMap={showHotMap}
           setShowHotMap={setShowHotMap}
+          setShowMyLocation={setShowMyLocation}
         />
       )}
 

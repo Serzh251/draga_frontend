@@ -1,5 +1,12 @@
 import React from 'react';
-import { EnvironmentFilled, EnvironmentOutlined, FileExcelOutlined, RadarChartOutlined } from '@ant-design/icons';
+import {
+  AimOutlined,
+  BorderInnerOutlined,
+  EnvironmentFilled,
+  EnvironmentOutlined,
+  FileExcelOutlined,
+  RadarChartOutlined,
+} from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { useAuth } from '../../hook/use-auth';
 
@@ -31,10 +38,17 @@ const ToggleButtonGroup = ({
   setShowGridCells,
   showHotMap,
   setShowHotMap,
+  setShowMyLocation,
 }) => {
   const { isAdmin } = useAuth();
   return (
     <>
+      <ToggleButton
+        title={showGridCells ? 'Скрыть мое местоположение' : 'Показать мое местоположение'}
+        icon={AimOutlined}
+        onClick={() => setShowMyLocation((prev) => !prev)}
+        style={{ top: 272, left: 11, width: 30, height: 30, padding: 3 }}
+      />
       <ToggleButton
         title={showHotMap ? 'Скрыть hot map' : 'Показать hot map'}
         icon={RadarChartOutlined}
@@ -62,7 +76,7 @@ const ToggleButtonGroup = ({
             icon={FileExcelOutlined}
             onClick={() => setShowGridCells((prev) => !prev)}
             style={{ top: 462, right: 11 }}
-          />
+          />{' '}
         </>
       )}
     </>
