@@ -1,10 +1,7 @@
-// TrackLine.jsx
 import { useEffect, useRef } from 'react';
 import { useMap } from 'react-leaflet';
 import * as turf from '@turf/turf';
 import L from 'leaflet';
-
-// RTK Query
 import { useFetchTrackPointsQuery } from '../../api/api';
 
 // Цветовая шкала
@@ -19,39 +16,30 @@ const getColor = (depth) => {
 };
 
 const TrackLine = ({ track }) => {
-  const map = useMap(); // Получаем карту
-  const layerRef = useRef(null); // Ссылка на слой
+  const map = useMap();
+  const layerRef = useRef(null);
 
-  // ✅ Безопасный вызов хука — на верхнем уровне компонента
-  const { pointsData, isLoading, error } = useFetchTrackPointsQuery(
-    { trackId: track.id },
-    { skip: !map } // только если карта готова
-  );
+  const { data, isFetching, error } = useFetchTrackPointsQuery({ trackId: track.id }, { skip: !map });
 
-  // Отрисовка трека
   useEffect(() => {
-    if (!map || !pointsData?.features?.length) return;
+    if (!map || !data?.features?.length) return;
 
-    // Фильтруем валидные точки
-    const cleanFeatures = pointsData.features.filter(
-      (f) => f.geometry?.type === 'Point' && f.properties?.depth != null
-    );
+    // Удаляем старый слой
+    if (layerRef.current) {
+      map.removeLayer(layerRef.current);
+    }
 
+    const cleanFeatures = data.features.filter((f) => f.geometry?.type === 'Point' && f.properties?.depth != null);
     if (cleanFeatures.length < 2) return;
 
-    // Подготавливаем координаты
-    const latlngs = cleanFeatures.map((f) => [
-      f.geometry.coordinates[1], // lat
-      f.geometry.coordinates[0], // lng
-    ]);
+    const latlngs = cleanFeatures.map((f) => [f.geometry.coordinates[1], f.geometry.coordinates[0]]);
     const depths = cleanFeatures.map((f) => f.properties.depth);
 
-    // Создаём линию
     const trackLayer = L.geoJson(null, {
       style: (feature) => ({
         color: getColor(feature.properties.depth),
-        weight: 12,
-        opacity: 0.9,
+        weight: 15,
+        opacity: 0.5,
         lineCap: 'round',
         lineJoin: 'round',
       }),
@@ -62,10 +50,10 @@ const TrackLine = ({ track }) => {
       },
     });
 
-    // Добавляем сегменты
+    // Рисуем сегменты
     for (let i = 0; i < latlngs.length - 1; i++) {
       const segment = turf.lineString([
-        [latlngs[i][1], latlngs[i][0]], // [lng, lat]
+        [latlngs[i][1], latlngs[i][0]],
         [latlngs[i + 1][1], latlngs[i + 1][0]],
       ]);
       const avgDepth = (depths[i] + depths[i + 1]) / 2;
@@ -77,26 +65,23 @@ const TrackLine = ({ track }) => {
       });
     }
 
-    // Добавляем на карту
     trackLayer.addTo(map);
     layerRef.current = trackLayer;
 
-    // Подстраиваем масштаб
     map.fitBounds(trackLayer.getBounds(), { padding: [50, 50] });
 
-    // Очистка при размонтировании
     return () => {
       if (layerRef.current) {
         map.removeLayer(layerRef.current);
       }
     };
-  }, [pointsData, map]);
+  }, [data, map]);
 
   if (error) {
     console.error(`Ошибка загрузки точек для трека ${track.id}:`, error);
   }
 
-  return null;
+  return isFetching ? null : null;
 };
 
 export default TrackLine;
