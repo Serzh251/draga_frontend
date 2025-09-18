@@ -29,6 +29,8 @@ const api = {
   LIST_USER_GEO_DATA: '/user-data/geo-data/',
   CREATE_USER_GEO_DATA: '/user-data/geo-data-create/',
   SETUP_DEFAULT_MAP_CENTER: '/setup/default-center/',
+  GET_TRACK_LIST: '/batymetry/tracks/',
+  GET_TRACK_POINTS: '/batymetry/tracks/:id/points/',
 };
 
 export default api;

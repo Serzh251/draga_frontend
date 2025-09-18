@@ -1,11 +1,11 @@
 import React from 'react';
 import {
   AimOutlined,
-  BorderInnerOutlined,
   EnvironmentFilled,
   EnvironmentOutlined,
   FileExcelOutlined,
   RadarChartOutlined,
+  AreaChartOutlined,
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { useAuth } from '../../hook/use-auth';
@@ -38,29 +38,38 @@ const ToggleButtonGroup = ({
   setShowGridCells,
   showHotMap,
   setShowHotMap,
+  showMyLocation,
   setShowMyLocation,
+  showBatymetryLayer,
+  setShowBatymetryLayer,
 }) => {
   const { isAdmin } = useAuth();
   return (
     <>
       <ToggleButton
-        title={showGridCells ? 'Скрыть мое местоположение' : 'Показать мое местоположение'}
+        title={showMyLocation ? 'Скрыть мое местоположение' : 'Показать мое местоположение'}
         icon={AimOutlined}
         onClick={() => setShowMyLocation((prev) => !prev)}
         style={{ top: 272, left: 11, width: 30, height: 30, padding: 3 }}
       />
       <ToggleButton
-        title={showHotMap ? 'Скрыть hot map' : 'Показать hot map'}
-        icon={RadarChartOutlined}
-        onClick={() => setShowHotMap((prev) => !prev)}
-        style={{ top: 292, right: 11, color: 'blue' }}
+        title={showBatymetryLayer ? 'Скрыть промеры' : 'Показать промеры'}
+        icon={AreaChartOutlined}
+        onClick={() => setShowBatymetryLayer((prev) => !prev)}
+        style={{ top: 312, left: 11, color: 'blue', width: 30, height: 30, padding: 3 }}
       />
-
       <ToggleButton
         title={showCleanPoints ? 'Скрыть clean точки' : 'Показать clean точки'}
         icon={EnvironmentFilled}
         onClick={() => setShowCleanPoints((prev) => !prev)}
         style={{ top: 350, right: 11, color: 'green' }}
+      />
+
+      <ToggleButton
+        title={showHotMap ? 'Скрыть hot map' : 'Показать hot map'}
+        icon={RadarChartOutlined}
+        onClick={() => setShowHotMap((prev) => !prev)}
+        style={{ top: 292, right: 11, color: 'blue' }}
       />
 
       {isAdmin && (

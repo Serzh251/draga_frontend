@@ -140,6 +140,32 @@ export const api = createApi({
       }),
       invalidatesTags: ['DefaultMapCenter'],
     }),
+    // 🚤 Список треков
+    fetchTrackList: builder.query({
+      query: () => configApi.GET_TRACK_LIST,
+      providesTags: ['TrackList'],
+    }),
+
+    // 🌊 Точки одного трека (с пагинацией)
+    fetchTrackPoints: builder.query({
+      query: ({ trackId, page = 1 }) => {
+        return `${configApi.GET_TRACK_POINTS.replace(':id', trackId)}?page=${page}`;
+      },
+      providesTags: (result, error, { trackId }) => [{ type: 'TrackPoints', id: trackId }],
+      serializeQueryArgs: ({ endpointName }) => {
+        return endpointName; // объединяем все запросы к одной точке
+      },
+      merge: (currentCache, newItems) => {
+        // Пагинация: добавляем новые страницы
+        if (!currentCache.features) {
+          currentCache.features = [];
+        }
+        currentCache.features.push(...newItems.features);
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.page !== previousArg?.page;
+      },
+    }),
   }),
 });
 
@@ -156,4 +182,6 @@ export const {
   useDeleteUserGeoDataMutation,
   useFetchDefaultMapCenterQuery,
   useCreateOrUpdateDefaultMapCenterMutation,
+  useFetchTrackListQuery,
+  useFetchTrackPointsQuery,
 } = api;

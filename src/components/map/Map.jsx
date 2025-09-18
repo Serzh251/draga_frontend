@@ -12,7 +12,7 @@ import MapCleanPoints from './MapCleanPoints';
 import FieldSelectionSidebar from './Fields/FieldSelectionSidebar';
 import MapFields from './Fields/MapFields';
 import ToggleButtonGroup from '../buttons/ToogleButtons';
-import WebSocketComponent from '../location/WebsockerLocation';
+import WebSocketComponent from '../location/WebsocketLocation';
 import LocationMarker from '../location/LocationMarker';
 import YearSelectionSidebar from './YearSelectionSidebar';
 import usePersistentState from '../../hook/usePersistentState';
@@ -30,6 +30,7 @@ import { useMapData } from '../../hook/useDataMap';
 import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
 import MapSyncCenter from './MapSyncCenter';
 import MyLocationMarker from '../location/MyLocationMarker';
+import BatymetryLayer from '../Batymetry/BatymetryLayer';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -43,15 +44,14 @@ const MapComponent = () => {
   const [showMapPoints, setShowMapPoints] = usePersistentState('showMapPoints', false);
   const [showMyLocation, setShowMyLocation] = usePersistentState('showMyLocation', false);
   const [showCleanPoints, setShowCleanPoints] = usePersistentState('showCleanPoints', true);
+  const [showBatymetryLayer, setShowBatymetryLayer] = usePersistentState('showBatymetryLayer', true);
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
   const [location, setLocation] = useState(null);
 
-  // Загружаем настройки карты
   const { data: mapData } = useFetchDefaultMapCenterQuery(undefined, {
     skip: !isAuth,
   });
 
-  // Запросы к данным
   const { data: listGeojsonFields } = useFetchFieldsQuery(undefined, {
     skip: !isAuth,
   });
@@ -59,7 +59,6 @@ const MapComponent = () => {
     skip: !isAuth,
   });
 
-  // === Запрос для текущих чистых точек ===
   const {
     data: cleanGeojsonData,
     isFetching: cleanLoading,
@@ -75,7 +74,6 @@ const MapComponent = () => {
     }
   );
 
-  // === Запрос для предыдущих чистых точек ===
   const {
     data: cleanGeojsonDataPrev,
     isFetching: cleanLoadingPrev,
@@ -91,10 +89,8 @@ const MapComponent = () => {
     }
   );
 
-  // === Ключевой эффект: принудительный refetch при изменении showCleanPoints ===
   useEffect(() => {
     if (isAuth && selectedFields.size > 0) {
-      // Принудительно запрашиваем данные при изменении showCleanPoints
       refetchCleanPoints();
       refetchCleanPointsPrev();
     }
@@ -150,6 +146,7 @@ const MapComponent = () => {
             )}
             {showHotMap && cleanPoints && <HeatmapLayer />}
             {showMyLocation && <MyLocationMarker />}
+            {showBatymetryLayer && <BatymetryLayer />}
             {showHotMap && cleanPointsPrev && selectedYearsPrev.size > 0 && <HeatmapLayer isPrev={true} />}
             {showGridCells && <GridCells />}
             {location && <LocationMarker location={location} />}
@@ -168,7 +165,10 @@ const MapComponent = () => {
           setShowGridCells={setShowGridCells}
           showHotMap={showHotMap}
           setShowHotMap={setShowHotMap}
+          showMyLocation={showMyLocation}
           setShowMyLocation={setShowMyLocation}
+          setShowBatymetryLayer={setShowBatymetryLayer}
+          showBatymetryLayer={showBatymetryLayer}
         />
       )}
 
