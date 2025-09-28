@@ -22,12 +22,12 @@ import { useMapData } from '../../hook/useDataMap';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
-  const { isAuth } = useAuth();
+  const { isAuth, authStatus } = useAuth();
   const { fieldsData, yearsData, cleanPoints, cleanPointsPrev } = useMapData();
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
-
+  const [isMapReady, setIsMapReady] = useState(false);
   const [selectedFields, setSelectedFields] = useState(new Set());
   const [selectedYears, setSelectedYears] = useState(new Set());
   const [selectedYearsPrev, setSelectedYearsPrev] = useState(new Set());
@@ -93,7 +93,7 @@ const MapComponent = () => {
     if (listGeojsonFields) dispatch(setFieldsData(listGeojsonFields));
     if (listUniqueYears) dispatch(setYearsData(listUniqueYears));
   }, [listGeojsonFields, listUniqueYears, cleanGeojsonData, cleanGeojsonDataPrev, dispatch]);
-
+  const mapRenderKey = isAuth ? 'map-authed' : 'map-guest';
   // Инициализация карты с поворотом
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -120,19 +120,26 @@ const MapComponent = () => {
     }).addTo(map);
 
     mapInstanceRef.current = map;
+    setIsMapReady(true);
 
     return () => {
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        map.remove();
         mapInstanceRef.current = null;
       }
+      setIsMapReady(false);
     };
   }, [mapData]);
 
+  if (authStatus === 'loading') {
+    return <div>Загрузка...</div>;
+  }
   return (
     <div className="app-layout">
       {/* Контейнер для карты */}
       <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
+      {isMapReady && <MapInstruments map={mapInstanceRef.current} isAuth={isAuth} />}
+
       {/* Слои, требующие переработки — временно закомментированы */}
       {/* {fieldsData && <MapFields />} */}
       {/* {showMapPoints && <MapPoints selectedFields={selectedFields} />} */}
@@ -147,8 +154,8 @@ const MapComponent = () => {
       {/* {showGridCells && <GridCells />} */}
       {/* {location && <LocationMarker location={location} />} */}
       {/* <UserGeoDataProvider /> */}
+
       {/* Инструменты поверх карты */}
-      <MapInstruments map={mapInstanceRef.current} />
       {/*{isAuth && (*/}
       {/*  <ToggleButtonGroup*/}
       {/*    showMapPoints={showMapPoints}*/}

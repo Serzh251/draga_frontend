@@ -55,7 +55,7 @@ const SaveMapCenterButton = ({ map, onSaveSuccess }) => {
         bottom: 20,
         left: 25,
         zIndex: 1000,
-        padding: '0 8px',
+        padding: 4,
         height: 'auto',
       }}
     >

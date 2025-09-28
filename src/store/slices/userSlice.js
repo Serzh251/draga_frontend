@@ -7,7 +7,7 @@ const initialState = {
   currentUser: localStorage.getItem('currentUser'),
   firstName: localStorage.getItem('firstName'),
   isAdmin: JSON.parse(localStorage.getItem('isAdmin')),
-  isAuth: localStorage.getItem('isAuth'),
+  isAuth: localStorage.getItem('isAuth') === 'true',
 };
 
 const userSlice = createSlice({
@@ -15,7 +15,8 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser(state, action) {
-      state.isAuth = action.payload.isAuth;
+      // state.isAuth = action.payload.isAuth;
+      state.isAuth = true;
       state.isAdmin = action.payload.isAdmin;
       state.firstName = action.payload.firstName;
       state.currentUser = action.payload.currentUser;

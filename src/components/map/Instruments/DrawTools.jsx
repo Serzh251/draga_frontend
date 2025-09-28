@@ -24,7 +24,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const DrawTools = ({ map }) => {
+const DrawTools = ({ map, isAuth }) => {
   const [showModal, setShowModal] = useState(false);
   const [drawnItems, setDrawnItems] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -209,20 +209,22 @@ const DrawTools = ({ map }) => {
   return (
     <>
       {contextHolder}
-      <Tooltip title="Сохранить данные" placement="right">
-        <SaveOutlined
-          onClick={() => setShowModal(true)}
-          style={{
-            position: 'absolute',
-            top: '230px',
-            left: '10px',
-            fontSize: '30px',
-            color: '#007bff',
-            cursor: 'pointer',
-            zIndex: 1000,
-          }}
-        />
-      </Tooltip>
+      {isAuth && (
+        <Tooltip title="Сохранить данные" placement="right">
+          <SaveOutlined
+            onClick={() => setShowModal(true)}
+            style={{
+              position: 'absolute',
+              top: '230px',
+              left: '10px',
+              fontSize: '30px',
+              color: '#007bff',
+              cursor: 'pointer',
+              zIndex: 1000,
+            }}
+          />
+        </Tooltip>
+      )}
 
       <Modal
         title="Сохранение геоданных"
@@ -236,7 +238,6 @@ const DrawTools = ({ map }) => {
         cancelText="Отмена"
         confirmLoading={isLoading}
       >
-        {/* ✅ Передаём form */}
         <Form form={form} layout="vertical">
           <Form.Item
             name="name"
