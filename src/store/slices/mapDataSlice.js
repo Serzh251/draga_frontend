@@ -32,7 +32,7 @@ const mapDataSlice = createSlice({
       state.cleanPoints = null;
       state.cleanPointsPrev = null;
       state.fieldsData = null;
-      state.cleanPoints = null;
+      state.yearsData = null;
     },
   },
 });

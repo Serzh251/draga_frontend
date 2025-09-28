@@ -19,6 +19,8 @@ import {
 } from '../../api/api';
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
+import RotatableLeafletMap from './RotatableLeafletMap';
+import MapFields from './Fields/MapFields';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -43,7 +45,11 @@ const MapComponent = () => {
     skip: !isAuth,
   });
 
-  const { data: listGeojsonFields } = useFetchFieldsQuery(undefined, {
+  const {
+    data: listGeojsonFields,
+    isLoading: fieldsLoading,
+    refetch: refetchFields,
+  } = useFetchFieldsQuery(undefined, {
     skip: !isAuth,
   });
   const { data: listUniqueYears } = useFetchYearsQuery(undefined, {
@@ -81,6 +87,16 @@ const MapComponent = () => {
   );
 
   useEffect(() => {
+    if (isAuth) {
+      refetchFields().then((result) => {
+        if (result.data) {
+          dispatch(setFieldsData(result.data));
+        }
+      });
+    }
+  }, [isAuth, refetchFields, dispatch]);
+
+  useEffect(() => {
     if (isAuth && selectedFields.size > 0) {
       refetchCleanPoints();
       refetchCleanPointsPrev();
@@ -90,11 +106,10 @@ const MapComponent = () => {
   useEffect(() => {
     if (cleanGeojsonData) dispatch(setCleanPoints(cleanGeojsonData));
     if (cleanGeojsonDataPrev) dispatch(setCleanPointsPrev(cleanGeojsonDataPrev));
-    if (listGeojsonFields) dispatch(setFieldsData(listGeojsonFields));
     if (listUniqueYears) dispatch(setYearsData(listUniqueYears));
-  }, [listGeojsonFields, listUniqueYears, cleanGeojsonData, cleanGeojsonDataPrev, dispatch]);
-  const mapRenderKey = isAuth ? 'map-authed' : 'map-guest';
-  // Инициализация карты с поворотом
+  }, [cleanGeojsonData, cleanGeojsonDataPrev, listUniqueYears, dispatch]);
+
+  // --- Инициализация карты ---
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -134,14 +149,42 @@ const MapComponent = () => {
   if (authStatus === 'loading') {
     return <div>Загрузка...</div>;
   }
+
   return (
     <div className="app-layout">
       {/* Контейнер для карты */}
       <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
+
+      {/* Инструменты */}
       {isMapReady && <MapInstruments map={mapInstanceRef.current} isAuth={isAuth} />}
 
+      {isAuth && isMapReady && fieldsData && !fieldsLoading && (
+        <MapFields
+          key={`map-fields-${fieldsData.features?.length || 0}`}
+          map={mapInstanceRef.current}
+          features={fieldsData.features}
+        />
+      )}
+
+      {/*<RotatableLeafletMap*/}
+      {/*  selectedFields={selectedFields}*/}
+      {/*  selectedYears={selectedYears}*/}
+      {/*  selectedYearsPrev={selectedYearsPrev}*/}
+      {/*  showGridCells={showGridCells}*/}
+      {/*  showMapPoints={showMapPoints}*/}
+      {/*  showMyLocation={showMyLocation}*/}
+      {/*  showCleanPoints={showCleanPoints}*/}
+      {/*  showBatymetryLayer={showBatymetryLayer}*/}
+      {/*  showHotMap={showHotMap}*/}
+      {/*  location={location}*/}
+      {/*  fieldsData={fieldsData}*/}
+      {/*  cleanPoints={cleanPoints}*/}
+      {/*  cleanPointsPrev={cleanPointsPrev}*/}
+      {/*  mapCenter={mapCenter}*/}
+      {/*  zoom={z}*/}
+      {/*/>*/}
+
       {/* Слои, требующие переработки — временно закомментированы */}
-      {/* {fieldsData && <MapFields />} */}
       {/* {showMapPoints && <MapPoints selectedFields={selectedFields} />} */}
       {/* {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />} */}
       {/* {showCleanPoints && cleanPointsPrev && selectedYearsPrev.size > 0 && (
@@ -155,23 +198,22 @@ const MapComponent = () => {
       {/* {location && <LocationMarker location={location} />} */}
       {/* <UserGeoDataProvider /> */}
 
-      {/* Инструменты поверх карты */}
-      {/*{isAuth && (*/}
-      {/*  <ToggleButtonGroup*/}
-      {/*    showMapPoints={showMapPoints}*/}
-      {/*    setShowMapPoints={setShowMapPoints}*/}
-      {/*    showCleanPoints={showCleanPoints}*/}
-      {/*    setShowCleanPoints={setShowCleanPoints}*/}
-      {/*    showGridCells={showGridCells}*/}
-      {/*    setShowGridCells={setShowGridCells}*/}
-      {/*    showHotMap={showHotMap}*/}
-      {/*    setShowHotMap={setShowHotMap}*/}
-      {/*    showMyLocation={showMyLocation}*/}
-      {/*    setShowMyLocation={setShowMyLocation}*/}
-      {/*    setShowBatymetryLayer={setShowBatymetryLayer}*/}
-      {/*    showBatymetryLayer={showBatymetryLayer}*/}
-      {/*  />*/}
-      {/*)}*/}
+      {isAuth && (
+        <ToggleButtonGroup
+          showMapPoints={showMapPoints}
+          setShowMapPoints={setShowMapPoints}
+          showCleanPoints={showCleanPoints}
+          setShowCleanPoints={setShowCleanPoints}
+          showGridCells={showGridCells}
+          setShowGridCells={setShowGridCells}
+          showHotMap={showHotMap}
+          setShowHotMap={setShowHotMap}
+          showMyLocation={showMyLocation}
+          setShowMyLocation={setShowMyLocation}
+          setShowBatymetryLayer={setShowBatymetryLayer}
+          showBatymetryLayer={showBatymetryLayer}
+        />
+      )}
       <WebSocketComponent setLocation={setLocation} />
     </div>
   );

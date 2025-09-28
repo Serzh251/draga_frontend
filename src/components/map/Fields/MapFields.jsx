@@ -1,55 +1,43 @@
-import { useEffect, useState } from 'react';
-import { useMap } from 'react-leaflet';
+// src/components/Map/Fields/MapFields.jsx
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { useMapData } from '../../../hook/useDataMap';
 
-const MapFields = () => {
-  const map = useMap();
-  const [layers, setLayers] = useState(new Map());
-  const { fieldsData } = useMapData();
+const MapFields = ({ map, features }) => {
+  const layersRef = useRef(new Map());
+
   useEffect(() => {
-    if (!fieldsData || !Array.isArray(fieldsData.features)) {
-      console.warn('Некорректные данные GeoJSON: отсутствует массив features');
-      return;
-    }
+    if (!map || !features) return;
 
-    layers.forEach(({ polygon, border, label }) => {
-      map.removeLayer(polygon);
-      map.removeLayer(border);
-      map.removeLayer(label);
+    // Удаляем старые слои
+    layersRef.current.forEach(({ polygon, border, label }) => {
+      if (polygon && map.hasLayer(polygon)) map.removeLayer(polygon);
+      if (border && map.hasLayer(border)) map.removeLayer(border);
+      if (label && map.hasLayer(label)) map.removeLayer(label);
     });
-    const newLayers = new Map();
+    layersRef.current.clear();
 
-    fieldsData.features.forEach((feature) => {
+    // Добавляем новые
+    features.forEach((feature) => {
       if (feature.geometry.type === 'Polygon') {
         const coordinates = feature.geometry.coordinates[0];
-        const polygon = L.geoJSON(feature.geometry, {
-          style: {
-            color: '#25282b',
-            weight: 2,
-            fillOpacity: 0,
-          },
-        }).addTo(map);
-
-        polygon.eachLayer((layer) => {
-          layer.on('click', (e) => {
-            e.originalEvent.stopPropagation(); // Блокируем всплытие события клика
-          });
-        });
-
-        const border = L.geoJSON(feature.geometry, {
-          style: {
-            color: 'blue',
-            weight: 3,
-            fillOpacity: 0,
-          },
-        }).addTo(map);
-
         const midIndex = Math.floor(coordinates.length / 2);
         const midPoint = coordinates[midIndex];
 
+        const polygon = L.geoJSON(feature.geometry, {
+          style: { color: '#25282b', weight: 2, fillOpacity: 0 },
+        }).addTo(map);
+
+        polygon.eachLayer((layer) => {
+          layer.on('click', (e) => e.originalEvent.stopPropagation());
+        });
+
+        const border = L.geoJSON(feature.geometry, {
+          style: { color: 'blue', weight: 3, fillOpacity: 0 },
+        }).addTo(map);
+
+        let label = null;
         if (midPoint) {
-          const label = L.marker([midPoint[1], midPoint[0]], {
+          label = L.marker([midPoint[1], midPoint[0]], {
             icon: L.divIcon({
               className: 'polygon-label',
               html: `<div style="background: white; padding: 2px 5px; border-radius: 5px; font-size: 12px; font-weight: bold; border: 1px solid #ccc;">
@@ -59,23 +47,22 @@ const MapFields = () => {
             }),
             interactive: false,
           }).addTo(map);
-
-          newLayers.set(feature.id, { polygon, border, label });
-        } else {
-          newLayers.set(feature.id, { polygon, border });
         }
+
+        layersRef.current.set(feature.id, { polygon, border, label });
       }
     });
-    setLayers(newLayers);
 
     return () => {
-      newLayers.forEach(({ polygon, border, label }) => {
-        map.removeLayer(polygon);
-        map.removeLayer(border);
-        if (label) map.removeLayer(label);
+      // Очистка при размонтировании
+      layersRef.current.forEach(({ polygon, border, label }) => {
+        if (polygon && map.hasLayer(polygon)) map.removeLayer(polygon);
+        if (border && map.hasLayer(border)) map.removeLayer(border);
+        if (label && map.hasLayer(label)) map.removeLayer(label);
       });
+      layersRef.current.clear();
     };
-  }, [fieldsData, map]);
+  }, [map, features]);
 
   return null;
 };
