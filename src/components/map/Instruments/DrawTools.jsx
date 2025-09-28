@@ -1,15 +1,15 @@
-import { useMap } from 'react-leaflet';
-import React, { useEffect, useState } from 'react';
+// src/components/Map/Instruments/DrawTools.jsx
+import { useEffect, useState } from 'react';
 import L from 'leaflet';
-import 'leaflet-draw';
-import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Modal, Form, Input, message, ColorPicker, Tooltip } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import 'leaflet-draw';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+import { Modal, Form, Input, message, ColorPicker, Tooltip } from 'antd';
+import { SaveOutlined } from '@ant-design/icons';
 
 import { useCreateUserGeoDataMutation } from '../../../api/api';
 import VirtualKeyboard from '../../tolls/VirtualKeyboard';
@@ -24,8 +24,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const DrawTools = () => {
-  const map = useMap();
+const DrawTools = ({ map }) => {
   const [showModal, setShowModal] = useState(false);
   const [drawnItems, setDrawnItems] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -36,12 +35,17 @@ const DrawTools = () => {
     description: '',
     color: '#0015ff',
   });
-  const [activeField, setActiveField] = useState(null); // Текущее активное поле
+  const [activeField, setActiveField] = useState(null);
 
-  // --- НОВОЕ: Проверяем, нужно ли вообще показывать виртуальную клавиатуру ---
-  const showVirtualKeyboard = shouldUseVirtualKeyboard(); // true только на ПК/ноуте без touch
+  const showVirtualKeyboard = shouldUseVirtualKeyboard();
+
+  // --- Форма Ant Design ---
+  const [form] = Form.useForm(); // Создаём форму
 
   useEffect(() => {
+    if (!map) return;
+
+    // Проверяем, уже ли добавлен контрол
     if (map.drawControl) return;
 
     const items = new L.FeatureGroup();
@@ -61,13 +65,16 @@ const DrawTools = () => {
       },
     });
 
+    map.addControl(drawControl);
+    map.drawControl = drawControl;
+
     const updateMeasurements = (layer) => {
       let tooltipContent = '';
 
       if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
         const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
         tooltipContent = `Площадь: ${area.toFixed(2)} м²`;
-      } else if (layer instanceof L.Polyline) {
+      } else if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
         const latLngs = layer.getLatLngs();
         const length = latLngs.reduce((sum, latLng, index, array) => {
           if (index === 0) return sum;
@@ -75,15 +82,6 @@ const DrawTools = () => {
           return sum + map.distance(prevLatLng, latLng);
         }, 0);
         tooltipContent = `Длина: ${length.toFixed(2)} м`;
-      } else if (layer instanceof L.Circle) {
-        const radius = layer.getRadius();
-        if (!isNaN(radius)) {
-          const circleArea = Math.PI * radius * radius;
-          tooltipContent = `Радиус: ${radius.toFixed(2)} м, Площадь: ${circleArea.toFixed(2)} м²`;
-        } else {
-          console.error('Invalid radius value:', radius);
-          tooltipContent = 'Ошибка в расчете радиуса.';
-        }
       }
 
       if (tooltipContent) {
@@ -97,24 +95,19 @@ const DrawTools = () => {
       }
     };
 
-    map.addControl(drawControl);
-    map.drawControl = drawControl;
-
     map.on(L.Draw.Event.CREATED, (event) => {
       const { layerType, layer } = event;
-      if (layerType === 'marker') {
-        items.eachLayer((l) => {
-          if (l instanceof L.Marker) items.removeLayer(l);
-        });
-      } else if (layerType === 'polyline') {
-        items.eachLayer((l) => {
-          if (l instanceof L.Polyline && !(l instanceof L.Polygon)) items.removeLayer(l);
-        });
-      } else if (layerType === 'polygon') {
-        items.eachLayer((l) => {
-          if (l instanceof L.Polygon && !(l instanceof L.Rectangle)) items.removeLayer(l);
-        });
-      }
+
+      items.eachLayer((l) => {
+        if (
+          (layerType === 'marker' && l instanceof L.Marker) ||
+          (layerType === 'polyline' && l instanceof L.Polyline && !(l instanceof L.Polygon)) ||
+          (layerType === 'polygon' && l instanceof L.Polygon && !(l instanceof L.Rectangle))
+        ) {
+          items.removeLayer(l);
+        }
+      });
+
       items.addLayer(layer);
       updateMeasurements(layer);
     });
@@ -124,9 +117,18 @@ const DrawTools = () => {
         updateMeasurements(layer);
       });
     });
-  }, [map]);
 
-  const [form] = Form.useForm();
+    // Очистка
+    return () => {
+      if (map.drawControl) {
+        map.removeControl(map.drawControl);
+        delete map.drawControl;
+      }
+      if (items) {
+        items.clearLayers();
+      }
+    };
+  }, [map]);
 
   const handleFocus = (field) => {
     if (showVirtualKeyboard) {
@@ -191,7 +193,7 @@ const DrawTools = () => {
       messageApi.success('✅ Данные успешно сохранены!');
       form.resetFields();
       setShowModal(false);
-      setActiveField(null); // Сбрасываем активное поле
+      setActiveField(null);
       if (drawnItems) {
         drawnItems.clearLayers();
       }
@@ -212,7 +214,7 @@ const DrawTools = () => {
           onClick={() => setShowModal(true)}
           style={{
             position: 'absolute',
-            top: '190px',
+            top: '230px',
             left: '10px',
             fontSize: '30px',
             color: '#007bff',
@@ -228,12 +230,13 @@ const DrawTools = () => {
         onOk={saveGeoData}
         onCancel={() => {
           setShowModal(false);
-          setActiveField(null); // Сбрасываем поле
+          setActiveField(null);
         }}
         okText="Сохранить геоданные"
         cancelText="Отмена"
         confirmLoading={isLoading}
       >
+        {/* ✅ Передаём form */}
         <Form form={form} layout="vertical">
           <Form.Item
             name="name"
@@ -259,7 +262,7 @@ const DrawTools = () => {
             />
           </Form.Item>
         </Form>
-        <SaveMapCenterButton onSaveSuccess={() => setShowModal(false)} />
+        <SaveMapCenterButton map={map} onSaveSuccess={() => setShowModal(false)} />
       </Modal>
 
       {showVirtualKeyboard && activeField && (

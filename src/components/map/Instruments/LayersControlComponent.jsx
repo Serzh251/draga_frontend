@@ -1,31 +1,55 @@
-import React, { useEffect, useState } from 'react';
-import { LayersControl, TileLayer } from 'react-leaflet';
+// src/components/Map/Instruments/LayersControlComponent.jsx
+import { useEffect } from 'react';
+import L from 'leaflet';
 import config from '../../../config';
 
-const LayersControlComponent = () => {
-  const [selectedLayer, setSelectedLayer] = useState(() => {
-    return localStorage.getItem('selectedLayer') || config.layers[0].name;
-  });
-
+const LayersControlComponent = ({ map }) => {
   useEffect(() => {
-    localStorage.setItem('selectedLayer', selectedLayer);
-  }, [selectedLayer]);
+    if (!map) return;
 
-  return (
-    <LayersControl position="topright">
-      {config.layers.map((layer) => (
-        <LayersControl.BaseLayer key={layer.name} name={layer.name} checked={layer.name === selectedLayer}>
-          <TileLayer
-            url={layer.url}
-            attribution={layer.attribution}
-            eventHandlers={{
-              add: () => setSelectedLayer(layer.name),
-            }}
-          />
-        </LayersControl.BaseLayer>
-      ))}
-    </LayersControl>
-  );
+    const layers = {};
+
+    config.layers.forEach((layerConfig) => {
+      const layer = L.tileLayer(layerConfig.url, {
+        attribution: layerConfig.attribution,
+      });
+      layers[layerConfig.name] = layer;
+    });
+
+    const savedLayerName = localStorage.getItem('selectedLayer');
+    const defaultLayerName = config.layers[0].name;
+    const initialLayerName = savedLayerName || defaultLayerName;
+
+    if (layers[initialLayerName]) {
+      layers[initialLayerName].addTo(map);
+    }
+
+    const layerControl = L.control
+      .layers(layers, null, {
+        position: 'topright',
+      })
+      .addTo(map);
+
+    map.on('baselayerchange', (event) => {
+      const newLayerName = Object.keys(layers).find((name) => layers[name] === event.layer);
+      if (newLayerName) {
+        localStorage.setItem('selectedLayer', newLayerName);
+      }
+    });
+
+    return () => {
+      map.off('baselayerchange');
+      layerControl.remove();
+      // Удаляем все базовые слои
+      Object.values(layers).forEach((layer) => {
+        if (map.hasLayer(layer)) {
+          map.removeLayer(layer);
+        }
+      });
+    };
+  }, [map]);
+
+  return null;
 };
 
 export default LayersControlComponent;

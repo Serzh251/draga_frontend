@@ -7,7 +7,6 @@ import { useMapData } from '../../hook/useDataMap';
 const MapCleanPoints = ({ isFetching, isPrev }) => {
   const map = useMap();
   const { cleanPoints, cleanPointsPrev } = useMapData();
-
   useEffect(() => {
     const pointsData = isPrev ? cleanPointsPrev : cleanPoints; // Выбор данных в зависимости от isPrev
     if (!pointsData || !map) return;

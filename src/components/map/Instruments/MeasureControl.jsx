@@ -1,12 +1,10 @@
+// src/components/Map/Instruments/MeasureControl.jsx
 import { useEffect } from 'react';
-import { useMap } from 'react-leaflet';
-import 'leaflet-measure/dist/leaflet-measure.ru';
-import 'leaflet-measure/dist/leaflet-measure.css';
 import L from 'leaflet';
+import 'leaflet-measure/dist/leaflet-measure.css';
+import 'leaflet-measure/dist/leaflet-measure.ru';
 
-const MeasureControl = () => {
-  const map = useMap();
-
+const MeasureControl = ({ map }) => {
   useEffect(() => {
     if (!map) return;
 
@@ -20,15 +18,17 @@ const MeasureControl = () => {
       position: 'topright',
     });
 
-    map.addControl(measureControl);
-
+    measureControl.addTo(map);
     const originalSetView = map.setView;
+
     map.setView = function (center, zoom, options) {
       return originalSetView.call(map, map.getCenter(), zoom, options);
     };
 
     return () => {
-      map.removeControl(measureControl);
+      if (measureControl && map.hasLayer(measureControl)) {
+        map.removeControl(measureControl);
+      }
       map.setView = originalSetView;
     };
   }, [map]);

@@ -1,20 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer } from 'react-leaflet';
+// src/components/Map/MapComponent.jsx
+import React, { useEffect, useState, useRef } from 'react';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet-draw/dist/leaflet.draw.css';
-import 'leaflet-draw';
+import 'leaflet-rotate'; // Подключаем плагин
 import '../../static/css/MapMain.css';
 import config from '../../config';
-import MapPoints from './MapPoints';
-import HeatmapLayer from './HeatMapLayer';
-import GridCells from './Fields/GridCells';
-import MapCleanPoints from './MapCleanPoints';
-import FieldSelectionSidebar from './Fields/FieldSelectionSidebar';
-import MapFields from './Fields/MapFields';
 import ToggleButtonGroup from '../buttons/ToogleButtons';
 import WebSocketComponent from '../location/WebsocketLocation';
-import LocationMarker from '../location/LocationMarker';
-import YearSelectionSidebar from './YearSelectionSidebar';
 import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
 import { useDispatch } from 'react-redux';
@@ -27,15 +19,14 @@ import {
 } from '../../api/api';
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
-import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
-import MapSyncCenter from './MapSyncCenter';
-import MyLocationMarker from '../location/MyLocationMarker';
-import BatymetryLayer from '../Batymetry/BatymetryLayer';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
   const { isAuth } = useAuth();
   const { fieldsData, yearsData, cleanPoints, cleanPointsPrev } = useMapData();
+
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
 
   const [selectedFields, setSelectedFields] = useState(new Set());
   const [selectedYears, setSelectedYears] = useState(new Set());
@@ -65,11 +56,11 @@ const MapComponent = () => {
     refetch: refetchCleanPoints,
   } = useFetchCleanPointsQuery(
     {
-      year: selectedYears.size > 0 ? Array.from(selectedYears) : [], // [] — все года
+      year: selectedYears.size > 0 ? Array.from(selectedYears) : [],
       field: Array.from(selectedFields),
     },
     {
-      skip: !isAuth || selectedFields.size === 0, // Убрали проверку на selectedYears.size === 0
+      skip: !isAuth || selectedFields.size === 0,
       refetchOnMountOrArgChange: true,
     }
   );
@@ -96,7 +87,6 @@ const MapComponent = () => {
     }
   }, [showCleanPoints, refetchCleanPoints, refetchCleanPointsPrev, isAuth, selectedFields]);
 
-  // Сохраняем данные в Redux
   useEffect(() => {
     if (cleanGeojsonData) dispatch(setCleanPoints(cleanGeojsonData));
     if (cleanGeojsonDataPrev) dispatch(setCleanPointsPrev(cleanGeojsonDataPrev));
@@ -104,74 +94,77 @@ const MapComponent = () => {
     if (listUniqueYears) dispatch(setYearsData(listUniqueYears));
   }, [listGeojsonFields, listUniqueYears, cleanGeojsonData, cleanGeojsonDataPrev, dispatch]);
 
+  // Инициализация карты с поворотом
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    const initialCenter = mapData?.center?.coordinates
+      ? [mapData.center.coordinates[1], mapData.center.coordinates[0]]
+      : config.defaultCenter;
+    const initialZoom = mapData?.zoom || config.defaultZoom;
+
+    const map = L.map(mapContainerRef.current, {
+      center: initialCenter,
+      zoom: initialZoom,
+      rotate: true,
+      bearing: 0,
+      touchRotate: true,
+      rotateControl: {
+        closeOnZeroBearing: false,
+      },
+      zoomControl: false,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [mapData]);
+
   return (
     <div className="app-layout">
-      <MapContainer
-        center={config.defaultCenter}
-        zoom={config.defaultZoom}
-        style={{ height: '100%', width: '100%' }}
-        zoomControl={false}
-        maxZoom={25}
-      >
-        {mapData?.center?.coordinates && (
-          <MapSyncCenter center={[mapData.center.coordinates[1], mapData.center.coordinates[0]]} zoom={mapData.zoom} />
-        )}
-
-        <MapInstruments />
-
-        {isAuth && (
-          <>
-            <FieldSelectionSidebar
-              fields={fieldsData?.features || []}
-              selectedFields={selectedFields}
-              onSelectionChange={setSelectedFields}
-            />
-            <YearSelectionSidebar
-              years={yearsData || []}
-              selectedYears={selectedYears}
-              onSelectionChange={setSelectedYears}
-            />
-            <YearSelectionSidebar
-              years={yearsData || []}
-              selectedYears={selectedYearsPrev}
-              onSelectionChange={setSelectedYearsPrev}
-              isPrev={true}
-            />
-
-            {fieldsData && <MapFields />}
-            {showMapPoints && <MapPoints selectedFields={selectedFields} />}
-            {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />}
-            {showCleanPoints && cleanPointsPrev && selectedYearsPrev.size > 0 && (
-              <MapCleanPoints isFetching={cleanLoadingPrev} isPrev={true} />
-            )}
-            {showHotMap && cleanPoints && <HeatmapLayer />}
-            {showMyLocation && <MyLocationMarker />}
-            {showBatymetryLayer && <BatymetryLayer />}
-            {showHotMap && cleanPointsPrev && selectedYearsPrev.size > 0 && <HeatmapLayer isPrev={true} />}
-            {showGridCells && <GridCells />}
-            {location && <LocationMarker location={location} />}
-            <UserGeoDataProvider />
-          </>
-        )}
-      </MapContainer>
-
-      {isAuth && (
-        <ToggleButtonGroup
-          showMapPoints={showMapPoints}
-          setShowMapPoints={setShowMapPoints}
-          showCleanPoints={showCleanPoints}
-          setShowCleanPoints={setShowCleanPoints}
-          showGridCells={showGridCells}
-          setShowGridCells={setShowGridCells}
-          showHotMap={showHotMap}
-          setShowHotMap={setShowHotMap}
-          showMyLocation={showMyLocation}
-          setShowMyLocation={setShowMyLocation}
-          setShowBatymetryLayer={setShowBatymetryLayer}
-          showBatymetryLayer={showBatymetryLayer}
-        />
-      )}
-
+      {/* Контейнер для карты */}
+      <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
+      {/* Слои, требующие переработки — временно закомментированы */}
+      {/* {fieldsData && <MapFields />} */}
+      {/* {showMapPoints && <MapPoints selectedFields={selectedFields} />} */}
+      {/* {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />} */}
+      {/* {showCleanPoints && cleanPointsPrev && selectedYearsPrev.size > 0 && (
+        <MapCleanPoints isFetching={cleanLoadingPrev} isPrev={true} />
+      )} */}
+      {/* {showHotMap && cleanPoints && <HeatmapLayer />} */}
+      {/* {showMyLocation && <MyLocationMarker />} */}
+      {/* {showBatymetryLayer && <BatymetryLayer />} */}
+      {/* {showHotMap && cleanPointsPrev && selectedYearsPrev.size > 0 && <HeatmapLayer isPrev={true} />} */}
+      {/* {showGridCells && <GridCells />} */}
+      {/* {location && <LocationMarker location={location} />} */}
+      {/* <UserGeoDataProvider /> */}
+      {/* Инструменты поверх карты */}
+      <MapInstruments map={mapInstanceRef.current} />
+      {/*{isAuth && (*/}
+      {/*  <ToggleButtonGroup*/}
+      {/*    showMapPoints={showMapPoints}*/}
+      {/*    setShowMapPoints={setShowMapPoints}*/}
+      {/*    showCleanPoints={showCleanPoints}*/}
+      {/*    setShowCleanPoints={setShowCleanPoints}*/}
+      {/*    showGridCells={showGridCells}*/}
+      {/*    setShowGridCells={setShowGridCells}*/}
+      {/*    showHotMap={showHotMap}*/}
+      {/*    setShowHotMap={setShowHotMap}*/}
+      {/*    showMyLocation={showMyLocation}*/}
+      {/*    setShowMyLocation={setShowMyLocation}*/}
+      {/*    setShowBatymetryLayer={setShowBatymetryLayer}*/}
+      {/*    showBatymetryLayer={showBatymetryLayer}*/}
+      {/*  />*/}
+      {/*)}*/}
       <WebSocketComponent setLocation={setLocation} />
     </div>
   );
