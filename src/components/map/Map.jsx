@@ -1,8 +1,7 @@
-// src/components/Map/MapComponent.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet-rotate'; // Подключаем плагин
+import 'leaflet-rotate';
 import '../../static/css/MapMain.css';
 import config from '../../config';
 import ToggleButtonGroup from '../buttons/ToogleButtons';
@@ -19,20 +18,22 @@ import {
 } from '../../api/api';
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
-import RotatableLeafletMap from './RotatableLeafletMap';
 import MapFields from './Fields/MapFields';
+import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
   const { isAuth, authStatus } = useAuth();
-  const { fieldsData, yearsData, cleanPoints, cleanPointsPrev } = useMapData();
+  const { fieldsData } = useMapData();
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [isMapReady, setIsMapReady] = useState(false);
+
   const [selectedFields, setSelectedFields] = useState(new Set());
   const [selectedYears, setSelectedYears] = useState(new Set());
   const [selectedYearsPrev, setSelectedYearsPrev] = useState(new Set());
+
   const [showGridCells, setShowGridCells] = usePersistentState('showGridCells', false);
   const [showMapPoints, setShowMapPoints] = usePersistentState('showMapPoints', false);
   const [showMyLocation, setShowMyLocation] = usePersistentState('showMyLocation', false);
@@ -41,59 +42,30 @@ const MapComponent = () => {
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
   const [location, setLocation] = useState(null);
 
-  const { data: mapData } = useFetchDefaultMapCenterQuery(undefined, {
-    skip: !isAuth,
-  });
+  const { data: mapData } = useFetchDefaultMapCenterQuery(undefined, { skip: !isAuth });
 
   const {
     data: listGeojsonFields,
     isLoading: fieldsLoading,
     refetch: refetchFields,
-  } = useFetchFieldsQuery(undefined, {
-    skip: !isAuth,
-  });
-  const { data: listUniqueYears } = useFetchYearsQuery(undefined, {
-    skip: !isAuth,
-  });
+  } = useFetchFieldsQuery(undefined, { skip: !isAuth });
+  const { data: listUniqueYears } = useFetchYearsQuery(undefined, { skip: !isAuth });
 
-  const {
-    data: cleanGeojsonData,
-    isFetching: cleanLoading,
-    refetch: refetchCleanPoints,
-  } = useFetchCleanPointsQuery(
-    {
-      year: selectedYears.size > 0 ? Array.from(selectedYears) : [],
-      field: Array.from(selectedFields),
-    },
-    {
-      skip: !isAuth || selectedFields.size === 0,
-      refetchOnMountOrArgChange: true,
-    }
+  const { data: cleanGeojsonData, refetch: refetchCleanPoints } = useFetchCleanPointsQuery(
+    { year: Array.from(selectedYears), field: Array.from(selectedFields) },
+    { skip: !isAuth || selectedFields.size === 0, refetchOnMountOrArgChange: true }
   );
 
-  const {
-    data: cleanGeojsonDataPrev,
-    isFetching: cleanLoadingPrev,
-    refetch: refetchCleanPointsPrev,
-  } = useFetchCleanPointsQuery(
-    {
-      year: selectedYearsPrev.size > 0 ? Array.from(selectedYearsPrev) : [],
-      field: Array.from(selectedFields),
-    },
-    {
-      skip: !isAuth || selectedFields.size === 0,
-      refetchOnMountOrArgChange: true,
-    }
+  const { data: cleanGeojsonDataPrev, refetch: refetchCleanPointsPrev } = useFetchCleanPointsQuery(
+    { year: Array.from(selectedYearsPrev), field: Array.from(selectedFields) },
+    { skip: !isAuth || selectedFields.size === 0, refetchOnMountOrArgChange: true }
   );
 
   useEffect(() => {
-    if (isAuth) {
-      refetchFields().then((result) => {
-        if (result.data) {
-          dispatch(setFieldsData(result.data));
-        }
-      });
-    }
+    if (!isAuth) return;
+    refetchFields().then((res) => {
+      if (res?.data) dispatch(setFieldsData(res.data));
+    });
   }, [isAuth, refetchFields, dispatch]);
 
   useEffect(() => {
@@ -101,7 +73,7 @@ const MapComponent = () => {
       refetchCleanPoints();
       refetchCleanPointsPrev();
     }
-  }, [showCleanPoints, refetchCleanPoints, refetchCleanPointsPrev, isAuth, selectedFields]);
+  }, [showCleanPoints, isAuth, selectedFields, refetchCleanPoints, refetchCleanPointsPrev]);
 
   useEffect(() => {
     if (cleanGeojsonData) dispatch(setCleanPoints(cleanGeojsonData));
@@ -109,7 +81,7 @@ const MapComponent = () => {
     if (listUniqueYears) dispatch(setYearsData(listUniqueYears));
   }, [cleanGeojsonData, cleanGeojsonDataPrev, listUniqueYears, dispatch]);
 
-  // --- Инициализация карты ---
+  // Инициализация карты — безопасно, с проверкой DOM
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -124,9 +96,7 @@ const MapComponent = () => {
       rotate: true,
       bearing: 0,
       touchRotate: true,
-      rotateControl: {
-        closeOnZeroBearing: false,
-      },
+      rotateControl: { closeOnZeroBearing: false },
       zoomControl: false,
     });
 
@@ -135,27 +105,25 @@ const MapComponent = () => {
     }).addTo(map);
 
     mapInstanceRef.current = map;
-    setIsMapReady(true);
+
+    // Ждём полной готовности карты и рендерера
+    map.whenReady(() => requestAnimationFrame(() => setIsMapReady(true)));
 
     return () => {
       if (mapInstanceRef.current) {
-        map.remove();
+        mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
       setIsMapReady(false);
     };
-  }, [mapData]);
+  }, [mapData?.center?.coordinates?.join?.(','), mapData?.zoom]);
 
-  if (authStatus === 'loading') {
-    return <div>Загрузка...</div>;
-  }
+  if (authStatus === 'loading') return <div>Загрузка...</div>;
 
   return (
     <div className="app-layout">
-      {/* Контейнер для карты */}
       <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
 
-      {/* Инструменты */}
       {isMapReady && <MapInstruments map={mapInstanceRef.current} isAuth={isAuth} />}
 
       {isAuth && isMapReady && fieldsData && !fieldsLoading && (
@@ -166,37 +134,7 @@ const MapComponent = () => {
         />
       )}
 
-      {/*<RotatableLeafletMap*/}
-      {/*  selectedFields={selectedFields}*/}
-      {/*  selectedYears={selectedYears}*/}
-      {/*  selectedYearsPrev={selectedYearsPrev}*/}
-      {/*  showGridCells={showGridCells}*/}
-      {/*  showMapPoints={showMapPoints}*/}
-      {/*  showMyLocation={showMyLocation}*/}
-      {/*  showCleanPoints={showCleanPoints}*/}
-      {/*  showBatymetryLayer={showBatymetryLayer}*/}
-      {/*  showHotMap={showHotMap}*/}
-      {/*  location={location}*/}
-      {/*  fieldsData={fieldsData}*/}
-      {/*  cleanPoints={cleanPoints}*/}
-      {/*  cleanPointsPrev={cleanPointsPrev}*/}
-      {/*  mapCenter={mapCenter}*/}
-      {/*  zoom={z}*/}
-      {/*/>*/}
-
-      {/* Слои, требующие переработки — временно закомментированы */}
-      {/* {showMapPoints && <MapPoints selectedFields={selectedFields} />} */}
-      {/* {showCleanPoints && cleanPoints && <MapCleanPoints isFetching={cleanLoading} />} */}
-      {/* {showCleanPoints && cleanPointsPrev && selectedYearsPrev.size > 0 && (
-        <MapCleanPoints isFetching={cleanLoadingPrev} isPrev={true} />
-      )} */}
-      {/* {showHotMap && cleanPoints && <HeatmapLayer />} */}
-      {/* {showMyLocation && <MyLocationMarker />} */}
-      {/* {showBatymetryLayer && <BatymetryLayer />} */}
-      {/* {showHotMap && cleanPointsPrev && selectedYearsPrev.size > 0 && <HeatmapLayer isPrev={true} />} */}
-      {/* {showGridCells && <GridCells />} */}
-      {/* {location && <LocationMarker location={location} />} */}
-      {/* <UserGeoDataProvider /> */}
+      {isMapReady && mapInstanceRef.current && <UserGeoDataProvider map={mapInstanceRef.current} />}
 
       {isAuth && (
         <ToggleButtonGroup

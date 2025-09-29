@@ -1,102 +1,103 @@
-import React from 'react';
-import { Marker, Polyline, Polygon, Popup } from 'react-leaflet';
-import { useUserGeoData } from '../../../hook/userGeoData';
+// UserGeoDataLayer.jsx
+import { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import { createRoot } from 'react-dom/client';
 import PopupContent from './PopupComponent';
 
-const UserGeoDataLayer = () => {
-  const { userGeoData } = useUserGeoData();
+const UserGeoDataLayer = ({ map, userGeoData }) => {
+  const layersRef = useRef(new Map());
+  const popupRoots = useRef(new Map()); // храним React root'ы
 
-  return (
-    <>
-      {Array.isArray(userGeoData) &&
-        userGeoData.map((feature) => {
-          const { geometry, properties } = feature;
-          if (!geometry) {
-            return null;
-          }
-          const color = properties?.color || '#3388ff';
-          if (geometry.type === 'Point') {
-            return (
-              <Marker key={feature.id} position={[geometry.coordinates[1], geometry.coordinates[0]]}>
-                <Popup>
-                  <PopupContent name={properties.name} description={properties.description} />
-                </Popup>
-              </Marker>
-            );
-          }
-          if (geometry.type === 'LineString') {
-            return (
-              <Polyline
-                key={feature.id}
-                positions={geometry.coordinates.map((coord) => [coord[1], coord[0]])}
-                pathOptions={{ color }}
-              >
-                <Popup>
-                  <PopupContent name={properties.name} description={properties.description} />
-                </Popup>
-              </Polyline>
-            );
-          }
-          if (geometry.type === 'Polygon') {
-            return (
-              <Polygon
-                key={feature.id}
-                positions={geometry.coordinates.map((ring) => ring.map((coord) => [coord[1], coord[0]]))}
-                pathOptions={{ color }}
-              >
-                <Popup>
-                  <PopupContent name={properties.name} description={properties.description} />
-                </Popup>
-              </Polygon>
-            );
-          }
-          if (geometry.type === 'GeometryCollection') {
-            return geometry.geometries.map((geo, index) => {
-              if (geo.type === 'Point') {
-                return (
-                  <Marker key={`${feature.id}-geo-${index}`} position={[geo.coordinates[1], geo.coordinates[0]]}>
-                    <Popup>
-                      <PopupContent name={properties.name} description={properties.description} />
-                    </Popup>
-                  </Marker>
-                );
-              }
+  useEffect(() => {
+    if (!map || !Array.isArray(userGeoData)) return;
 
-              if (geo.type === 'LineString') {
-                return (
-                  <Polyline
-                    key={`${feature.id}-geo-${index}`}
-                    positions={geo.coordinates.map((coord) => [coord[1], coord[0]])}
-                    pathOptions={{ color }}
-                  >
-                    <Popup>
-                      <PopupContent name={properties.name} description={properties.description} />
-                    </Popup>
-                  </Polyline>
-                );
-              }
+    // Очистка старых слоёв
+    layersRef.current.forEach((layer) => {
+      if (map.hasLayer(layer)) map.removeLayer(layer);
+    });
+    layersRef.current.clear();
+    popupRoots.current.clear();
 
-              if (geo.type === 'Polygon') {
-                return (
-                  <Polygon
-                    key={`${feature.id}-geo-${index}`}
-                    positions={geo.coordinates.map((ring) => ring.map((coord) => [coord[1], coord[0]]))}
-                    pathOptions={{ color }}
-                  >
-                    <Popup>
-                      <PopupContent name={properties.name} description={properties.description} />
-                    </Popup>
-                  </Polygon>
-                );
-              }
+    const makePopupNode = (id, properties) => {
+      let rootEntry = popupRoots.current.get(id);
 
-              return null;
-            });
+      if (!rootEntry) {
+        const node = document.createElement('div');
+        const root = createRoot(node);
+        popupRoots.current.set(id, { node, root });
+        rootEntry = { node, root };
+      }
+
+      const render = () => {
+        rootEntry.root.render(
+          <PopupContent name={properties?.name || 'Без названия'} description={properties?.description || ''} />
+        );
+      };
+
+      return { node: rootEntry.node, render };
+    };
+
+    userGeoData.forEach((feature) => {
+      const { geometry, properties } = feature;
+      if (!geometry) return;
+
+      const color = properties?.color || '#3388ff';
+      let layer = null;
+
+      if (geometry.type === 'Point') {
+        const { node, render } = makePopupNode(feature.id, properties);
+        layer = L.marker([geometry.coordinates[1], geometry.coordinates[0]]).bindPopup(node);
+        layer.on('popupopen', render);
+      } else if (geometry.type === 'LineString') {
+        const { node, render } = makePopupNode(feature.id, properties);
+        const latlngs = geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+        layer = L.polyline(latlngs, { color, weight: 4 }).bindPopup(node);
+        layer.on('popupopen', render);
+      } else if (geometry.type === 'Polygon') {
+        const { node, render } = makePopupNode(feature.id, properties);
+        const rings = geometry.coordinates.map((ring) => ring.map(([lon, lat]) => [lat, lon]));
+        layer = L.polygon(rings, { color, weight: 4, fillOpacity: 0.1 }).bindPopup(node);
+        layer.on('popupopen', render);
+      } else if (geometry.type === 'GeometryCollection') {
+        geometry.geometries.forEach((geo, index) => {
+          const { node, render } = makePopupNode(`${feature.id}-geo-${index}`, properties);
+          let subLayer = null;
+
+          if (geo.type === 'Point') {
+            subLayer = L.marker([geo.coordinates[1], geo.coordinates[0]]).bindPopup(node);
+          } else if (geo.type === 'LineString') {
+            const coords = geo.coordinates.map(([lon, lat]) => [lat, lon]);
+            subLayer = L.polyline(coords, { color, weight: 4 }).bindPopup(node);
+          } else if (geo.type === 'Polygon') {
+            const rings = geo.coordinates.map((ring) => ring.map(([lon, lat]) => [lat, lon]));
+            subLayer = L.polygon(rings, { color, weight: 4, fillOpacity: 0.1 }).bindPopup(node);
           }
-          return null;
-        })}
-    </>
-  );
+
+          if (subLayer) {
+            subLayer.on('popupopen', render);
+            subLayer.addTo(map);
+            layersRef.current.set(`${feature.id}-geo-${index}`, subLayer);
+          }
+        });
+        return;
+      }
+
+      if (layer) {
+        layer.addTo(map);
+        layersRef.current.set(feature.id, layer);
+      }
+    });
+
+    return () => {
+      layersRef.current.forEach((layer) => {
+        if (map.hasLayer(layer)) map.removeLayer(layer);
+      });
+      layersRef.current.clear();
+      popupRoots.current.clear();
+    };
+  }, [map, userGeoData]);
+
+  return null;
 };
 
 export default UserGeoDataLayer;

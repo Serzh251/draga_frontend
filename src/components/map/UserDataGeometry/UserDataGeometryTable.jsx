@@ -1,3 +1,4 @@
+// src/components/Map/UserDataGeometry/UserDataGeometryTable.jsx
 import React from 'react';
 import { Modal, Table, Button, Tooltip } from 'antd';
 import { CheckSquareOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
@@ -12,6 +13,7 @@ const UserDataGeometryTable = ({
   data,
   selectedRowKeys,
   setSelectedRowKeys,
+  isAuth,
 }) => {
   const dataSource = data.map((feature) => {
     const geometry = feature.geometry || {};
@@ -135,33 +137,36 @@ const UserDataGeometryTable = ({
 
   return (
     <>
-      <Tooltip title="Показать данные" placement="right">
-        <SearchOutlined
-          style={{
-            position: 'absolute',
-            top: 230,
-            left: 10,
-            background: 'rgba(255, 255, 255, 0.9)',
-            padding: '3px',
-            borderRadius: '5px',
-            fontSize: '24px',
-            cursor: 'pointer',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-            zIndex: 1000,
-          }}
-          onClick={onOpenModal}
-        />
-      </Tooltip>
+      {isAuth && (
+        <Tooltip title="Показать данные" placement="right">
+          <SearchOutlined
+            style={{
+              position: 'absolute',
+              top: 350,
+              left: 10,
+              background: 'rgba(255, 255, 255, 0.9)',
+              padding: '3px',
+              borderRadius: '5px',
+              fontSize: '24px',
+              cursor: 'pointer',
+              boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+              zIndex: 1000,
+            }}
+            onClick={onOpenModal}
+          />
+        </Tooltip>
+      )}
+
       <Modal
         title="Таблица данных"
         open={isModalOpen}
         onCancel={onCloseModal}
         footer={[
+          <Button key="clear" onClick={onClear} disabled={selectedRowKeys.length === 0}>
+            Очистить
+          </Button>,
           <Button key="save" type="primary" onClick={onSave}>
             Показать
-          </Button>,
-          <Button key="save" type="primary" onClick={onClear} disabled={selectedRowKeys.length === 0}>
-            Очистить
           </Button>,
         ]}
         width="80%"

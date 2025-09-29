@@ -1,70 +1,102 @@
+// src/components/Map/UserDataGeometry/UserGeoDataProvider.jsx
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../../hook/use-auth';
 import { useFetchUserGeoDataQuery, useDeleteUserGeoDataMutation } from '../../../api/api';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setUserGeoData, removeUserGeoData } from '../../../store/slices/userGeoDataSlice';
 import UserDataGeometryTable from './UserDataGeometryTable';
 import UserGeoDataLayer from './UserGeoDataLayer';
 
-const UserGeoDataProvider = () => {
+const UserGeoDataProvider = ({ map }) => {
+  const { isAuth } = useAuth();
+  const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const dispatch = useDispatch();
 
-  const storedIds = (() => {
+  const userGeoData = useSelector((state) => state.userGeoData.userGeoData);
+
+  // Загружаем список геоданных пользователя
+  const { data: listUserGeoData, refetch: refetchUserGeoData } = useFetchUserGeoDataQuery(undefined, {
+    skip: !isAuth,
+  });
+
+  const [deleteUserGeoData] = useDeleteUserGeoDataMutation();
+
+  // Чтение/запись ID в localStorage
+  const getStoredIds = () => {
     try {
       const data = localStorage.getItem('userGeoDataIds');
       return data ? JSON.parse(data) : [];
-    } catch (error) {
-      console.error('Ошибка парсинга localStorage:', error);
+    } catch {
       return [];
     }
-  })();
+  };
 
-  const { data: listUserGeoData, refetch: refetchUserGeoData } = useFetchUserGeoDataQuery();
-  const [deleteUserGeoData] = useDeleteUserGeoDataMutation();
-
-  useEffect(() => {
-    if (listUserGeoData && Array.isArray(storedIds) && storedIds.length > 0 && !selectedRowKeys.length) {
-      const filteredData = listUserGeoData.features.filter((feature) => storedIds.includes(feature.id));
-      dispatch(setUserGeoData(filteredData));
-      setSelectedRowKeys(storedIds);
+  const saveSelectedIds = (ids) => {
+    if (!ids.length) {
+      localStorage.removeItem('userGeoDataIds');
+    } else {
+      localStorage.setItem('userGeoDataIds', JSON.stringify(ids));
     }
-  }, [listUserGeoData, storedIds, selectedRowKeys, dispatch]);
+  };
+
+  // Восстановление выбора из localStorage
+  useEffect(() => {
+    if (!isAuth) {
+      dispatch(removeUserGeoData());
+      setSelectedRowKeys([]);
+      return;
+    }
+
+    if (listUserGeoData && !selectedRowKeys.length) {
+      const storedIds = getStoredIds();
+      const filteredData = listUserGeoData.features.filter((f) => storedIds.includes(f.id));
+      if (filteredData.length > 0) {
+        dispatch(setUserGeoData(filteredData));
+        setSelectedRowKeys(storedIds);
+      }
+    }
+  }, [listUserGeoData, isAuth, selectedRowKeys.length, dispatch]);
+
+  // Очистка при выходе
+  useEffect(() => {
+    return () => {
+      dispatch(removeUserGeoData());
+    };
+  }, [dispatch]);
 
   const handleDelete = async (id) => {
     try {
-      await deleteUserGeoData(id);
+      await deleteUserGeoData(id).unwrap();
       await refetchUserGeoData();
+      setSelectedRowKeys((prev) => prev.filter((key) => key !== id));
     } catch (error) {
       console.error('Ошибка при удалении записи:', error);
     }
   };
 
   const handleOpenModal = async () => {
-    try {
+    if (isAuth) {
       await refetchUserGeoData();
       setIsModalOpen(true);
-    } catch (error) {
-      console.error('Ошибка загрузки данных геоJSON:', error);
     }
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    dispatch(removeUserGeoData());
-  };
+  const handleCloseModal = () => setIsModalOpen(false);
 
   const handleSave = () => {
-    const selectedData = (listUserGeoData?.features || []).filter((feature) => selectedRowKeys.includes(feature.id));
+    const selectedData = (listUserGeoData?.features || []).filter((f) => selectedRowKeys.includes(f.id));
     dispatch(setUserGeoData(selectedData));
-    localStorage.setItem('userGeoDataIds', JSON.stringify(selectedRowKeys));
+    saveSelectedIds(selectedRowKeys);
     setIsModalOpen(false);
   };
+
   const handleClear = () => {
     setSelectedRowKeys([]);
     dispatch(removeUserGeoData());
-    localStorage.removeItem('userGeoDataIds');
+    saveSelectedIds([]);
   };
+
   return (
     <>
       <UserDataGeometryTable
@@ -77,8 +109,10 @@ const UserGeoDataProvider = () => {
         data={listUserGeoData?.features || []}
         selectedRowKeys={selectedRowKeys}
         setSelectedRowKeys={setSelectedRowKeys}
+        isAuth={isAuth}
       />
-      <UserGeoDataLayer />
+
+      {isAuth && map && <UserGeoDataLayer userGeoData={userGeoData || []} map={map} />}
     </>
   );
 };
