@@ -9,8 +9,8 @@ import WebSocketComponent from '../location/WebsocketLocation';
 import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
 import { useDispatch } from 'react-redux';
-import { setFieldsData, setYearsData } from '../../store/slices/mapDataSlice';
-import { useFetchFieldsQuery, useFetchYearsQuery, useFetchDefaultMapCenterQuery } from '../../api/api';
+import { setYearsData } from '../../store/slices/mapDataSlice';
+import { useFetchYearsQuery, useFetchDefaultMapCenterQuery } from '../../api/api';
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
 import MapFields from './Fields/MapFields';
@@ -23,7 +23,7 @@ import MapCleanPoints from './MapCleanPoints';
 const MapComponent = () => {
   const dispatch = useDispatch();
   const { isAuth, authStatus } = useAuth();
-  const { fieldsData, yearsData } = useMapData();
+  const { yearsData } = useMapData();
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -42,21 +42,7 @@ const MapComponent = () => {
   const [location, setLocation] = useState(null);
 
   const { data: mapData } = useFetchDefaultMapCenterQuery(undefined, { skip: !isAuth });
-
-  const {
-    data: listGeojsonFields,
-    isLoading: fieldsLoading,
-    refetch: refetchFields,
-  } = useFetchFieldsQuery(undefined, { skip: !isAuth });
-
   const { data: listUniqueYears } = useFetchYearsQuery(undefined, { skip: !isAuth });
-
-  useEffect(() => {
-    if (!isAuth) return;
-    refetchFields().then((res) => {
-      if (res?.data) dispatch(setFieldsData(res.data));
-    });
-  }, [isAuth, refetchFields, dispatch]);
 
   useEffect(() => {
     if (listUniqueYears) dispatch(setYearsData(listUniqueYears));
@@ -101,25 +87,16 @@ const MapComponent = () => {
     <div className="app-layout">
       <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
 
-      {isMapReady && <MapInstruments map={mapInstanceRef.current} isAuth={isAuth} />}
-
-      {isAuth && isMapReady && fieldsData && !fieldsLoading && (
-        <MapFields
-          key={`map-fields-${fieldsData.features?.length || 0}`}
-          map={mapInstanceRef.current}
-          features={fieldsData.features}
-        />
+      {isMapReady && (
+        <>
+          <MapInstruments map={mapInstanceRef.current} isAuth={isAuth} />
+          {mapInstanceRef.current && <UserGeoDataProvider map={mapInstanceRef.current} />}
+        </>
       )}
-      {showMapPoints && isMapReady && <MapPoints map={mapInstanceRef.current} selectedFields={selectedFields} />}
-      {isMapReady && mapInstanceRef.current && <UserGeoDataProvider map={mapInstanceRef.current} />}
 
       {isAuth && (
         <>
-          <FieldSelectionSidebar
-            fields={fieldsData?.features || []}
-            selectedFields={selectedFields}
-            onSelectionChange={setSelectedFields}
-          />
+          <FieldSelectionSidebar selectedFields={selectedFields} onSelectionChange={setSelectedFields} />
           <YearSelectionSidebar
             years={yearsData || []}
             selectedYears={selectedYears}
@@ -131,22 +108,28 @@ const MapComponent = () => {
             onSelectionChange={setSelectedYearsPrev}
             isPrev={true}
           />
-
-          {showCleanPoints && isMapReady && (
+          {isMapReady && (
             <>
-              <MapCleanPoints
-                map={mapInstanceRef.current}
-                selectedFields={selectedFields}
-                selectedYears={selectedYears}
-                isPrev={false}
-              />
+              <MapFields map={mapInstanceRef.current} />
 
-              <MapCleanPoints
-                map={mapInstanceRef.current}
-                selectedFields={selectedFields}
-                selectedYears={selectedYearsPrev}
-                isPrev={true}
-              />
+              {showMapPoints && <MapPoints map={mapInstanceRef.current} selectedFields={selectedFields} />}
+              {showCleanPoints && (
+                <>
+                  <MapCleanPoints
+                    map={mapInstanceRef.current}
+                    selectedFields={selectedFields}
+                    selectedYears={selectedYears}
+                    isPrev={false}
+                  />
+
+                  <MapCleanPoints
+                    map={mapInstanceRef.current}
+                    selectedFields={selectedFields}
+                    selectedYears={selectedYearsPrev}
+                    isPrev={true}
+                  />
+                </>
+              )}
             </>
           )}
 

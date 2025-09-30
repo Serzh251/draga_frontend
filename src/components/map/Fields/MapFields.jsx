@@ -1,9 +1,26 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
+import { useFetchFieldsQuery } from '../../../api/api';
+import { useAuth } from '../../../hook/use-auth';
+import { useDispatch } from 'react-redux';
+import { setFieldsData } from '../../../store/slices/mapDataSlice';
 
-const MapFields = ({ map, features }) => {
+const MapFields = ({ map }) => {
   const layersRef = useRef(new Map());
+  const { isAuth } = useAuth();
+  const dispatch = useDispatch();
+  const [features, setFeatures] = useState([]);
 
+  const { data } = useFetchFieldsQuery(undefined, { skip: !isAuth });
+
+  useEffect(() => {
+    if (data?.features) {
+      setFeatures(data.features);
+      dispatch(setFieldsData(data));
+    }
+  }, [data, dispatch]);
+
+  // Добавление слоев на карту
   useEffect(() => {
     if (!map || !features) return;
 
@@ -55,7 +72,7 @@ const MapFields = ({ map, features }) => {
 
           layersRef.current.set(feature.id, { polygon, border, label });
         } catch (err) {
-          console.warn('Ошибка добавления слоя Leaflet, возможно рендерер ещё не готов', err);
+          console.warn('Ошибка добавления слоя Leaflet', err);
         }
       });
     };
