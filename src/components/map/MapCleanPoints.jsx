@@ -22,7 +22,12 @@ const MapCleanPoints = ({
     year: isPrev ? yearsArray : yearsArray.length > 0 ? yearsArray : undefined,
   };
 
-  const { data: pointsData, isFetching } = useFetchCleanPointsQuery(queryArgs, { skip });
+  const { data: pointsData, isFetching } = useFetchCleanPointsQuery(queryArgs, {
+    skip,
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
 
   useEffect(() => {
     if (!map) return;
