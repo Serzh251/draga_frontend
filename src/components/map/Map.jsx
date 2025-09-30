@@ -9,13 +9,8 @@ import WebSocketComponent from '../location/WebsocketLocation';
 import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
 import { useDispatch } from 'react-redux';
-import { setFieldsData, setYearsData, setCleanPoints, setCleanPointsPrev } from '../../store/slices/mapDataSlice';
-import {
-  useFetchCleanPointsQuery,
-  useFetchFieldsQuery,
-  useFetchYearsQuery,
-  useFetchDefaultMapCenterQuery,
-} from '../../api/api';
+import { setFieldsData, setYearsData } from '../../store/slices/mapDataSlice';
+import { useFetchFieldsQuery, useFetchYearsQuery, useFetchDefaultMapCenterQuery } from '../../api/api';
 import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
 import MapFields from './Fields/MapFields';
@@ -23,6 +18,7 @@ import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
 import FieldSelectionSidebar from './Fields/FieldSelectionSidebar';
 import YearSelectionSidebar from './YearSelectionSidebar';
 import MapPoints from './MapPoints';
+import MapCleanPoints from './MapCleanPoints';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -52,17 +48,8 @@ const MapComponent = () => {
     isLoading: fieldsLoading,
     refetch: refetchFields,
   } = useFetchFieldsQuery(undefined, { skip: !isAuth });
+
   const { data: listUniqueYears } = useFetchYearsQuery(undefined, { skip: !isAuth });
-
-  const { data: cleanGeojsonData, refetch: refetchCleanPoints } = useFetchCleanPointsQuery(
-    { year: Array.from(selectedYears), field: Array.from(selectedFields) },
-    { skip: !isAuth || selectedFields.size === 0, refetchOnMountOrArgChange: true }
-  );
-
-  const { data: cleanGeojsonDataPrev, refetch: refetchCleanPointsPrev } = useFetchCleanPointsQuery(
-    { year: Array.from(selectedYearsPrev), field: Array.from(selectedFields) },
-    { skip: !isAuth || selectedFields.size === 0, refetchOnMountOrArgChange: true }
-  );
 
   useEffect(() => {
     if (!isAuth) return;
@@ -72,17 +59,8 @@ const MapComponent = () => {
   }, [isAuth, refetchFields, dispatch]);
 
   useEffect(() => {
-    if (isAuth && selectedFields.size > 0) {
-      refetchCleanPoints();
-      refetchCleanPointsPrev();
-    }
-  }, [showCleanPoints, isAuth, selectedFields, refetchCleanPoints, refetchCleanPointsPrev]);
-
-  useEffect(() => {
-    if (cleanGeojsonData) dispatch(setCleanPoints(cleanGeojsonData));
-    if (cleanGeojsonDataPrev) dispatch(setCleanPointsPrev(cleanGeojsonDataPrev));
     if (listUniqueYears) dispatch(setYearsData(listUniqueYears));
-  }, [cleanGeojsonData, cleanGeojsonDataPrev, listUniqueYears, dispatch]);
+  }, [listUniqueYears, dispatch]);
 
   // Инициализация карты — безопасно, с проверкой DOM
   useEffect(() => {
@@ -102,10 +80,6 @@ const MapComponent = () => {
       rotateControl: { closeOnZeroBearing: false },
       zoomControl: false,
     });
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
 
     mapInstanceRef.current = map;
 
@@ -157,6 +131,25 @@ const MapComponent = () => {
             onSelectionChange={setSelectedYearsPrev}
             isPrev={true}
           />
+
+          {showCleanPoints && isMapReady && (
+            <>
+              <MapCleanPoints
+                map={mapInstanceRef.current}
+                selectedFields={selectedFields}
+                selectedYears={selectedYears}
+                isPrev={false}
+              />
+
+              <MapCleanPoints
+                map={mapInstanceRef.current}
+                selectedFields={selectedFields}
+                selectedYears={selectedYearsPrev}
+                isPrev={true}
+              />
+            </>
+          )}
+
           <ToggleButtonGroup
             showMapPoints={showMapPoints}
             setShowMapPoints={setShowMapPoints}

@@ -1,15 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import L from 'leaflet';
 import { LoadingOutlined } from '@ant-design/icons';
-import { useDispatch } from 'react-redux';
 import { useFetchPointsQuery } from '../../api/api';
-import { setPoints } from '../../store/slices/mapDataSlice';
-import { useMapData } from '../../hook/useDataMap';
 
 const MapPoints = ({ map, selectedFields }) => {
-  const dispatch = useDispatch();
-  const { points } = useMapData();
-
   const [queryParams, setQueryParams] = useState(null);
   const layerRef = useRef(null);
 
@@ -21,15 +15,9 @@ const MapPoints = ({ map, selectedFields }) => {
     }
   }, [selectedFields]);
 
-  const { data, isFetching } = useFetchPointsQuery(queryParams, {
+  const { data: points, isFetching } = useFetchPointsQuery(queryParams, {
     skip: !queryParams,
   });
-
-  useEffect(() => {
-    if (data) {
-      dispatch(setPoints(data));
-    }
-  }, [data, dispatch]);
 
   useEffect(() => {
     if (!map) return;

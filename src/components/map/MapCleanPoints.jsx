@@ -1,33 +1,56 @@
-import React, { useEffect } from 'react';
-import { useMap } from 'react-leaflet';
+import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { LoadingOutlined } from '@ant-design/icons';
-import { useMapData } from '../../hook/useDataMap';
+import { useFetchCleanPointsQuery } from '../../api/api';
 
-const MapCleanPoints = ({ isFetching, isPrev }) => {
-  const map = useMap();
-  const { cleanPoints, cleanPointsPrev } = useMapData();
+const MapCleanPoints = ({
+  map,
+  selectedFields = new Set(),
+  selectedYears = new Set(),
+  isPrev = false,
+  show = true, // новый проп для управления видимостью
+}) => {
+  const fieldsArray = Array.from(selectedFields);
+  const yearsArray = Array.from(selectedYears);
+
+  const layerRef = useRef(null);
+
+  const skip = fieldsArray.length === 0 || (isPrev && yearsArray.length === 0);
+
+  const queryArgs = {
+    field: fieldsArray,
+    year: isPrev ? yearsArray : yearsArray.length > 0 ? yearsArray : undefined,
+  };
+
+  const { data: pointsData, isFetching } = useFetchCleanPointsQuery(queryArgs, { skip });
+
   useEffect(() => {
-    const pointsData = isPrev ? cleanPointsPrev : cleanPoints; // Выбор данных в зависимости от isPrev
-    if (!pointsData || !map) return;
+    if (!map) return;
+
+    // Удаляем предыдущий слой перед добавлением нового
+    if (layerRef.current) {
+      map.removeLayer(layerRef.current);
+      layerRef.current = null;
+    }
+
+    // Если show выключен или prev без годов — не рисуем
+    if (!show || (isPrev && yearsArray.length === 0)) return;
+
+    if (!pointsData) return;
 
     function getFillColor(depth) {
-      if (depth <= 0 || depth > 15) {
-        return '#aba9a9';
-      }
-
+      if (depth <= 0 || depth > 15) return '#aba9a9';
       const maxDepth = 15;
       const normalized = Math.min(1, depth / maxDepth);
       const green = Math.floor(255 * (1 - normalized));
       const blue = Math.floor(100 * (1 - normalized));
-
       return `rgb(0, ${green}, ${blue})`;
     }
 
     const geoJsonLayer = L.geoJSON(pointsData, {
       pointToLayer: (feature, latlng) => {
         const depth = feature.properties?.depth ?? 0;
-        const circleMarker = L.circleMarker(latlng, {
+        return L.circleMarker(latlng, {
           radius: 8,
           stroke: false,
           fillColor: getFillColor(depth),
@@ -35,19 +58,23 @@ const MapCleanPoints = ({ isFetching, isPrev }) => {
           weight: 1,
           opacity: 0.1,
           fillOpacity: isPrev ? 0.2 : 1,
-        });
-
-        circleMarker.bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
-        return circleMarker;
+        }).bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
       },
     });
 
     geoJsonLayer.addTo(map);
+    layerRef.current = geoJsonLayer;
 
-    return () => map.removeLayer(geoJsonLayer);
-  }, [cleanPoints, cleanPointsPrev, map, isPrev]); // Добавлено isPrev в зависимости
+    // Очистка слоя при размонтировании
+    return () => {
+      if (layerRef.current) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+    };
+  }, [map, pointsData, yearsArray, isPrev, show]);
 
-  if (isFetching) {
+  if (isFetching && show) {
     return (
       <div
         style={{
@@ -68,7 +95,7 @@ const MapCleanPoints = ({ isFetching, isPrev }) => {
         }}
       >
         <LoadingOutlined style={{ fontSize: 18, marginRight: 8 }} />
-        Загрузка очищенных данных...
+        Загрузка точек...
       </div>
     );
   }
