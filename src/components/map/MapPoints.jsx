@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { useMap } from 'react-leaflet';
+import React, { useEffect, useState, useRef } from 'react';
 import L from 'leaflet';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
@@ -7,14 +6,19 @@ import { useFetchPointsQuery } from '../../api/api';
 import { setPoints } from '../../store/slices/mapDataSlice';
 import { useMapData } from '../../hook/useDataMap';
 
-const MapPoints = ({ selectedFields }) => {
-  const map = useMap();
+const MapPoints = ({ map, selectedFields }) => {
   const dispatch = useDispatch();
-  const [queryParams, setQueryParams] = useState(null);
   const { points } = useMapData();
 
+  const [queryParams, setQueryParams] = useState(null);
+  const layerRef = useRef(null);
+
   useEffect(() => {
-    setQueryParams({ field: Array.from(selectedFields) });
+    if (selectedFields.size > 0) {
+      setQueryParams({ field: Array.from(selectedFields) });
+    } else {
+      setQueryParams(null);
+    }
   }, [selectedFields]);
 
   const { data, isFetching } = useFetchPointsQuery(queryParams, {
@@ -25,10 +29,18 @@ const MapPoints = ({ selectedFields }) => {
     if (data) {
       dispatch(setPoints(data));
     }
-  }, [data, isFetching, dispatch]);
+  }, [data, dispatch]);
 
   useEffect(() => {
-    if (!points || !map) return;
+    if (!map) return;
+
+    // Удаляем старый слой перед добавлением нового
+    if (layerRef.current) {
+      map.removeLayer(layerRef.current);
+      layerRef.current = null;
+    }
+
+    if (!points) return;
 
     function getFillColor(depth) {
       if (depth > 15) return '#aba9a9';
@@ -42,7 +54,7 @@ const MapPoints = ({ selectedFields }) => {
 
     const geoJsonLayer = L.geoJSON(points, {
       pointToLayer: (feature, latlng) => {
-        const depth = feature.properties?.depth ?? 0;
+        const depth = Number(feature.properties?.depth ?? 0);
         const circleMarker = L.circleMarker(latlng, {
           radius: 8,
           stroke: false,
@@ -53,14 +65,20 @@ const MapPoints = ({ selectedFields }) => {
           fillOpacity: 0.8,
         });
 
-        circleMarker.bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
+        circleMarker.bindPopup(`<strong>Глубина:</strong> ${isNaN(depth) ? '-' : depth.toFixed(2)} м`);
         return circleMarker;
       },
     });
 
     geoJsonLayer.addTo(map);
+    layerRef.current = geoJsonLayer;
 
-    return () => map.removeLayer(geoJsonLayer);
+    return () => {
+      if (layerRef.current) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+    };
   }, [points, map]);
 
   return isFetching ? (

@@ -22,6 +22,7 @@ import MapFields from './Fields/MapFields';
 import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
 import FieldSelectionSidebar from './Fields/FieldSelectionSidebar';
 import YearSelectionSidebar from './YearSelectionSidebar';
+import MapPoints from './MapPoints';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -135,7 +136,7 @@ const MapComponent = () => {
           features={fieldsData.features}
         />
       )}
-
+      {showMapPoints && isMapReady && <MapPoints map={mapInstanceRef.current} selectedFields={selectedFields} />}
       {isMapReady && mapInstanceRef.current && <UserGeoDataProvider map={mapInstanceRef.current} />}
 
       {isAuth && (
