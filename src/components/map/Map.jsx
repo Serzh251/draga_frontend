@@ -20,6 +20,7 @@ import { useAuth } from '../../hook/use-auth';
 import { useMapData } from '../../hook/useDataMap';
 import MapFields from './Fields/MapFields';
 import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
+import FieldSelectionSidebar from './Fields/FieldSelectionSidebar';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -137,20 +138,27 @@ const MapComponent = () => {
       {isMapReady && mapInstanceRef.current && <UserGeoDataProvider map={mapInstanceRef.current} />}
 
       {isAuth && (
-        <ToggleButtonGroup
-          showMapPoints={showMapPoints}
-          setShowMapPoints={setShowMapPoints}
-          showCleanPoints={showCleanPoints}
-          setShowCleanPoints={setShowCleanPoints}
-          showGridCells={showGridCells}
-          setShowGridCells={setShowGridCells}
-          showHotMap={showHotMap}
-          setShowHotMap={setShowHotMap}
-          showMyLocation={showMyLocation}
-          setShowMyLocation={setShowMyLocation}
-          setShowBatymetryLayer={setShowBatymetryLayer}
-          showBatymetryLayer={showBatymetryLayer}
-        />
+        <>
+          <FieldSelectionSidebar
+            fields={fieldsData?.features || []}
+            selectedFields={selectedFields}
+            onSelectionChange={setSelectedFields}
+          />
+          <ToggleButtonGroup
+            showMapPoints={showMapPoints}
+            setShowMapPoints={setShowMapPoints}
+            showCleanPoints={showCleanPoints}
+            setShowCleanPoints={setShowCleanPoints}
+            showGridCells={showGridCells}
+            setShowGridCells={setShowGridCells}
+            showHotMap={showHotMap}
+            setShowHotMap={setShowHotMap}
+            showMyLocation={showMyLocation}
+            setShowMyLocation={setShowMyLocation}
+            setShowBatymetryLayer={setShowBatymetryLayer}
+            showBatymetryLayer={showBatymetryLayer}
+          />
+        </>
       )}
       <WebSocketComponent setLocation={setLocation} />
     </div>
