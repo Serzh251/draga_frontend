@@ -21,11 +21,12 @@ import { useMapData } from '../../hook/useDataMap';
 import MapFields from './Fields/MapFields';
 import UserGeoDataProvider from './UserDataGeometry/UserGeoDataProvider';
 import FieldSelectionSidebar from './Fields/FieldSelectionSidebar';
+import YearSelectionSidebar from './YearSelectionSidebar';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
   const { isAuth, authStatus } = useAuth();
-  const { fieldsData } = useMapData();
+  const { fieldsData, yearsData } = useMapData();
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -143,6 +144,17 @@ const MapComponent = () => {
             fields={fieldsData?.features || []}
             selectedFields={selectedFields}
             onSelectionChange={setSelectedFields}
+          />
+          <YearSelectionSidebar
+            years={yearsData || []}
+            selectedYears={selectedYears}
+            onSelectionChange={setSelectedYears}
+          />
+          <YearSelectionSidebar
+            years={yearsData || []}
+            selectedYears={selectedYearsPrev}
+            onSelectionChange={setSelectedYearsPrev}
+            isPrev={true}
           />
           <ToggleButtonGroup
             showMapPoints={showMapPoints}
