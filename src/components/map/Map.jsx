@@ -49,7 +49,6 @@ const MapComponent = () => {
     if (listUniqueYears) dispatch(setYearsData(listUniqueYears));
   }, [listUniqueYears, dispatch]);
 
-  // Инициализация карты — безопасно, с проверкой DOM
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -57,21 +56,22 @@ const MapComponent = () => {
       ? [mapData.center.coordinates[1], mapData.center.coordinates[0]]
       : config.defaultCenter;
     const initialZoom = mapData?.zoom || config.defaultZoom;
-
+    const initialBearing = mapData?.bearing || 0;
     const map = L.map(mapContainerRef.current, {
       center: initialCenter,
       zoom: initialZoom,
       maxZoom: 25,
       rotate: true,
-      bearing: 0,
       touchRotate: true,
-      rotateControl: { closeOnZeroBearing: false },
+      bearing: initialBearing,
+      rotateControl: { closeOnZeroBearing: false, position: 'bottomright' },
       zoomControl: false,
+      attributionControl: false,
+      touchGestures: true,
     });
 
     mapInstanceRef.current = map;
 
-    // Ждём полной готовности карты и рендерера
     map.whenReady(() => requestAnimationFrame(() => setIsMapReady(true)));
 
     return () => {
@@ -81,7 +81,7 @@ const MapComponent = () => {
       }
       setIsMapReady(false);
     };
-  }, [mapData?.center?.coordinates?.join?.(','), mapData?.zoom]);
+  }, [mapData?.center?.coordinates?.join(','), mapData?.zoom]);
 
   if (authStatus === 'loading') return <div>Загрузка...</div>;
 
@@ -123,7 +123,6 @@ const MapComponent = () => {
                     selectedYears={selectedYears}
                     isPrev={false}
                   />
-
                   <MapCleanPoints
                     map={mapInstanceRef.current}
                     selectedFields={selectedFields}

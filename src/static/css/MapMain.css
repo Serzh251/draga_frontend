@@ -16,6 +16,16 @@
     right: 0;
     bottom: 0;
 }
+.leaflet-control-rotate {
+  left: -50vh;
+  transform: translateX(-50%);
+  bottom: 0px; /* отступ снизу */
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
 .leaflet-control-attribution span,
 .leaflet-control-attribution a:first-child {

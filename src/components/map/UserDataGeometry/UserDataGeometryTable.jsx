@@ -142,7 +142,7 @@ const UserDataGeometryTable = ({
           <SearchOutlined
             style={{
               position: 'absolute',
-              top: 350,
+              top: 190,
               left: 10,
               background: 'rgba(255, 255, 255, 0.9)',
               padding: '3px',

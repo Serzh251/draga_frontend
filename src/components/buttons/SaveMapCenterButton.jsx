@@ -1,7 +1,6 @@
 // src/components/buttons/SaveMapCenterButton.jsx
 import React from 'react';
 import { Button, notification } from 'antd';
-import { AimOutlined } from '@ant-design/icons';
 import { useCreateOrUpdateDefaultMapCenterMutation } from '../../api/api';
 
 const SaveMapCenterButton = ({ map, onSaveSuccess }) => {
@@ -15,18 +14,19 @@ const SaveMapCenterButton = ({ map, onSaveSuccess }) => {
 
     const center = map.getCenter();
     const zoom = map.getZoom();
-    // Форматируем координаты: POINT(долгота широта)
     const wktCenter = `POINT(${center.lng.toFixed(6)} ${center.lat.toFixed(6)})`;
+    const getBearing = map.getBearing();
 
     saveMapCenter({
       center: wktCenter,
       zoom,
+      bearing: getBearing,
     })
       .unwrap()
       .then(() => {
         notification.success({
           message: 'Успешно',
-          description: 'Центр и масштаб сохранены',
+          description: 'Настройки карты сохранены',
           duration: 2,
         });
 
@@ -47,7 +47,6 @@ const SaveMapCenterButton = ({ map, onSaveSuccess }) => {
   return (
     <Button
       type="primary"
-      icon={<AimOutlined />}
       onClick={handleSave}
       disabled={!map}
       style={{
@@ -59,7 +58,7 @@ const SaveMapCenterButton = ({ map, onSaveSuccess }) => {
         height: 'auto',
       }}
     >
-      Сохранить центр и zoom
+      Сохранить настройки карты
     </Button>
   );
 };
