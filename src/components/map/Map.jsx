@@ -19,6 +19,7 @@ import FieldSelectionSidebar from './Fields/FieldSelectionSidebar';
 import YearSelectionSidebar from './YearSelectionSidebar';
 import MapPoints from './MapPoints';
 import MapCleanPoints from './MapCleanPoints';
+import HeatmapLayer from './HeatMapLayer';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -60,6 +61,7 @@ const MapComponent = () => {
     const map = L.map(mapContainerRef.current, {
       center: initialCenter,
       zoom: initialZoom,
+      maxZoom: 25,
       rotate: true,
       bearing: 0,
       touchRotate: true,
@@ -129,6 +131,13 @@ const MapComponent = () => {
                     isPrev={true}
                   />
                 </>
+              )}
+              {showHotMap && (
+                <HeatmapLayer
+                  map={mapInstanceRef.current}
+                  selectedFields={selectedFields}
+                  selectedYears={selectedYears}
+                />
               )}
             </>
           )}

@@ -55,12 +55,12 @@ const MapCleanPoints = ({
     const geoJsonLayer = L.geoJSON(pointsData, {
       pointToLayer: (feature, latlng) => {
         const depth = feature.properties?.depth ?? 0;
-        return L.circleMarker(latlng, {
-          radius: 8,
+        return L.circle(latlng, {
+          radius: 4,
           stroke: false,
           fillColor: getFillColor(depth),
-          color: '#000',
-          weight: 1,
+          color: getFillColor(depth),
+          weight: 10,
           opacity: 0.1,
           fillOpacity: isPrev ? 0.2 : 1,
         }).bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
