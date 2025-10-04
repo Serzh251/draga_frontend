@@ -1,5 +1,5 @@
+// src/components/Batymetry/TrackLine.jsx
 import { useEffect, useRef } from 'react';
-import { useMap } from 'react-leaflet';
 import * as turf from '@turf/turf';
 import L from 'leaflet';
 import { useFetchTrackPointsQuery } from '../../api/api';
@@ -15,11 +15,10 @@ const getColor = (depth) => {
   return '#f6ecc1';
 };
 
-const TrackLine = ({ track }) => {
-  const map = useMap();
+const TrackLine = ({ track, map }) => {
   const layerRef = useRef(null);
 
-  const { data, isFetching, error } = useFetchTrackPointsQuery({ trackId: track.id }, { skip: !map });
+  const { data, isFetching, error } = useFetchTrackPointsQuery({ trackId: track.id }, { skip: !map || !track?.id });
 
   useEffect(() => {
     if (!map || !data?.features?.length) return;
@@ -27,9 +26,11 @@ const TrackLine = ({ track }) => {
     // Удаляем старый слой
     if (layerRef.current) {
       map.removeLayer(layerRef.current);
+      layerRef.current = null;
     }
 
     const cleanFeatures = data.features.filter((f) => f.geometry?.type === 'Point' && f.properties?.depth != null);
+
     if (cleanFeatures.length < 2) return;
 
     const latlngs = cleanFeatures.map((f) => [f.geometry.coordinates[1], f.geometry.coordinates[0]]);
@@ -50,10 +51,10 @@ const TrackLine = ({ track }) => {
       },
     });
 
-    // Рисуем сегменты
+    // Рисуем сегменты линии
     for (let i = 0; i < latlngs.length - 1; i++) {
       const segment = turf.lineString([
-        [latlngs[i][1], latlngs[i][0]],
+        [latlngs[i][1], latlngs[i][0]], // [lng, lat] для Turf
         [latlngs[i + 1][1], latlngs[i + 1][0]],
       ]);
       const avgDepth = (depths[i] + depths[i + 1]) / 2;
@@ -68,20 +69,23 @@ const TrackLine = ({ track }) => {
     trackLayer.addTo(map);
     layerRef.current = trackLayer;
 
-    map.fitBounds(trackLayer.getBounds(), { padding: [50, 50] });
+    // Опционально: подгоняем карту под трек (удалите, если не нужно)
+    // map.fitBounds(trackLayer.getBounds(), { padding: [50, 50] });
 
+    // Cleanup
     return () => {
       if (layerRef.current) {
         map.removeLayer(layerRef.current);
+        layerRef.current = null;
       }
     };
-  }, [data, map]);
+  }, [map, data, track.id]);
 
   if (error) {
     console.error(`Ошибка загрузки точек для трека ${track.id}:`, error);
   }
 
-  return isFetching ? null : null;
+  return null; // Компонент ничего не рендерит в DOM
 };
 
 export default TrackLine;

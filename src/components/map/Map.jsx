@@ -22,6 +22,7 @@ import MapCleanPoints from './MapCleanPoints';
 import HeatmapLayer from './HeatMapLayer';
 import RotateButtons from './Instruments/RotateButtons';
 import LocationMarker from '../location/LocationMarker';
+import BatymetryLayer from '../Batymetry/BatymetryLayer';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -112,10 +113,12 @@ const MapComponent = () => {
             onSelectionChange={setSelectedYearsPrev}
             isPrev={true}
           />
+          <WebSocketComponent setLocation={setLocation} />
           {isMapReady && (
             <>
               <MapFields map={mapInstanceRef.current} />
               <RotateButtons map={mapInstanceRef.current} />;
+              {showBatymetryLayer && <BatymetryLayer map={mapInstanceRef.current} />}
               {location && <LocationMarker map={mapInstanceRef.current} location={location} />}
               {showMapPoints && <MapPoints map={mapInstanceRef.current} selectedFields={selectedFields} />}
               {showCleanPoints && (
@@ -160,7 +163,6 @@ const MapComponent = () => {
           />
         </>
       )}
-      <WebSocketComponent setLocation={setLocation} />
     </div>
   );
 };

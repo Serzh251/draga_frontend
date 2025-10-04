@@ -64,3 +64,18 @@
     display: none;
 }
 
+.batymetry-legend{
+      position: absolute;
+      bottom: 32px;
+      left: 8px;
+      opacity: 0.8;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      font-family: sans-serif;
+      line-height: 1.8;
+      width: 88px;
+      z-index: 1000;
+      pointer-events: none;
+}
