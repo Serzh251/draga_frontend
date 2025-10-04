@@ -20,6 +20,7 @@ import YearSelectionSidebar from './YearSelectionSidebar';
 import MapPoints from './MapPoints';
 import MapCleanPoints from './MapCleanPoints';
 import HeatmapLayer from './HeatMapLayer';
+import RotateButtons from './Instruments/RotateButtons';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -113,7 +114,7 @@ const MapComponent = () => {
           {isMapReady && (
             <>
               <MapFields map={mapInstanceRef.current} />
-
+              <RotateButtons map={mapInstanceRef.current} />;
               {showMapPoints && <MapPoints map={mapInstanceRef.current} selectedFields={selectedFields} />}
               {showCleanPoints && (
                 <>
