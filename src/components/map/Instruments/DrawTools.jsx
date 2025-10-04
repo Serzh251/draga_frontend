@@ -30,17 +30,11 @@ const DrawTools = ({ map, isAuth }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [createUserGeoData, { isLoading }] = useCreateUserGeoDataMutation();
 
-  const [formValues, setFormValues] = useState({
-    name: '',
-    description: '',
-    color: '#0015ff',
-  });
   const [activeField, setActiveField] = useState(null);
-
   const showVirtualKeyboard = shouldUseVirtualKeyboard();
 
-  // --- Форма Ant Design ---
-  const [form] = Form.useForm(); // Создаём форму
+  // Создаём форму
+  const [form] = Form.useForm();
 
   useEffect(() => {
     if (!map) return;
@@ -139,7 +133,8 @@ const DrawTools = ({ map, isAuth }) => {
   const handleKeyPress = (key) => {
     if (!activeField) return;
 
-    let newValue = formValues[activeField];
+    const currentValue = form.getFieldValue(activeField) || '';
+    let newValue = currentValue;
 
     if (key === 'Backspace') {
       newValue = newValue.slice(0, -1);
@@ -149,19 +144,12 @@ const DrawTools = ({ map, isAuth }) => {
       newValue += key;
     }
 
-    setFormValues((prev) => ({
-      ...prev,
-      [activeField]: newValue,
-    }));
-
-    form.setFieldsValue({
-      [activeField]: newValue,
-    });
+    form.setFieldsValue({ [activeField]: newValue });
   };
 
   const saveGeoData = async () => {
     try {
-      await form.validateFields();
+      const formData = await form.validateFields();
 
       if (!drawnItems || !drawnItems.getLayers().length) {
         messageApi.error('Вы должны нарисовать хотя бы один объект, чтобы сохранить!');
@@ -181,7 +169,6 @@ const DrawTools = ({ map, isAuth }) => {
         }
       });
 
-      const formData = form.getFieldsValue();
       const payload = {
         name: formData.name,
         description: formData.description,
@@ -233,34 +220,32 @@ const DrawTools = ({ map, isAuth }) => {
         onCancel={() => {
           setShowModal(false);
           setActiveField(null);
+          form.resetFields();
         }}
         okText="Сохранить геоданные"
         cancelText="Отмена"
         confirmLoading={isLoading}
       >
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" initialValues={{ color: '#0015ff' }}>
           <Form.Item
             name="name"
             label="Название:"
             rules={[{ required: true, message: 'Поле "Название" обязательно!' }]}
           >
-            <Input placeholder="Введите название" onFocus={() => handleFocus('name')} value={formValues.name} />
+            <Input placeholder="Введите название" onFocus={() => handleFocus('name')} />
           </Form.Item>
 
           <Form.Item name="description" label="Описание:">
-            <Input.TextArea
-              placeholder="Введите описание"
-              onFocus={() => handleFocus('description')}
-              value={formValues.description}
-            />
+            <Input.TextArea placeholder="Введите описание" onFocus={() => handleFocus('description')} />
           </Form.Item>
 
-          <Form.Item label="Выберите цвет:" name="color" initialValue="#0015ff" style={{ justifyContent: 'center' }}>
-            <ColorPicker
-              value={form.getFieldValue('color')}
-              onChange={(color) => form.setFieldsValue({ color: color.toHexString() })}
-              style={{ width: '20%', height: '40px', marginTop: '5px', display: 'flex', alignItems: 'center' }}
-            />
+          <Form.Item label="Выберите цвет:" name="color" style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: 'inline-block' }}>
+              <ColorPicker
+                onChange={(color) => form.setFieldsValue({ color: color.toHexString() })}
+                style={{ height: '40px', marginTop: '5px' }}
+              />
+            </div>
           </Form.Item>
         </Form>
         <SaveMapCenterButton map={map} onSaveSuccess={() => setShowModal(false)} />
