@@ -1,71 +1,68 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Marker, Popup, Polyline } from 'react-leaflet';
+import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 
-const LocationMarker = ({ location }) => {
-  const [trail, setTrail] = useState([]);
-  const [isActive, setIsActive] = useState(true);
-  const lastUpdateTime = useRef(Date.now());
+const LocationMarker = ({ map, location }) => {
+  const markerRef = useRef(null);
+  const polylineRef = useRef(null);
+  const trailRef = useRef([]); // <-- сохраняется между рендерами
+
+  // Валидация
+  const isValid = location?.lat != null && location?.lng != null;
 
   useEffect(() => {
-    if (location.lat && location.lng) {
-      lastUpdateTime.current = Date.now();
-      setIsActive(true);
-      setTrail((prevTrail) => [
-        ...prevTrail.slice(-50),
-        [location.lat, location.lng],
-      ]);
+    if (!map || !isValid) return;
+
+    const latlng = L.latLng(location.lat, location.lng);
+    trailRef.current = [...trailRef.current, latlng].slice(-50);
+
+    console.log('Trail length:', trailRef.current.length); // Должно расти!
+
+    // --- Маркер ---
+    if (markerRef.current) {
+      markerRef.current.setLatLng(latlng);
+    } else {
+      const icon = L.divIcon({
+        html: `<div class="custom-icon-wrapper">
+          <div class="pulse-ring"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+            <circle cx="12.5" cy="12.5" r="8" fill="red" stroke="black" strokeWidth="2"/>
+          </svg>
+        </div>`,
+        className: 'custom-icon',
+        iconSize: [25, 25],
+        iconAnchor: [12, 12],
+      });
+      markerRef.current = L.marker(latlng, { icon }).addTo(map);
     }
-  }, [location]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Date.now() - lastUpdateTime.current > 60000) {
-        setIsActive(false);
+    // --- Шлейф ---
+    if (trailRef.current.length >= 2) {
+      if (polylineRef.current) {
+        polylineRef.current.setLatLngs(trailRef.current);
+      } else {
+        polylineRef.current = L.polyline(trailRef.current, {
+          color: 'red',
+          weight: 5,
+          opacity: 0.8,
+          dashArray: '5, 5',
+        }).addTo(map);
       }
-    }, 10000); // Проверяем каждые 10 секунд
+    }
 
-    return () => clearInterval(interval);
-  }, []);
+    // Cleanup
+    return () => {
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+        markerRef.current = null;
+      }
+      if (polylineRef.current) {
+        map.removeLayer(polylineRef.current);
+        polylineRef.current = null;
+      }
+    };
+  }, [map, location.lat, location.lng]);
 
-  const icon = new L.DivIcon({
-    html: `
-      <div class="custom-icon-wrapper ${isActive ? '' : 'inactive'}">
-        <div class="pulse-ring ${isActive ? '' : 'hidden'}"></div>
-        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
-          <circle cx="12.5" cy="12.5" r="8" fill="red" stroke="black" strokeWidth="2"/>
-        </svg>
-      </div>
-    `,
-    className: 'custom-icon',
-    iconSize: [25, 25],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12],
-  });
-
-  return (
-    <>
-      {/* Шлейф пути */}
-      {trail.length > 5 && (
-        <Polyline
-          positions={trail}
-          color="red"
-          weight={5}
-          opacity={0.8}
-          dashArray="5, 5"
-        />
-      )}
-
-      <Marker position={[location.lat, location.lng]} icon={icon}>
-        <Popup>
-          <strong>Текущая позиция</strong>
-          <br />
-          Широта: {location.lat}, Долгота: {location.lng}
-          {location.course && <p>Курс: {location.course}°</p>}
-        </Popup>
-      </Marker>
-    </>
-  );
+  return null;
 };
 
 export default LocationMarker;

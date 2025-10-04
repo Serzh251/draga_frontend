@@ -21,6 +21,7 @@ import MapPoints from './MapPoints';
 import MapCleanPoints from './MapCleanPoints';
 import HeatmapLayer from './HeatMapLayer';
 import RotateButtons from './Instruments/RotateButtons';
+import LocationMarker from '../location/LocationMarker';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -115,6 +116,7 @@ const MapComponent = () => {
             <>
               <MapFields map={mapInstanceRef.current} />
               <RotateButtons map={mapInstanceRef.current} />;
+              {location && <LocationMarker map={mapInstanceRef.current} location={location} />}
               {showMapPoints && <MapPoints map={mapInstanceRef.current} selectedFields={selectedFields} />}
               {showCleanPoints && (
                 <>
