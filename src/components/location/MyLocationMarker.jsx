@@ -1,8 +1,7 @@
+// src/components/location/MyLocationMarker.jsx
 import { useEffect } from 'react';
-import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 
-// Стили для пульсации (добавляются один раз)
 const addPulseStyles = () => {
   const styleId = 'user-location-styles';
   if (document.getElementById(styleId)) return;
@@ -35,25 +34,21 @@ const addPulseStyles = () => {
   document.head.appendChild(styleSheet);
 };
 
-const MyLocationMarker = () => {
-  const map = useMap();
+const MyLocationMarker = ({ map }) => {
   let userMarker = null;
   let accuracyCircle = null;
 
   useEffect(() => {
     if (!map) return;
 
-    // Добавляем стили
     addPulseStyles();
 
     const onLocationFound = (e) => {
       const { latlng, accuracy } = e;
 
-      // Удаляем старые слои
       if (userMarker) map.removeLayer(userMarker);
       if (accuracyCircle) map.removeLayer(accuracyCircle);
 
-      // Создаём маркер с пульсацией
       userMarker = L.marker(latlng, {
         icon: L.divIcon({
           className: 'user-location-icon',
@@ -67,7 +62,6 @@ const MyLocationMarker = () => {
         Долгота: ${latlng.lng.toFixed(6)}
       `);
 
-      // Круг точности
       accuracyCircle = L.circle(latlng, {
         radius: accuracy,
         color: '#007bff',
@@ -76,10 +70,7 @@ const MyLocationMarker = () => {
         weight: 1,
       }).addTo(map);
 
-      // Центрируем карту
-      map.setView(latlng, Math.min(map.getZoom(), 17), {
-        animate: true,
-      });
+      map.setView(latlng, Math.min(map.getZoom(), 17), { animate: true });
     };
 
     const onLocationError = (e) => {
@@ -88,24 +79,21 @@ const MyLocationMarker = () => {
         'Не удалось получить местоположение.\n\n' +
           'Проверьте:\n' +
           '1. Разрешён ли доступ к геолокации\n' +
-          '2. Включён ли GPS\n' +
-          '3. Откройте страницу по HTTPS или localhost'
+          '2. Включён ли GPS\n'
       );
     };
 
-    // Запускаем определение местоположения
     map.locate({
-      setView: false, // Не центрируем сразу — сделаем вручную
+      setView: false,
       maxZoom: 17,
       timeout: 10000,
       maximumAge: 60000,
-      watch: true, // Слежение за перемещением
+      watch: true,
     });
 
     map.on('locationfound', onLocationFound);
     map.on('locationerror', onLocationError);
 
-    // Очистка
     return () => {
       map.stopLocate();
       map.off('locationfound', onLocationFound);
@@ -115,7 +103,7 @@ const MyLocationMarker = () => {
     };
   }, [map]);
 
-  return null; // Маркер управляется напрямую через Leaflet API
+  return null;
 };
 
 export default MyLocationMarker;

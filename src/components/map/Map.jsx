@@ -23,6 +23,7 @@ import HeatmapLayer from './HeatMapLayer';
 import RotateButtons from './Instruments/RotateButtons';
 import LocationMarker from '../location/LocationMarker';
 import BatymetryLayer from '../Batymetry/BatymetryLayer';
+import MyLocationMarker from '../location/MyLocationMarker';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -120,6 +121,7 @@ const MapComponent = () => {
               <RotateButtons map={mapInstanceRef.current} />;
               {showBatymetryLayer && <BatymetryLayer map={mapInstanceRef.current} />}
               {location && <LocationMarker map={mapInstanceRef.current} location={location} />}
+              {showMyLocation && <MyLocationMarker map={mapInstanceRef.current} />}
               {showMapPoints && <MapPoints map={mapInstanceRef.current} selectedFields={selectedFields} />}
               {showCleanPoints && (
                 <>
