@@ -42,22 +42,18 @@ const MapPoints = ({ map, selectedFields }) => {
 
     const geoJsonLayer = L.geoJSON(points, {
       pointToLayer: (feature, latlng) => {
-        const depth = Number(feature.properties?.depth ?? 0);
-        const circleMarker = L.circleMarker(latlng, {
-          radius: 8,
+        const depth = feature.properties?.depth ?? 0;
+        return L.circle(latlng, {
+          radius: 4,
           stroke: false,
           fillColor: getFillColor(depth),
-          color: '#000',
+          color: getFillColor(depth),
           weight: 1,
-          opacity: 1,
+          opacity: 0.1,
           fillOpacity: 0.8,
-        });
-
-        circleMarker.bindPopup(`<strong>Глубина:</strong> ${isNaN(depth) ? '-' : depth.toFixed(2)} м`);
-        return circleMarker;
+        }).bindPopup(`<strong>Глубина:</strong> ${depth.toFixed(2)} м`);
       },
     });
-
     geoJsonLayer.addTo(map);
     layerRef.current = geoJsonLayer;
 
