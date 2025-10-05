@@ -1,50 +1,101 @@
-import React, { useEffect, useState } from 'react';
-import { useMap } from 'react-leaflet';
+// src/components/Map/Fields/GridCells.jsx
+import React, { useEffect, useState, useRef } from 'react';
 import L from 'leaflet';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useLazyFetchGridCellsQuery } from '../../../api/api';
 
-const GridCells = () => {
-  const map = useMap();
+const GridCells = ({ map, selectedFields }) => {
   const [allCells, setAllCells] = useState([]);
   const [error, setError] = useState(null);
-  const [fetchCells, { isFetching, isError }] = useLazyFetchGridCellsQuery();
+  const [isFetching, setIsFetching] = useState(false);
 
+  // Защита от некорректного типа selectedFields
+  const safeSelectedFields =
+    selectedFields instanceof Set
+      ? selectedFields
+      : Array.isArray(selectedFields)
+        ? new Set(selectedFields)
+        : new Set();
+
+  const fieldId = safeSelectedFields.size > 0 ? Array.from(safeSelectedFields)[0] : null;
+
+  const [triggerFetch] = useLazyFetchGridCellsQuery();
+  const layerGroupRef = useRef(null);
+  const isMountedRef = useRef(true);
+
+  // Cleanup
   useEffect(() => {
-    const loadAllPages = async () => {
-      try {
-        let currentPage = 1;
-        let hasMore = true;
-
-        while (hasMore) {
-          const result = await fetchCells(currentPage).unwrap();
-          if (result?.features?.length) {
-            setAllCells((prevCells) => [...prevCells, ...result.features]);
-          }
-          hasMore = result?.hasMore || false;
-          currentPage += 1;
-        }
-      } catch (err) {
-        console.error('Ошибка при загрузке данных:', err);
-        setError(err?.data?.message || 'Не удалось загрузить данные для сетки');
+    return () => {
+      isMountedRef.current = false;
+      if (layerGroupRef.current && map) {
+        map.removeLayer(layerGroupRef.current);
+        layerGroupRef.current = null;
       }
     };
+  }, [map]);
 
-    loadAllPages();
-  }, [fetchCells]);
+  // Рекурсивная загрузка
+  const loadPage = async (urlOrParams) => {
+    if (!isMountedRef.current) return;
 
-  // Отображение сетки на карте
+    setIsFetching(true);
+    try {
+      const result = await triggerFetch(urlOrParams).unwrap();
+      const features = result.features || [];
+      const nextUrl = result.next;
+
+      if (isMountedRef.current) {
+        setAllCells((prev) => [...prev, ...features]);
+      }
+
+      if (nextUrl && isMountedRef.current) {
+        await loadPage(nextUrl);
+      }
+    } catch (err) {
+      if (isMountedRef.current) {
+        setError(err?.data?.message || 'Не удалось загрузить данные для сетки');
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsFetching(false);
+      }
+    }
+  };
+
+  // Запуск при смене поля
   useEffect(() => {
-    if (!map || allCells.length === 0) return;
+    if (fieldId == null) {
+      setAllCells([]);
+      setError(null);
+      return;
+    }
 
-    const layerGroup = L.layerGroup().addTo(map);
+    setAllCells([]);
+    setError(null);
+    loadPage({ page: 1, field: fieldId });
+  }, [fieldId]);
+
+  // Отображение на карте
+  useEffect(() => {
+    if (!map) return;
+
+    if (layerGroupRef.current) {
+      map.removeLayer(layerGroupRef.current);
+      layerGroupRef.current = null;
+    }
+
+    if (allCells.length === 0) return;
+
+    const layerGroup = L.layerGroup();
+    layerGroupRef.current = layerGroup;
+
     const geoJsonData = {
       type: 'FeatureCollection',
       features: allCells.map((cell) => ({
         type: 'Feature',
         geometry: {
           type: 'Polygon',
-          coordinates: cell?.properties?.cell?.coordinates || [],
+          coordinates: cell?.geometry?.coordinates || [], // ← ИСПРАВЛЕНО
         },
         properties: {
           ...cell.properties,
@@ -54,11 +105,7 @@ const GridCells = () => {
     };
 
     const geoJsonLayer = L.geoJSON(geoJsonData, {
-      style: {
-        color: '#000',
-        weight: 1,
-        fillOpacity: 0,
-      },
+      style: { color: '#000', weight: 1, fillOpacity: 0 },
       onEachFeature: (feature, layer) => {
         layer.on('click', () => {
           layer.bindPopup(`<strong>ID ячейки:</strong> ${feature.properties.cell_id}`).openPopup();
@@ -67,14 +114,19 @@ const GridCells = () => {
     });
 
     geoJsonLayer.addTo(layerGroup);
+    map.addLayer(layerGroup);
+
     return () => {
-      map.removeLayer(layerGroup);
+      if (layerGroupRef.current && map.hasLayer(layerGroupRef.current)) {
+        map.removeLayer(layerGroupRef.current);
+        layerGroupRef.current = null;
+      }
     };
   }, [allCells, map]);
 
   return (
     <>
-      {isFetching && (
+      {isFetching && fieldId != null && (
         <div
           style={{
             position: 'fixed',
@@ -98,7 +150,7 @@ const GridCells = () => {
         </div>
       )}
 
-      {isError && (
+      {error && (
         <div
           style={{
             position: 'fixed',
@@ -115,7 +167,7 @@ const GridCells = () => {
             zIndex: 1000,
           }}
         >
-          ❌ Ошибка: {error || 'Не удалось загрузить данные для сетки'}
+          ❌ Ошибка: {error}
         </div>
       )}
     </>

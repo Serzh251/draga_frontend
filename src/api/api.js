@@ -97,11 +97,32 @@ export const api = createApi({
 
     // 🟨 Ячейки сетки (пагинация)
     fetchGridCells: builder.query({
-      query: (page = 1) => `${configApi.GET_GRID_CELLS}?page=${page}`,
-      transformResponse: (response) => ({
-        features: response.results?.features || [],
-        hasMore: !!response.next_page,
-      }),
+      query: (urlOrParams) => {
+        // Если передан полный URL (из next) — используем его
+        if (typeof urlOrParams === 'string') {
+          // Убираем базовый URL, если он абсолютный
+          const baseUrl = configApi.BASE_URL || 'http://localhost:2025';
+          if (urlOrParams.startsWith(baseUrl)) {
+            return urlOrParams.replace(baseUrl, '');
+          }
+          return urlOrParams; // относительный URL
+        }
+
+        const { page = 1, field = null } = urlOrParams;
+        const params = new URLSearchParams();
+        params.append('page', page);
+        if (field != null) {
+          params.append('field', field);
+        }
+        return `${configApi.GET_GRID_CELLS}?${params.toString()}`;
+      },
+      transformResponse: (response) => {
+        // DRF возвращает: { count, next, previous, results: { type: 'FeatureCollection', features: [...] } }
+        return {
+          features: response.results?.features || [],
+          next: response.next, // строка URL или null
+        };
+      },
       providesTags: ['GridCells'],
     }),
 
