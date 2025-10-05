@@ -36,7 +36,7 @@ const YearSelectionSidebar = ({ years, onSelectionChange, isPrev = false }) => {
 
   return (
     <div
-      className={`year-sidebar-wrapper ${isPrev ? 'last-year-position' : ''}`}
+      className={`year-sidebar-wrapper ${isPrev ? 'last-year-position' : ''} ${selectedYears ? 'has-selection' : ''}`}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >

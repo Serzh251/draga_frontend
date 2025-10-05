@@ -1,14 +1,26 @@
 .year-sidebar-wrapper {
-    position: absolute;
-    top: 180px;
-    right: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    z-index: 611;
+  position: absolute;
+  top: 180px;
+  right: 11px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 611;
+  box-shadow: 0 0 0 0 transparent;
+  transition: outline 0.2s ease;
 }
 .clean-points-sidebar-wrapper {
     top: 170px;
+}
+
+.year-sidebar-wrapper.has-selection {
+  box-shadow: 0 0 0 2px #48fa19;
+    border-radius: 5px;
+}
+
+.last-year-position {
+  top: 236px;
+  z-index: 609;
 }
 .year-toggle-button {
     width: 43px;

@@ -42,7 +42,11 @@ const FieldSelectionSidebar = ({ onSelectionChange }) => {
   }, [selectedField, onSelectionChange]);
 
   return (
-    <div className="field-sidebar-wrapper" onMouseEnter={() => setIsOpen(true)} onMouseLeave={() => setIsOpen(false)}>
+    <div
+      className={`field-sidebar-wrapper ${selectedField ? 'has-selection' : ''}`}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
       <div className="field-toggle-button">☰</div>
       {isOpen && (
         <div className="field-sidebar">
@@ -52,6 +56,7 @@ const FieldSelectionSidebar = ({ onSelectionChange }) => {
               minWidth: minWidth,
               maxWidth: '80vw',
             }}
+            className={selectedField ? 'select-with-value' : ''}
             placeholder="Выберите месторождение"
             value={selectedField || undefined}
             onChange={(value) => setSelectedField(value || null)}
