@@ -119,12 +119,18 @@ const MapComponent = () => {
           {isMapReady && (
             <>
               <MapFields map={mapInstanceRef.current} />
-              <RotateButtons map={mapInstanceRef.current} />;
+              <RotateButtons map={mapInstanceRef.current} />
               {showBatymetryLayer && <BatymetryLayer map={mapInstanceRef.current} />}
               {location && <LocationMarker map={mapInstanceRef.current} location={location} />}
               {showMyLocation && <MyLocationMarker map={mapInstanceRef.current} />}
               {showGridCells && <GridCells selectedFields={selectedFields} map={mapInstanceRef.current} />}
-              {showMapPoints && <MapPoints map={mapInstanceRef.current} selectedFields={selectedFields} />}
+              {showMapPoints && (
+                <MapPoints
+                  map={mapInstanceRef.current}
+                  selectedFields={selectedFields}
+                  selectedYears={selectedYears}
+                />
+              )}
               {showCleanPoints && (
                 <>
                   <MapCleanPoints

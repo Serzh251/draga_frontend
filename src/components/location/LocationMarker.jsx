@@ -5,8 +5,6 @@ const LocationMarker = ({ map, location }) => {
   const markerRef = useRef(null);
   const polylineRef = useRef(null);
   const trailRef = useRef([]); // <-- сохраняется между рендерами
-
-  // Валидация
   const isValid = location?.lat != null && location?.lng != null;
 
   useEffect(() => {
@@ -15,9 +13,6 @@ const LocationMarker = ({ map, location }) => {
     const latlng = L.latLng(location.lat, location.lng);
     trailRef.current = [...trailRef.current, latlng].slice(-50);
 
-    console.log('Trail length:', trailRef.current.length); // Должно расти!
-
-    // --- Маркер ---
     if (markerRef.current) {
       markerRef.current.setLatLng(latlng);
     } else {

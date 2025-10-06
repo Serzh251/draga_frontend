@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import L from 'leaflet';
-import { LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useFetchCleanPointsQuery } from '../../api/api';
 
 const MapCleanPoints = ({
@@ -8,14 +8,13 @@ const MapCleanPoints = ({
   selectedFields = new Set(),
   selectedYears = new Set(),
   isPrev = false,
-  show = true, // новый проп для управления видимостью
+  show = true,
 }) => {
-  const fieldsArray = Array.from(selectedFields);
-  const yearsArray = Array.from(selectedYears);
-
   const layerRef = useRef(null);
 
-  const skip = fieldsArray.length === 0 || (isPrev && yearsArray.length === 0);
+  const fieldsArray = useMemo(() => Array.from(selectedFields), [selectedFields]);
+  const yearsArray = useMemo(() => Array.from(selectedYears), [selectedYears]);
+  const shouldFetch = fieldsArray.length > 0 && (!isPrev || yearsArray.length > 0);
 
   const queryArgs = {
     field: fieldsArray,
@@ -23,25 +22,19 @@ const MapCleanPoints = ({
   };
 
   const { data: pointsData, isFetching } = useFetchCleanPointsQuery(queryArgs, {
-    skip,
+    skip: !shouldFetch,
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
 
   useEffect(() => {
-    if (!map) return;
+    if (!map || !show || !shouldFetch || !pointsData) return;
 
-    // Удаляем предыдущий слой перед добавлением нового
     if (layerRef.current) {
       map.removeLayer(layerRef.current);
       layerRef.current = null;
     }
-
-    // Если show выключен или prev без годов — не рисуем
-    if (!show || (isPrev && yearsArray.length === 0)) return;
-
-    if (!pointsData) return;
 
     function getFillColor(depth) {
       if (depth <= 0 || depth > 15) return '#aba9a9';
@@ -70,21 +63,49 @@ const MapCleanPoints = ({
     geoJsonLayer.addTo(map);
     layerRef.current = geoJsonLayer;
 
-    // Очистка слоя при размонтировании
     return () => {
       if (layerRef.current) {
         map.removeLayer(layerRef.current);
         layerRef.current = null;
       }
     };
-  }, [map, pointsData, yearsArray, isPrev, show]);
+  }, [map, pointsData, show, shouldFetch, isPrev]);
 
-  if (isFetching && show) {
+  // 🔴 ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ТОЛЬКО ЕСЛИ НЕ ВЫБРАНО МЕСТОРОЖДЕНИЕ
+  if (show && fieldsArray.length === 0) {
     return (
       <div
         style={{
           position: 'fixed',
-          bottom: 100,
+          bottom: '50%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#fffbe6',
+          color: '#7a5c00',
+          padding: '8px 12px',
+          borderRadius: '5px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '13px',
+          fontWeight: 'bold',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          zIndex: 1000,
+          border: '1px solid #ffe58f',
+        }}
+      >
+        <ExclamationCircleOutlined style={{ color: '#faad14' }} />
+        Выберите месторождение для отображения точек
+      </div>
+    );
+  }
+
+  if (isFetching && show && shouldFetch) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '7%',
           left: '50%',
           transform: 'translateX(-50%)',
           background: 'rgba(255, 255, 255, 0.9)',
