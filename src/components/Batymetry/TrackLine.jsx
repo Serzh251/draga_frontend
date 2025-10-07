@@ -19,7 +19,7 @@ const getColor = (depth) => {
 const TrackLine = ({ track, map, onLoaded, onError, status, currentIndex, totalTracks }) => {
   const layerRef = useRef(null);
 
-  const { data, isFetching, error } = useFetchTrackPointsQuery({ trackId: track.id }, { skip: !map || !track?.id });
+  const { data, error } = useFetchTrackPointsQuery({ trackId: track.id }, { skip: !map || !track?.id });
 
   // Обработка ошибки
   useEffect(() => {
@@ -29,14 +29,8 @@ const TrackLine = ({ track, map, onLoaded, onError, status, currentIndex, totalT
     }
   }, [error, track.id]);
 
-  // Отрисовка при получении данных
   useEffect(() => {
     if (!data || !map) return;
-
-    if (layerRef.current) {
-      map.removeLayer(layerRef.current);
-      layerRef.current = null;
-    }
 
     const cleanFeatures =
       data.features?.filter((f) => f.geometry?.type === 'Point' && f.properties?.depth != null) || [];
@@ -80,14 +74,9 @@ const TrackLine = ({ track, map, onLoaded, onError, status, currentIndex, totalT
 
     trackLayer.addTo(map);
     layerRef.current = trackLayer;
-    onLoaded();
+    onLoaded(trackLayer);
 
-    return () => {
-      if (layerRef.current) {
-        map.removeLayer(layerRef.current);
-        layerRef.current = null;
-      }
-    };
+    return () => {};
   }, [data, map, track.id]);
 
   // UI: уведомления

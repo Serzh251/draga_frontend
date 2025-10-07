@@ -5,11 +5,12 @@ import TrackLine from './TrackLine';
 
 const BatymetryLayer = ({ map }) => {
   const legendRef = useRef(null);
+  const layersRef = useRef([]); // ← храним все слои здесь
+
   const [tracks, setTracks] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'error' | 'success'
+  const [status, setStatus] = useState('idle');
 
-  // ✅ Используем isLoading и data от RTK Query
   const {
     data: trackList,
     isLoading,
@@ -18,24 +19,21 @@ const BatymetryLayer = ({ map }) => {
     skip: !map,
   });
 
-  // ✅ Инициализация треков только когда данные загружены
+  // Инициализация треков
   useEffect(() => {
     if (isLoading) return;
-
     if (error) {
       console.error('Ошибка загрузки списка треков:', error);
       setStatus('error');
       return;
     }
-
     if (trackList && Array.isArray(trackList.tracks)) {
-      const loadedTracks = trackList.tracks;
-      setTracks(loadedTracks);
-      if (loadedTracks.length > 0) {
+      setTracks(trackList.tracks);
+      if (trackList.tracks.length > 0) {
         setCurrentIndex(0);
         setStatus('loading');
       } else {
-        setStatus('success'); // треков нет
+        setStatus('success');
       }
     } else {
       setTracks([]);
@@ -43,7 +41,7 @@ const BatymetryLayer = ({ map }) => {
     }
   }, [trackList, isLoading, error]);
 
-  // ✅ Легенда (без изменений)
+  // Легенда
   useEffect(() => {
     if (!map || !map.getContainer()) return;
 
@@ -73,13 +71,34 @@ const BatymetryLayer = ({ map }) => {
     };
   }, [map]);
 
-  // UI: ошибки и загрузка списка
+  // 🔥 Cleanup всех слоёв при размонтировании BatymetryLayer
+  useEffect(() => {
+    return () => {
+      // Удаляем все сохранённые слои
+      layersRef.current.forEach((layer) => {
+        if (map && map.hasLayer(layer)) {
+          map.removeLayer(layer);
+        }
+      });
+      layersRef.current = [];
+    };
+  }, [map]);
+
+  // Передаём массив слоёв в TrackLine для добавления
+  const handleTrackLoaded = (layer) => {
+    if (layer) {
+      layersRef.current.push(layer);
+    }
+
+    if (currentIndex < tracks.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setStatus('success');
+    }
+  };
+
   if (isLoading) {
-    return (
-      <div style={notificationStyle}>
-        <span>Загрузка списка треков...</span>
-      </div>
-    );
+    return <div style={notificationStyle}>Загрузка списка треков...</div>;
   }
 
   if (error) {
@@ -90,7 +109,6 @@ const BatymetryLayer = ({ map }) => {
     );
   }
 
-  // Рендерим только текущий трек
   const currentTrack = tracks[currentIndex];
 
   return (
@@ -100,13 +118,7 @@ const BatymetryLayer = ({ map }) => {
           key={currentTrack.id}
           track={currentTrack}
           map={map}
-          onLoaded={() => {
-            if (currentIndex < tracks.length - 1) {
-              setCurrentIndex(currentIndex + 1);
-            } else {
-              setStatus('success');
-            }
-          }}
+          onLoaded={handleTrackLoaded}
           onError={() => setStatus('error')}
           status={status}
           currentIndex={currentIndex}
