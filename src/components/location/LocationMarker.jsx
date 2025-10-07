@@ -1,18 +1,36 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 
 const LocationMarker = ({ map, location }) => {
   const markerRef = useRef(null);
   const polylineRef = useRef(null);
-  const trailRef = useRef([]); // <-- сохраняется между рендерами
+  const trailRef = useRef([]);
+  const lastUpdateTimeRef = useRef(null);
+  const intervalRef = useRef(null);
   const isValid = location?.lat != null && location?.lng != null;
+
+  // Функция для обновления стиля маркера
+  const updateMarkerStyle = (isActive) => {
+    if (!markerRef.current) return;
+
+    const iconDiv = markerRef.current.getElement();
+    if (iconDiv) {
+      if (isActive) {
+        iconDiv.classList.remove('inactive');
+      } else {
+        iconDiv.classList.add('inactive');
+      }
+    }
+  };
 
   useEffect(() => {
     if (!map || !isValid) return;
 
     const latlng = L.latLng(location.lat, location.lng);
     trailRef.current = [...trailRef.current, latlng].slice(-50);
+    lastUpdateTimeRef.current = Date.now();
 
+    // Создаём или обновляем маркер
     if (markerRef.current) {
       markerRef.current.setLatLng(latlng);
     } else {
@@ -30,6 +48,9 @@ const LocationMarker = ({ map, location }) => {
       markerRef.current = L.marker(latlng, { icon }).addTo(map);
     }
 
+    // Обновляем стиль: активный
+    updateMarkerStyle(true);
+
     // --- Шлейф ---
     if (trailRef.current.length >= 2) {
       if (polylineRef.current) {
@@ -44,8 +65,21 @@ const LocationMarker = ({ map, location }) => {
       }
     }
 
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      if (lastUpdateTimeRef.current) {
+        const elapsed = Date.now() - lastUpdateTimeRef.current;
+        const isActive = elapsed < 5 * 60 * 1000;
+        updateMarkerStyle(isActive);
+      }
+    }, 20000);
+
     // Cleanup
     return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
       if (markerRef.current) {
         map.removeLayer(markerRef.current);
         markerRef.current = null;
@@ -55,7 +89,7 @@ const LocationMarker = ({ map, location }) => {
         polylineRef.current = null;
       }
     };
-  }, [map, location.lat, location.lng]);
+  }, [map, location?.lat, location?.lng, isValid]);
 
   return null;
 };
