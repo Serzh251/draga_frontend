@@ -25,6 +25,7 @@ import LocationMarker from '../location/LocationMarker';
 import BatymetryLayer from '../Batymetry/BatymetryLayer';
 import MyLocationMarker from '../location/MyLocationMarker';
 import GridCells from './Fields/GridCells';
+import SaveCurrentPointButton from './Instruments/SaveCurrentPointButton';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
@@ -120,6 +121,7 @@ const MapComponent = () => {
             <>
               <MapFields map={mapInstanceRef.current} />
               <RotateButtons map={mapInstanceRef.current} />
+              <SaveCurrentPointButton />
               {showBatymetryLayer && <BatymetryLayer map={mapInstanceRef.current} />}
               {location && <LocationMarker map={mapInstanceRef.current} location={location} />}
               {showMyLocation && <MyLocationMarker map={mapInstanceRef.current} />}

@@ -14,7 +14,7 @@ const WS_API_HOST = isDevelopment
 
 const api = {
   BASE_URL,
-  API_URL: '/', // может быть не нужен, если всё через BASE_URL
+  API_URL: '/',
   API_ADMIN: '/admin/',
 
   WS_API_HOST,
@@ -31,6 +31,7 @@ const api = {
   SETUP_DEFAULT_MAP_CENTER: '/setup/default-center/',
   GET_TRACK_LIST: '/batymetry/tracks/',
   GET_TRACK_POINTS: '/batymetry/tracks/:id/points/',
+  CREATE_POINT_MANYALLY: 'get-data/manual-save/',
 };
 
 export default api;

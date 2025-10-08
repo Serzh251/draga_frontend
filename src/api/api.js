@@ -174,6 +174,15 @@ export const api = createApi({
       },
       providesTags: (result, error, { trackId }) => [{ type: 'TrackPoints', id: trackId }],
     }),
+
+    // создание точки вручную
+    createManualPoint: builder.mutation({
+      query: () => ({
+        url: configApi.CREATE_POINT_MANYALLY,
+        method: 'POST',
+      }),
+      invalidatesTags: ['CreatePoint'],
+    }),
   }),
 });
 
@@ -192,4 +201,5 @@ export const {
   useCreateOrUpdateDefaultMapCenterMutation,
   useFetchTrackListQuery,
   useFetchTrackPointsQuery,
+  useCreateManualPointMutation,
 } = api;
