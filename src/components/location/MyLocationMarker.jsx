@@ -34,12 +34,23 @@ const addPulseStyles = () => {
   document.head.appendChild(styleSheet);
 };
 
+// Проверка: мобильное устройство (iOS, Android)
+const isMobileDevice = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+};
+
 const MyLocationMarker = ({ map }) => {
   let userMarker = null;
   let accuracyCircle = null;
 
   useEffect(() => {
     if (!map) return;
+
+    // На десктопах — не пытаемся получить геолокацию вообще
+    if (!isMobileDevice()) {
+      console.log('Геолокация отключена на десктопе');
+      return;
+    }
 
     addPulseStyles();
 
@@ -75,6 +86,7 @@ const MyLocationMarker = ({ map }) => {
 
     const onLocationError = (e) => {
       console.warn('Не удалось определить местоположение:', e.message);
+      // Показываем alert ТОЛЬКО на мобильных
       alert(
         'Не удалось получить местоположение.\n\n' +
           'Проверьте:\n' +
