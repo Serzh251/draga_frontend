@@ -5,7 +5,6 @@ import 'leaflet-rotate';
 import '../../static/css/MapMain.css';
 import config from '../../config';
 import ToggleButtonGroup from '../buttons/ToogleButtons';
-import WebSocketComponent from '../location/WebsocketLocation';
 import usePersistentState from '../../hook/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
 import { useDispatch } from 'react-redux';
@@ -46,7 +45,6 @@ const MapComponent = () => {
   const [showCleanPoints, setShowCleanPoints] = usePersistentState('showCleanPoints', true);
   const [showBatymetryLayer, setShowBatymetryLayer] = usePersistentState('showBatymetryLayer', true);
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
-  const [location, setLocation] = useState(null);
 
   const { data: mapData } = useFetchDefaultMapCenterQuery(undefined, { skip: !isAuth });
   const { data: listUniqueYears } = useFetchYearsQuery(undefined, { skip: !isAuth });
@@ -116,14 +114,14 @@ const MapComponent = () => {
             onSelectionChange={setSelectedYearsPrev}
             isPrev={true}
           />
-          <WebSocketComponent setLocation={setLocation} />
+
           {isMapReady && (
             <>
               <MapFields map={mapInstanceRef.current} />
               <RotateButtons map={mapInstanceRef.current} />
               <SaveCurrentPointButton />
               {showBatymetryLayer && <BatymetryLayer map={mapInstanceRef.current} />}
-              {location && <LocationMarker map={mapInstanceRef.current} location={location} />}
+              <LocationMarker map={mapInstanceRef.current} />
               {showMyLocation && <MyLocationMarker map={mapInstanceRef.current} />}
               {showGridCells && <GridCells selectedFields={selectedFields} map={mapInstanceRef.current} />}
               {showMapPoints && (
