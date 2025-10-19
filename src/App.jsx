@@ -1,4 +1,4 @@
-// App.js
+// App.jsx
 import React from 'react';
 import { useAuth } from './hook/use-auth';
 import { Route, Routes } from 'react-router-dom';
