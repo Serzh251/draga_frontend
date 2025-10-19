@@ -2,14 +2,16 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import path from 'node:path';
 
 export default defineConfig({
   plugins: [
     react(),
+
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: false, // ← отключено в dev, чтобы не мешало
+        enabled: false,
       },
       manifest: {
         short_name: 'Draga',
@@ -50,7 +52,6 @@ export default defineConfig({
           },
         ],
       },
-      // 🔑 КЛЮЧЕВАЯ НАСТРОЙКА: Workbox
       workbox: {
         // Не использовать navigateFallback как SPA-ловушку для всех путей
         navigateFallback: '/', // можно оставить, но ограничим его
@@ -74,5 +75,10 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'), // ← настраиваем @ как src
+    },
   },
 });

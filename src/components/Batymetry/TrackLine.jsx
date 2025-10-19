@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import * as turf from '@turf/turf';
 import L from 'leaflet';
 import { LoadingOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { useFetchTrackPointsQuery } from '../../api/api';
+import { useFetchTrackPointsQuery } from '@/api/api';
 
 const getColor = (depth) => {
   if (depth >= 10) return '#002B5B';

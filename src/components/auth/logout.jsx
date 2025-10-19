@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Form } from 'antd';
-import { removeUser } from '../../store/slices/userSlice';
+import { removeUser } from '@/store/slices/userSlice';
 import Cookies from 'js-cookie';
 import { useDispatch } from 'react-redux';
-import { removeMapData } from '../../store/slices/mapDataSlice';
+import { removeMapData } from '@/store/slices/mapDataSlice';
 
 const Logout = ({ onLogoutSuccess }) => {
   const dispatch = useDispatch();

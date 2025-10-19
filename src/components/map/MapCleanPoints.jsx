@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import L from 'leaflet';
 import { LoadingOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { useFetchCleanPointsQuery } from '../../api/api';
+import { useFetchCleanPointsQuery } from '@/api/api';
 
 const MapCleanPoints = ({
   map,

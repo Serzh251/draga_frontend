@@ -8,7 +8,7 @@ import {
   AreaChartOutlined,
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
-import { useAuth } from '../../hook/use-auth';
+import { useAuth } from '@/hook/use-auth';
 
 // Общая базовая кнопка
 const ToggleButton = ({ title, icon: Icon, onClick, isActive, activeColor = '#1890ff', ...props }) => {

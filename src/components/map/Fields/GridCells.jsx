@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import L from 'leaflet';
 import { LoadingOutlined } from '@ant-design/icons';
-import { useLazyFetchGridCellsQuery } from '../../../api/api';
+import { useLazyFetchGridCellsQuery } from '@/api/api';
 
 const GridCells = ({ map, selectedFields }) => {
   const [allCells, setAllCells] = useState([]);

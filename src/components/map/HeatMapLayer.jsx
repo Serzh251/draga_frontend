@@ -2,7 +2,7 @@ import { useEffect, useRef, useMemo } from 'react';
 import L from 'leaflet';
 import 'leaflet.heat';
 import { LoadingOutlined } from '@ant-design/icons';
-import { useFetchPointsQuery } from '../../api/api';
+import { useFetchPointsQuery } from '@/api/api';
 
 const HeatmapLayer = ({ map, selectedFields = new Set(), selectedYears = new Set() }) => {
   const heatLayerRef = useRef(null);

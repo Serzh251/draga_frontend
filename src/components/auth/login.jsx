@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Form, Input, Button } from 'antd';
-import { useLoginMutation } from '../../api/api';
+import { useLoginMutation } from '@/api/api';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../../store/slices/userSlice';
-import { parseJwt } from '../../utils/token';
+import { setUser } from '@/store/slices/userSlice';
+import { parseJwt } from '@/utils/token';
 import VirtualKeyboard from '../tolls/VirtualKeyboard';
-import { shouldUseVirtualKeyboard } from '../../utils/getTypePlarform';
+import { shouldUseVirtualKeyboard } from '@/utils/getTypePlarform';
 
 const Login = ({ onLoginSuccess }) => {
   const [login, { isLoading }] = useLoginMutation();

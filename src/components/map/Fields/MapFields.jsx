@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { useFetchFieldsQuery } from '../../../api/api';
-import { useAuth } from '../../../hook/use-auth';
+import { useFetchFieldsQuery } from '@/api/api';
+import { useAuth } from '@/hook/use-auth';
 import { useDispatch } from 'react-redux';
-import { setFieldsData } from '../../../store/slices/mapDataSlice';
+import { setFieldsData } from '@/store/slices/mapDataSlice';
 
 const MapFields = ({ map }) => {
   const layersRef = useRef(new Map());

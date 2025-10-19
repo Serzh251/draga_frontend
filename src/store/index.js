@@ -5,7 +5,7 @@ import userGeoDataReducer from './slices/userGeoDataSlice';
 import { configureStore } from '@reduxjs/toolkit';
 // import { thunk } from 'redux-thunk';
 import { composeWithDevTools } from '@redux-devtools/extension';
-import { api } from '../api/api';
+import { api } from '@/api/api';
 
 const rootReducer = combineReducers({
   [api.reducerPath]: api.reducer,

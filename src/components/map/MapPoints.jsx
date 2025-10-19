@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import L from 'leaflet';
 import { LoadingOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { useFetchPointsQuery } from '../../api/api';
+import { useFetchPointsQuery } from '@/api/api';
 
 const MapPoints = ({ map, selectedFields, selectedYears }) => {
   const layerRef = useRef(null);

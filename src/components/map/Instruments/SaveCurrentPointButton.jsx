@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, notification, Tooltip } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
-import { useCreateManualPointMutation } from '../../../api/api';
+import { useCreateManualPointMutation } from '@/api/api';
 
 const SaveCurrentPointButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -1,7 +1,7 @@
 // src/components/buttons/SaveMapCenterButton.jsx
 import React from 'react';
 import { Button, notification } from 'antd';
-import { useCreateOrUpdateDefaultMapCenterMutation } from '../../api/api';
+import { useCreateOrUpdateDefaultMapCenterMutation } from '@/api/api';
 
 const SaveMapCenterButton = ({ map, onSaveSuccess }) => {
   const [saveMapCenter] = useCreateOrUpdateDefaultMapCenterMutation();

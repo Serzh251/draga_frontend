@@ -12,9 +12,9 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { Modal, Form, Input, message, ColorPicker, Tooltip } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 
-import { useCreateUserGeoDataMutation } from '../../../api/api';
+import { useCreateUserGeoDataMutation } from '@/api/api';
 import VirtualKeyboard from '../../tolls/VirtualKeyboard';
-import { shouldUseVirtualKeyboard } from '../../../utils/getTypePlarform';
+import { shouldUseVirtualKeyboard } from '@/utils/getTypePlarform';
 import SaveMapCenterButton from '../../buttons/SaveMapCenterButton';
 
 // Исправляем иконку маркера

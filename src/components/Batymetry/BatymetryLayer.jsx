@@ -1,6 +1,6 @@
 // src/components/Batymetry/BatymetryLayer.jsx
 import { useEffect, useRef, useState } from 'react';
-import { useFetchTrackListQuery } from '../../api/api';
+import { useFetchTrackListQuery } from '@/api/api';
 import TrackLine from './TrackLine';
 
 const BatymetryLayer = ({ map }) => {
