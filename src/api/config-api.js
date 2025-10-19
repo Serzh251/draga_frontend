@@ -7,17 +7,20 @@ const BASE_URL = isDevelopment
   ? 'http://localhost:2025/api/' // Прямой доступ к бэкенду
   : '/api/'; // Через nginx на проде
 
-// WebSocket URL
-const WS_API_HOST = isDevelopment
-  ? 'ws://localhost:2025/ws/last-location/' // Прямой WS
-  : `${isSecure ? 'wss' : 'ws'}://${window.location.host}/ws/last-location/`;
+const WS_BASE_URL = isDevelopment
+  ? 'ws://localhost:2025/ws'
+  : `${isSecure ? 'wss' : 'ws'}://${window.location.host}/ws`;
+
+const WS_LAST_LOCATION = `${WS_BASE_URL}/last-location/`;
+const WS_NOTIFICATIONS = `${WS_BASE_URL}/notifications/`;
 
 const api = {
   BASE_URL,
+  WS_LAST_LOCATION,
+  WS_NOTIFICATIONS,
+
   API_URL: '/',
   API_ADMIN: '/admin/',
-
-  WS_API_HOST,
 
   GET_POINTS: '/points/',
   GET_CLEAN_POINTS: '/clean/points/',
@@ -33,5 +36,4 @@ const api = {
   GET_TRACK_POINTS: '/batymetry/tracks/:id/points/',
   CREATE_POINT_MANYALLY: 'get-data/manual-save/',
 };
-
 export default api;

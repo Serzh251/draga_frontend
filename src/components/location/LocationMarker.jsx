@@ -2,6 +2,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 import configApi from '../../api/config-api';
+import { useWebSocket } from '@/hook/useWebsocket';
 
 const LocationTracker = ({ map }) => {
   const markerRef = useRef(null);
@@ -9,24 +10,15 @@ const LocationTracker = ({ map }) => {
   const trailRef = useRef([]);
   const lastUpdateTimeRef = useRef(null);
   const intervalRef = useRef(null);
-  const wsRef = useRef(null);
-  const reconnectTimeoutRef = useRef(null);
-  const isManuallyClosedRef = useRef(false);
 
-  // === Обновление стиля маркера ===
   const updateMarkerStyle = useCallback((isActive) => {
     if (!markerRef.current) return;
     const iconDiv = markerRef.current.getElement();
     if (iconDiv) {
-      if (isActive) {
-        iconDiv.classList.remove('inactive');
-      } else {
-        iconDiv.classList.add('inactive');
-      }
+      iconDiv.classList.toggle('inactive', !isActive);
     }
   }, []);
 
-  // === Обновление маркера и шлейфа на карте ===
   const updateLocationOnMap = useCallback(
     (lat, lng) => {
       if (!map) return;
@@ -35,7 +27,6 @@ const LocationTracker = ({ map }) => {
       trailRef.current = [...trailRef.current, latlng].slice(-50);
       lastUpdateTimeRef.current = Date.now();
 
-      // Маркер
       if (markerRef.current) {
         markerRef.current.setLatLng(latlng);
       } else {
@@ -55,7 +46,6 @@ const LocationTracker = ({ map }) => {
 
       updateMarkerStyle(true);
 
-      // Шлейф
       if (trailRef.current.length >= 2) {
         if (polylineRef.current) {
           polylineRef.current.setLatLngs(trailRef.current);
@@ -72,94 +62,42 @@ const LocationTracker = ({ map }) => {
     [map, updateMarkerStyle]
   );
 
-  // === Подключение WebSocket ===
-  const connectWebSocket = useCallback(() => {
-    // Защита от дублирования
-    if (wsRef.current) {
-      if (wsRef.current.readyState === WebSocket.OPEN) return;
-      wsRef.current.close();
-    }
-
-    if (isManuallyClosedRef.current) return;
-
-    const ws = new WebSocket(configApi.WS_API_HOST);
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      console.log('📍 WebSocket connected');
-    };
-
-    ws.onmessage = (event) => {
+  // Обработка сообщений от WebSocket
+  const handleWebSocketMessage = useCallback(
+    (event) => {
       try {
         const data = JSON.parse(event.data);
-        const message = data.message;
-        if (message?.lat != null && message?.lng != null) {
-          updateLocationOnMap(message.lat, message.lng);
+        const { lat, lng } = data.message || {};
+        if (lat != null && lng != null) {
+          updateLocationOnMap(lat, lng);
         }
       } catch (e) {
-        console.error('Invalid WebSocket message:', e);
+        console.error('Invalid location message:', e);
       }
-    };
+    },
+    [updateLocationOnMap]
+  );
 
-    ws.onclose = () => {
-      console.log('📍 WebSocket disconnected. Reconnecting...');
-      wsRef.current = null;
-      if (!isManuallyClosedRef.current) {
-        reconnectTimeoutRef.current = setTimeout(connectWebSocket, 3000);
-      }
-    };
+  // Подключаемся к WebSocket через хук
+  useWebSocket(configApi.WS_LAST_LOCATION, handleWebSocketMessage);
 
-    ws.onerror = (error) => {
-      console.error('📍 WebSocket error:', error);
-      ws.close(); // триггерит onclose
-    };
-  }, [updateLocationOnMap]);
-
-  // === Эффект: инициализация и cleanup ===
+  // Таймер неактивности
   useEffect(() => {
     if (!map) return;
 
-    isManuallyClosedRef.current = false;
-    connectWebSocket();
-
-    // Таймер неактивности
     intervalRef.current = setInterval(() => {
       if (lastUpdateTimeRef.current) {
-        const elapsed = Date.now() - lastUpdateTimeRef.current;
-        const isActive = elapsed < 5 * 60 * 1000; // 5 минут
+        const isActive = Date.now() - lastUpdateTimeRef.current < 5 * 60 * 1000;
         updateMarkerStyle(isActive);
       }
     }, 20000);
 
     return () => {
-      isManuallyClosedRef.current = true;
-
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = null;
-      }
-
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-
-      if (wsRef.current) {
-        wsRef.current.close();
-        wsRef.current = null;
-      }
-
-      // Удаление слоёв
-      if (markerRef.current) {
-        map.removeLayer(markerRef.current);
-        markerRef.current = null;
-      }
-      if (polylineRef.current) {
-        map.removeLayer(polylineRef.current);
-        polylineRef.current = null;
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (markerRef.current) map.removeLayer(markerRef.current);
+      if (polylineRef.current) map.removeLayer(polylineRef.current);
     };
-  }, [map, connectWebSocket, updateMarkerStyle]);
+  }, [map, updateMarkerStyle]);
 
   return null;
 };
