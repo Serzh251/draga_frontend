@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Select } from 'antd';
 import 'antd/dist/reset.css';
 import '../../../static/css/MapFields.css';
-import { useMapData } from '@/hook/useDataMap';
+import { useMapData } from '@/hooks/useDataMap';
 
 const { Option } = Select;
 

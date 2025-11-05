@@ -1,3 +1,4 @@
+// src/hooks/useWebSocket.js
 import { useEffect, useRef, useCallback } from 'react';
 
 export const useWebSocket = (url, onMessage) => {
@@ -9,6 +10,7 @@ export const useWebSocket = (url, onMessage) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
     if (isManuallyClosedRef.current) return;
 
+    // Просто подключаемся — куки отправятся автоматически
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
@@ -19,7 +21,7 @@ export const useWebSocket = (url, onMessage) => {
     ws.onclose = () => {
       wsRef.current = null;
       if (!isManuallyClosedRef.current) {
-        reconnectTimeoutRef.current = setTimeout(connect, 3000);
+        reconnectTimeoutRef.current = setTimeout(connect, 10000);
       }
     };
 
@@ -35,7 +37,6 @@ export const useWebSocket = (url, onMessage) => {
     };
   }, [connect]);
 
-  // Опционально: вернуть метод отправки
   const sendMessage = useCallback((data) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(typeof data === 'string' ? data : JSON.stringify(data));

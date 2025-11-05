@@ -2,7 +2,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 import configApi from '../../api/config-api';
-import { useWebSocket } from '@/hook/useWebsocket';
+import { useWebSocket } from '@/hooks/useWebsocket';
 
 const LocationTracker = ({ map }) => {
   const markerRef = useRef(null);

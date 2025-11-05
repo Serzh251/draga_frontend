@@ -1,11 +1,12 @@
 // App.jsx
 import React from 'react';
-import { useAuth } from './hook/use-auth';
+
 import { Route, Routes } from 'react-router-dom';
 import RouteLayout from './components/Header';
 import MapComponent from './components/map/Map';
 import 'leaflet/dist/leaflet.css';
 import './static/bootstrap/css/bootstrap.min.css';
+import { useAuth } from '@/hooks/useAuth';
 
 const App = () => {
   const { isAuth } = useAuth();

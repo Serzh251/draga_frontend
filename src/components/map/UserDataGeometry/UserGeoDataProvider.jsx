@@ -1,6 +1,6 @@
 // src/components/Map/UserDataGeometry/UserGeoDataProvider.jsx
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/hook/use-auth';
+import { useAuth } from '@/hooks/useAuth';
 import { useFetchUserGeoDataQuery, useDeleteUserGeoDataMutation } from '@/api/api';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserGeoData, removeUserGeoData } from '@/store/slices/userGeoDataSlice';

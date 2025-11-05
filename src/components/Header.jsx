@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Modal } from 'antd';
+import { Layout, Menu, Modal, Space } from 'antd';
 import { NavLink, Outlet } from 'react-router-dom';
 import { HomeOutlined, LoginOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
-import { useAuth } from '@/hook/use-auth';
+import { useAuth } from '@/hooks/useAuth';
 import Login from './auth/login';
 import Logout from './auth/logout';
 import configApi from '../api/config-api';
+import NotificationBell from '@/components/Notifications';
 
-const { Header } = Layout;
+const { Header: AntHeader } = Layout;
 
 const AppHeader = () => {
   const apiAdmin = configApi.API_ADMIN;
@@ -15,33 +16,14 @@ const AppHeader = () => {
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
-  const showLoginModal = () => {
-    setIsLoginModalVisible(true);
-  };
-
-  const handleLoginOk = () => {
-    setIsLoginModalVisible(false);
-  };
-
-  const handleLoginCancel = () => {
-    setIsLoginModalVisible(false);
-  };
-
-  const showLogoutModal = () => {
-    setIsLogoutModalVisible(true);
-  };
-
-  const handleLogoutOk = () => {
-    setIsLogoutModalVisible(false);
-  };
-
-  const handleLogoutCancel = () => {
-    setIsLogoutModalVisible(false);
-  };
+  const showLoginModal = () => setIsLoginModalVisible(true);
+  const handleLoginCancel = () => setIsLoginModalVisible(false);
+  const showLogoutModal = () => setIsLogoutModalVisible(true);
+  const handleLogoutCancel = () => setIsLogoutModalVisible(false);
 
   const menuItems = [
     {
-      key: '1',
+      key: 'home',
       icon: <HomeOutlined />,
       label: <NavLink to="/">Главная</NavLink>,
     },
@@ -49,28 +31,20 @@ const AppHeader = () => {
 
   if (!isAuth) {
     menuItems.push({
-      key: '2',
+      key: 'login',
       icon: <LoginOutlined />,
-      label: (
-        <span onClick={showLoginModal} style={{ cursor: 'pointer' }}>
-          Вход
-        </span>
-      ),
+      label: <span onClick={showLoginModal}>Вход</span>,
     });
   } else {
     menuItems.push({
-      key: '3',
+      key: 'logout',
       icon: <LogoutOutlined />,
-      label: (
-        <span onClick={showLogoutModal} style={{ cursor: 'pointer' }}>
-          Выход
-        </span>
-      ),
+      label: <span onClick={showLogoutModal}>Выход</span>,
     });
 
     if (isAdmin) {
       menuItems.push({
-        key: '4',
+        key: 'admin',
         icon: <SettingOutlined />,
         label: (
           <a href={apiAdmin} rel="noopener noreferrer">
@@ -79,30 +53,46 @@ const AppHeader = () => {
         ),
       });
     }
-    menuItems.push({
-      key: '5',
-      label: <div className="current-user text-decoration-none">{firstName}</div>,
-      style: { marginLeft: 'auto' },
-    });
   }
 
   return (
     <>
-      <Header>
-        <Menu theme="dark" mode="horizontal" selectable={false} style={{ marginRight: 15 }} items={menuItems} />
-      </Header>
-      <Modal title="Вход" open={isLoginModalVisible} onOk={handleLoginOk} onCancel={handleLoginCancel} footer={null}>
-        <Login onLoginSuccess={handleLoginOk} />
-      </Modal>
-      <Modal
-        title="Выход"
-        open={isLogoutModalVisible}
-        onOk={handleLogoutOk}
-        onCancel={handleLogoutCancel}
-        footer={null}
+      <AntHeader
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '0 24px', // опционально: добавьте отступы
+        }}
       >
-        <Logout onLogoutSuccess={handleLogoutOk} />
+        {/* Контейнер меню растягивается на всё доступное пространство */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            selectable={false}
+            items={menuItems}
+            overflowedIndicator={null} // ← отключаем "три точки"
+            style={{
+              lineHeight: '64px',
+              minWidth: 'fit-content', // ← гарантирует, что меню не сжимается
+            }}
+          />
+        </div>
+
+        <Space>
+          {isAuth && firstName && <span style={{ color: '#fff', marginRight: 16 }}>{firstName}</span>}
+          <NotificationBell />
+        </Space>
+      </AntHeader>
+
+      <Modal open={isLoginModalVisible} onCancel={handleLoginCancel} footer={null} title="Вход">
+        <Login onLoginSuccess={handleLoginCancel} />
       </Modal>
+      <Modal open={isLogoutModalVisible} onCancel={handleLogoutCancel} footer={null} title="Выход">
+        <Logout onLogoutSuccess={handleLogoutCancel} />
+      </Modal>
+
       <Outlet />
     </>
   );

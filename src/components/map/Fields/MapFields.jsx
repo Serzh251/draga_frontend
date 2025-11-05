@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { useFetchFieldsQuery } from '@/api/api';
-import { useAuth } from '@/hook/use-auth';
+import { useAuth } from '@/hooks/useAuth';
 import { useDispatch } from 'react-redux';
 import { setFieldsData } from '@/store/slices/mapDataSlice';
 
