@@ -75,6 +75,10 @@ const MapComponent = () => {
       touchGestures: true,
     });
 
+    // Создаем пользовательскую панель с высоким z-index для слоев MapFields
+    const fieldsPane = map.createPane('fieldsPane');
+    fieldsPane.style.zIndex = 650; // Выше markerPane (600), но ниже popup/tooltipPane (700)
+
     mapInstanceRef.current = map;
 
     map.whenReady(() => requestAnimationFrame(() => setIsMapReady(true)));

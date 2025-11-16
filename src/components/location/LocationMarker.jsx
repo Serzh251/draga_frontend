@@ -41,7 +41,8 @@ const LocationTracker = ({ map }) => {
           iconSize: [25, 25],
           iconAnchor: [12, 12],
         });
-        markerRef.current = L.marker(latlng, { icon }).addTo(map);
+        // --- ИЗМЕНЕНИЕ: Указываем пользовательскую панель 'fieldsPane' для маркера ---
+        markerRef.current = L.marker(latlng, { icon, pane: 'fieldsPane' }).addTo(map);
       }
 
       updateMarkerStyle(true);
@@ -50,16 +51,18 @@ const LocationTracker = ({ map }) => {
         if (polylineRef.current) {
           polylineRef.current.setLatLngs(trailRef.current);
         } else {
+          // --- ИЗМЕНЕНИЕ: Указываем пользовательскую панель 'fieldsPane' для линии ---
           polylineRef.current = L.polyline(trailRef.current, {
             color: 'red',
             weight: 5,
             opacity: 0.8,
             dashArray: '5, 5',
+            pane: 'fieldsPane', // Добавляем опцию pane
           }).addTo(map);
         }
       }
     },
-    [map, updateMarkerStyle]
+    [map, updateMarkerStyle] // map теперь в зависимостях, так как pane используется
   );
 
   // Обработка сообщений от WebSocket
