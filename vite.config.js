@@ -65,6 +65,7 @@ export default defineConfig({
           /^\/swagger/, // Swagger
           /^\/ws/, // WebSocket
           /^\/django-static/,
+          /^\/backup-api/,
         ],
       },
     }),
