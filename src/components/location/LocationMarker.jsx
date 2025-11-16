@@ -41,8 +41,18 @@ const LocationTracker = ({ map }) => {
           iconSize: [25, 25],
           iconAnchor: [12, 12],
         });
-        // --- ИЗМЕНЕНИЕ: Указываем пользовательскую панель 'fieldsPane' для маркера ---
-        markerRef.current = L.marker(latlng, { icon, pane: 'fieldsPane' }).addTo(map);
+        // --- ИЗМЕНЕНИЕ: Создаем маркер ---
+        const newMarker = L.marker(latlng, { icon, pane: 'fieldsPane' });
+
+        newMarker.on('click', function (e) {
+          e.originalEvent.stopPropagation();
+          newMarker
+            .bindPopup(`Текущая позиция:<br>Широта: ${lat.toFixed(6)}<br>Долгота: ${lng.toFixed(6)}`)
+            .openPopup();
+        });
+
+        newMarker.addTo(map);
+        markerRef.current = newMarker;
       }
 
       updateMarkerStyle(true);
@@ -51,7 +61,6 @@ const LocationTracker = ({ map }) => {
         if (polylineRef.current) {
           polylineRef.current.setLatLngs(trailRef.current);
         } else {
-          // --- ИЗМЕНЕНИЕ: Указываем пользовательскую панель 'fieldsPane' для линии ---
           polylineRef.current = L.polyline(trailRef.current, {
             color: 'red',
             weight: 5,
@@ -62,10 +71,9 @@ const LocationTracker = ({ map }) => {
         }
       }
     },
-    [map, updateMarkerStyle] // map теперь в зависимостях, так как pane используется
+    [map, updateMarkerStyle]
   );
 
-  // Обработка сообщений от WebSocket
   const handleWebSocketMessage = useCallback(
     (event) => {
       try {
