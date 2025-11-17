@@ -31,8 +31,13 @@ const MapCleanPoints = ({
   useEffect(() => {
     if (!map || !show || !shouldFetch || !pointsData) return;
 
+    // Удаляем старый слой, если был
     if (layerRef.current) {
-      map.removeLayer(layerRef.current);
+      try {
+        if (map.hasLayer(layerRef.current)) map.removeLayer(layerRef.current);
+      } catch (e) {
+        // ignore
+      }
       layerRef.current = null;
     }
 
@@ -63,15 +68,33 @@ const MapCleanPoints = ({
     geoJsonLayer.addTo(map);
     layerRef.current = geoJsonLayer;
 
+    requestAnimationFrame(() => {
+      try {
+        if (layerRef.current && typeof layerRef.current.bringToBack === 'function') {
+          layerRef.current.bringToBack();
+        } else if (layerRef.current && map && typeof map.eachLayer === 'function') {
+          map.eachLayer((l) => {
+            if (l === layerRef.current) return;
+            try {
+              if (typeof l.bringToFront === 'function') l.bringToFront();
+            } catch (e) {}
+          });
+        }
+      } catch (e) {
+        // console.warn('bringToBack failed', e);
+      }
+    });
+
     return () => {
       if (layerRef.current) {
-        map.removeLayer(layerRef.current);
+        try {
+          if (map.hasLayer(layerRef.current)) map.removeLayer(layerRef.current);
+        } catch (e) {}
         layerRef.current = null;
       }
     };
   }, [map, pointsData, show, shouldFetch, isPrev]);
 
-  // 🔴 ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ТОЛЬКО ЕСЛИ НЕ ВЫБРАНО МЕСТОРОЖДЕНИЕ
   if (show && fieldsArray.length === 0) {
     return (
       <div

@@ -1,3 +1,4 @@
+// src/components/MapComponent.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -75,9 +76,10 @@ const MapComponent = () => {
       touchGestures: true,
     });
 
-    // Создаем пользовательскую панель с высоким z-index для слоев MapFields
     const fieldsPane = map.createPane('fieldsPane');
-    fieldsPane.style.zIndex = 650; // Выше markerPane (600), но ниже popup/tooltipPane (700)
+    fieldsPane.style.zIndex = 650; // для слоев которые нужно поднять
+    const popupAbovePane = map.createPane('popupAbovePane');
+    popupAbovePane.style.zIndex = 710;
 
     mapInstanceRef.current = map;
 

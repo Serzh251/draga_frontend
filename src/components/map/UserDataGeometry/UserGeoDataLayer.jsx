@@ -46,20 +46,17 @@ const UserGeoDataLayer = ({ map, userGeoData }) => {
 
       if (geometry.type === 'Point') {
         const { node, render } = makePopupNode(feature.id, properties);
-        // Указываем панель 'fieldsPane' для маркера
-        layer = L.marker([geometry.coordinates[1], geometry.coordinates[0]], { pane: 'fieldsPane' }).bindPopup(node);
+        layer = L.marker([geometry.coordinates[1], geometry.coordinates[0]]).bindPopup(node);
         layer.on('popupopen', render);
       } else if (geometry.type === 'LineString') {
         const { node, render } = makePopupNode(feature.id, properties);
         const latlngs = geometry.coordinates.map(([lon, lat]) => [lat, lon]);
-        // Указываем панель 'fieldsPane' для линии
-        layer = L.polyline(latlngs, { color, weight: 4, pane: 'fieldsPane' }).bindPopup(node);
+        layer = L.polyline(latlngs, { color, weight: 4 }).bindPopup(node);
         layer.on('popupopen', render);
       } else if (geometry.type === 'Polygon') {
         const { node, render } = makePopupNode(feature.id, properties);
         const rings = geometry.coordinates.map((ring) => ring.map(([lon, lat]) => [lat, lon]));
-        // Указываем панель 'fieldsPane' для полигона
-        layer = L.polygon(rings, { color, weight: 4, fillOpacity: 0.1, pane: 'fieldsPane' }).bindPopup(node);
+        layer = L.polygon(rings, { color, weight: 4, fillOpacity: 0.1 }).bindPopup(node);
         layer.on('popupopen', render);
       } else if (geometry.type === 'GeometryCollection') {
         geometry.geometries.forEach((geo, index) => {
@@ -67,16 +64,13 @@ const UserGeoDataLayer = ({ map, userGeoData }) => {
           let subLayer = null;
 
           if (geo.type === 'Point') {
-            // Указываем панель 'fieldsPane' для подмаркера
-            subLayer = L.marker([geo.coordinates[1], geo.coordinates[0]], { pane: 'fieldsPane' }).bindPopup(node);
+            subLayer = L.marker([geo.coordinates[1], geo.coordinates[0]]).bindPopup(node);
           } else if (geo.type === 'LineString') {
             const coords = geo.coordinates.map(([lon, lat]) => [lat, lon]);
-            // Указываем панель 'fieldsPane' для подлинии
-            subLayer = L.polyline(coords, { color, weight: 4, pane: 'fieldsPane' }).bindPopup(node);
+            subLayer = L.polyline(coords, { color, weight: 4 }).bindPopup(node);
           } else if (geo.type === 'Polygon') {
             const rings = geo.coordinates.map((ring) => ring.map(([lon, lat]) => [lat, lon]));
-            // Указываем панель 'fieldsPane' для подполигона
-            subLayer = L.polygon(rings, { color, weight: 4, fillOpacity: 0.1, pane: 'fieldsPane' }).bindPopup(node);
+            subLayer = L.polygon(rings, { color, weight: 4, fillOpacity: 0.1 }).bindPopup(node);
           }
 
           if (subLayer) {

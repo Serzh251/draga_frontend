@@ -29,6 +29,10 @@ const LocationTracker = ({ map }) => {
 
       if (markerRef.current) {
         markerRef.current.setLatLng(latlng);
+        // Обновляем привязанный попап, если он открыт
+        if (markerRef.current.getPopup() && markerRef.current.getPopup().isOpen()) {
+          markerRef.current.getPopup().setLatLng(latlng);
+        }
       } else {
         const icon = L.divIcon({
           html: `<div class="custom-icon-wrapper">
@@ -41,15 +45,11 @@ const LocationTracker = ({ map }) => {
           iconSize: [25, 25],
           iconAnchor: [12, 12],
         });
-        // --- ИЗМЕНЕНИЕ: Создаем маркер ---
-        const newMarker = L.marker(latlng, { icon, pane: 'fieldsPane' });
+        const newMarker = L.marker(latlng, { icon /*, pane: 'fieldsPane' */ });
 
-        newMarker.on('click', function (e) {
-          e.originalEvent.stopPropagation();
-          newMarker
-            .bindPopup(`Текущая позиция:<br>Широта: ${lat.toFixed(6)}<br>Долгота: ${lng.toFixed(6)}`)
-            .openPopup();
-        });
+        const popupContent = `Текущая позиция:<br>Широта: ${lat.toFixed(6)}<br>Долгота: ${lng.toFixed(6)}`;
+        const popup = L.popup({ pane: 'popupAbovePane' }).setContent(popupContent);
+        newMarker.bindPopup(popup);
 
         newMarker.addTo(map);
         markerRef.current = newMarker;
@@ -60,14 +60,15 @@ const LocationTracker = ({ map }) => {
       if (trailRef.current.length >= 2) {
         if (polylineRef.current) {
           polylineRef.current.setLatLngs(trailRef.current);
+          polylineRef.current.bringToFront();
         } else {
           polylineRef.current = L.polyline(trailRef.current, {
             color: 'red',
             weight: 5,
             opacity: 0.8,
             dashArray: '5, 5',
-            pane: 'fieldsPane', // Добавляем опцию pane
           }).addTo(map);
+          polylineRef.current.bringToFront();
         }
       }
     },
@@ -105,8 +106,13 @@ const LocationTracker = ({ map }) => {
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
-      if (markerRef.current) map.removeLayer(markerRef.current);
-      if (polylineRef.current) map.removeLayer(polylineRef.current);
+      if (markerRef.current) {
+        if (markerRef.current.getPopup() && markerRef.current.getPopup().isOpen()) {
+          markerRef.current.closePopup();
+        }
+        map.removeLayer(markerRef.current);
+      }
+      if (polylineRef.current) map.removeLayer(polylineRef.current); // Удаляем линию из карты
     };
   }, [map, updateMarkerStyle]);
 
