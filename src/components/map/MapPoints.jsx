@@ -6,7 +6,6 @@ import { useFetchPointsQuery } from '@/api/api';
 const MapPoints = ({ map, selectedFields, selectedYears }) => {
   const layerRef = useRef(null);
   const fieldsArray = useMemo(() => Array.from(selectedFields), [selectedFields]);
-
   const yearsArray = useMemo(() => Array.from(selectedYears || []), [selectedYears]);
 
   const shouldFetch = fieldsArray.length > 0;
@@ -14,6 +13,7 @@ const MapPoints = ({ map, selectedFields, selectedYears }) => {
     field: fieldsArray[0],
     year: yearsArray.length > 0 ? yearsArray[0] : undefined,
   };
+
   const { data: points, isFetching } = useFetchPointsQuery(queryArgs, {
     skip: !shouldFetch,
     refetchOnMountOrArgChange: true,
@@ -24,8 +24,11 @@ const MapPoints = ({ map, selectedFields, selectedYears }) => {
   useEffect(() => {
     if (!map || !shouldFetch || !points) return;
 
+    // Удаляем предыдущий слой
     if (layerRef.current) {
-      map.removeLayer(layerRef.current);
+      try {
+        if (map.hasLayer(layerRef.current)) map.removeLayer(layerRef.current);
+      } catch (e) {}
       layerRef.current = null;
     }
 
@@ -57,15 +60,25 @@ const MapPoints = ({ map, selectedFields, selectedYears }) => {
     geoJsonLayer.addTo(map);
     layerRef.current = geoJsonLayer;
 
+    requestAnimationFrame(() => {
+      try {
+        if (layerRef.current?.bringToBack) {
+          layerRef.current.bringToBack();
+        }
+      } catch (e) {}
+      // map.eachLayer(l => l !== layerRef.current && l.bringToFront?.());
+    });
+
     return () => {
       if (layerRef.current) {
-        map.removeLayer(layerRef.current);
+        try {
+          if (map.hasLayer(layerRef.current)) map.removeLayer(layerRef.current);
+        } catch (e) {}
         layerRef.current = null;
       }
     };
   }, [map, points, shouldFetch]);
 
-  // Уведомление: выберите месторождение
   if (fieldsArray.length === 0) {
     return (
       <div
