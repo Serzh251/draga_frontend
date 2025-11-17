@@ -1,11 +1,12 @@
+// src/components/buttons/ToogleButtons.jsx
 import React from 'react';
 import {
   AimOutlined,
+  AreaChartOutlined,
   EnvironmentFilled,
   EnvironmentOutlined,
   FileExcelOutlined,
   RadarChartOutlined,
-  AreaChartOutlined,
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { useAuth } from '@/hooks/useAuth';
@@ -33,56 +34,42 @@ const ToggleButton = ({ title, icon: Icon, onClick, isActive, activeColor = '#18
   );
 };
 
-const ToggleButtonGroup = ({
-  showMapPoints,
-  setShowMapPoints,
-  showCleanPoints,
-  setShowCleanPoints,
-  showGridCells,
-  setShowGridCells,
-  showHotMap,
-  setShowHotMap,
-  showMyLocation,
-  setShowMyLocation,
-  showBatymetryLayer,
-  setShowBatymetryLayer,
-}) => {
+const ToggleButtonGroup = ({ displayStates, toggleDisplayState }) => {
   const { isAdmin } = useAuth();
 
   return (
     <>
       <ToggleButton
-        title={showMyLocation ? 'Скрыть мое местоположение' : 'Показать мое местоположение'}
-        icon={AimOutlined}
-        onClick={() => setShowMyLocation((prev) => !prev)}
-        isActive={showMyLocation}
-        activeColor="#52c41a" // зелёный при включении
+        title={displayStates.showBatymetryLayer ? 'Скрыть промеры' : 'Показать промеры'}
+        icon={AreaChartOutlined}
+        onClick={() => toggleDisplayState('showBatymetryLayer')}
+        isActive={displayStates.showBatymetryLayer}
+        activeColor="blue"
         style={{ top: 272, left: 11, width: 30, height: 30, padding: 3 }}
       />
-
       <ToggleButton
-        title={showBatymetryLayer ? 'Скрыть промеры' : 'Показать промеры'}
-        icon={AreaChartOutlined}
-        onClick={() => setShowBatymetryLayer((prev) => !prev)}
-        isActive={showBatymetryLayer}
-        activeColor="blue"
-        style={{ top: 312, left: 11, width: 30, height: 30, padding: 3 }}
+        title={displayStates.showMyLocation ? 'Скрыть мое местоположение' : 'Показать мое местоположение'}
+        icon={AimOutlined}
+        onClick={() => toggleDisplayState('showMyLocation')}
+        isActive={displayStates.showMyLocation}
+        activeColor="#52c41a"
+        style={{ top: 392, left: 11, width: 30, height: 30, padding: 3 }}
       />
 
       <ToggleButton
-        title={showCleanPoints ? 'Скрыть clean точки' : 'Показать clean точки'}
+        title={displayStates.showCleanPoints ? 'Скрыть clean точки' : 'Показать clean точки'}
         icon={EnvironmentFilled}
-        onClick={() => setShowCleanPoints((prev) => !prev)}
-        isActive={showCleanPoints}
+        onClick={() => toggleDisplayState('showCleanPoints')}
+        isActive={displayStates.showCleanPoints}
         activeColor="green"
         style={{ top: 350, right: 11 }}
       />
 
       <ToggleButton
-        title={showHotMap ? 'Скрыть hot map' : 'Показать hot map'}
+        title={displayStates.showHotMap ? 'Скрыть hot map' : 'Показать hot map'}
         icon={RadarChartOutlined}
-        onClick={() => setShowHotMap((prev) => !prev)}
-        isActive={showHotMap}
+        onClick={() => toggleDisplayState('showHotMap')}
+        isActive={displayStates.showHotMap}
         activeColor="blue"
         style={{ top: 292, right: 11 }}
       />
@@ -90,20 +77,20 @@ const ToggleButtonGroup = ({
       {isAdmin && (
         <>
           <ToggleButton
-            title={showMapPoints ? 'Скрыть все точки' : 'Показать все точки'}
+            title={displayStates.showMapPoints ? 'Скрыть все точки' : 'Показать все точки'}
             icon={EnvironmentOutlined}
-            onClick={() => setShowMapPoints((prev) => !prev)}
-            isActive={showMapPoints}
+            onClick={() => toggleDisplayState('showMapPoints')}
+            isActive={displayStates.showMapPoints}
             activeColor="red"
             style={{ top: 406, right: 11 }}
           />
 
           <ToggleButton
-            title={showGridCells ? 'Скрыть сетку' : 'Показать сетку'}
+            title={displayStates.showGridCells ? 'Скрыть сетку' : 'Показать сетку'}
             icon={FileExcelOutlined}
-            onClick={() => setShowGridCells((prev) => !prev)}
-            isActive={showGridCells}
-            activeColor="#faad14" // оранжевый
+            onClick={() => toggleDisplayState('showGridCells')}
+            isActive={displayStates.showGridCells}
+            activeColor="#faad14"
             style={{ top: 462, right: 11 }}
           />
         </>

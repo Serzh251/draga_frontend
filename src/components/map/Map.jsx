@@ -41,12 +41,32 @@ const MapComponent = () => {
   const [selectedYears, setSelectedYears] = useState(new Set());
   const [selectedYearsPrev, setSelectedYearsPrev] = useState(new Set());
 
+  const [displayStates, setDisplayStates] = useState({
+    showGridCells: usePersistentState('showGridCells', false)[0],
+    showMapPoints: usePersistentState('showMapPoints', false)[0],
+    showMyLocation: usePersistentState('showMyLocation', false)[0],
+    showCleanPoints: usePersistentState('showCleanPoints', true)[0],
+    showBatymetryLayer: usePersistentState('showBatymetryLayer', true)[0],
+    showHotMap: usePersistentState('showHotMap', true)[0],
+  });
+
   const [showGridCells, setShowGridCells] = usePersistentState('showGridCells', false);
   const [showMapPoints, setShowMapPoints] = usePersistentState('showMapPoints', false);
   const [showMyLocation, setShowMyLocation] = usePersistentState('showMyLocation', false);
   const [showCleanPoints, setShowCleanPoints] = usePersistentState('showCleanPoints', true);
   const [showBatymetryLayer, setShowBatymetryLayer] = usePersistentState('showBatymetryLayer', true);
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
+
+  useEffect(() => {
+    setDisplayStates({
+      showGridCells,
+      showMapPoints,
+      showMyLocation,
+      showCleanPoints,
+      showBatymetryLayer,
+      showHotMap,
+    });
+  }, [showGridCells, showMapPoints, showMyLocation, showCleanPoints, showBatymetryLayer, showHotMap]);
 
   const { data: mapData } = useFetchDefaultMapCenterQuery(undefined, { skip: !isAuth });
   const { data: listUniqueYears } = useFetchYearsQuery(undefined, { skip: !isAuth });
@@ -77,7 +97,7 @@ const MapComponent = () => {
     });
 
     const fieldsPane = map.createPane('fieldsPane');
-    fieldsPane.style.zIndex = 650; // для слоев которые нужно поднять
+    fieldsPane.style.zIndex = 650;
     const popupAbovePane = map.createPane('popupAbovePane');
     popupAbovePane.style.zIndex = 710;
 
@@ -95,6 +115,19 @@ const MapComponent = () => {
   }, [mapData?.center?.coordinates?.join(','), mapData?.zoom]);
 
   if (authStatus === 'loading') return <div>Загрузка...</div>;
+
+  const toggleDisplayState = (key) => {
+    setDisplayStates((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+    if (key === 'showGridCells') setShowGridCells((prev) => !prev);
+    if (key === 'showMapPoints') setShowMapPoints((prev) => !prev);
+    if (key === 'showMyLocation') setShowMyLocation((prev) => !prev);
+    if (key === 'showCleanPoints') setShowCleanPoints((prev) => !prev);
+    if (key === 'showBatymetryLayer') setShowBatymetryLayer((prev) => !prev);
+    if (key === 'showHotMap') setShowHotMap((prev) => !prev);
+  };
 
   return (
     <div className="app-layout">
@@ -128,18 +161,20 @@ const MapComponent = () => {
               <MapFields map={mapInstanceRef.current} />
               <RotateButtons map={mapInstanceRef.current} />
               <SaveCurrentPointButton />
-              {showBatymetryLayer && <BatymetryLayer map={mapInstanceRef.current} />}
+              {displayStates.showBatymetryLayer && <BatymetryLayer map={mapInstanceRef.current} />}
               <LocationMarker map={mapInstanceRef.current} />
-              {showMyLocation && <MyLocationMarker map={mapInstanceRef.current} />}
-              {showGridCells && <GridCells selectedFields={selectedFields} map={mapInstanceRef.current} />}
-              {showMapPoints && (
+              {displayStates.showMyLocation && <MyLocationMarker map={mapInstanceRef.current} />}
+              {displayStates.showGridCells && (
+                <GridCells selectedFields={selectedFields} map={mapInstanceRef.current} />
+              )}
+              {displayStates.showMapPoints && (
                 <MapPoints
                   map={mapInstanceRef.current}
                   selectedFields={selectedFields}
                   selectedYears={selectedYears}
                 />
               )}
-              {showCleanPoints && (
+              {displayStates.showCleanPoints && (
                 <>
                   <MapCleanPoints
                     map={mapInstanceRef.current}
@@ -155,7 +190,7 @@ const MapComponent = () => {
                   />
                 </>
               )}
-              {showHotMap && (
+              {displayStates.showHotMap && (
                 <HeatmapLayer
                   map={mapInstanceRef.current}
                   selectedFields={selectedFields}
@@ -165,20 +200,7 @@ const MapComponent = () => {
             </>
           )}
 
-          <ToggleButtonGroup
-            showMapPoints={showMapPoints}
-            setShowMapPoints={setShowMapPoints}
-            showCleanPoints={showCleanPoints}
-            setShowCleanPoints={setShowCleanPoints}
-            showGridCells={showGridCells}
-            setShowGridCells={setShowGridCells}
-            showHotMap={showHotMap}
-            setShowHotMap={setShowHotMap}
-            showMyLocation={showMyLocation}
-            setShowMyLocation={setShowMyLocation}
-            setShowBatymetryLayer={setShowBatymetryLayer}
-            showBatymetryLayer={showBatymetryLayer}
-          />
+          <ToggleButtonGroup displayStates={displayStates} toggleDisplayState={toggleDisplayState} />
         </>
       )}
     </div>
