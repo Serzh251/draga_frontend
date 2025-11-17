@@ -10,12 +10,15 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import '@ant-design/v5-patch-for-react-19';
 import App from './App';
+import ResponsiveProvider from '@/components/ResponsiveProvider';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
     <Provider store={store}>
-      <App />
+      <ResponsiveProvider>
+        <App />
+      </ResponsiveProvider>
     </Provider>
   </BrowserRouter>
 );

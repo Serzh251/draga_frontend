@@ -7,6 +7,7 @@ import Login from './auth/login';
 import Logout from './auth/logout';
 import configApi from '../api/config-api';
 import NotificationBell from '@/components/Notifications';
+import { useSelector } from 'react-redux';
 
 const { Header: AntHeader } = Layout;
 
@@ -15,18 +16,8 @@ const AppHeader = () => {
   const { isAuth, isAdmin, firstName } = useAuth();
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useSelector((state) => state.ui.isMobile);
   const [menuCollapsed, setMenuCollapsed] = useState(true);
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
 
   const showLoginModal = () => setIsLoginModalVisible(true);
   const handleLoginCancel = () => setIsLoginModalVisible(false);

@@ -3,6 +3,7 @@ import { Dropdown, List, Typography, Space, Empty, Modal, Button } from 'antd';
 import { BellOutlined, CloseOutlined } from '@ant-design/icons';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import configApi from '@/api/config-api';
+import { useSelector } from 'react-redux';
 
 const { Text, Paragraph } = Typography;
 
@@ -25,17 +26,7 @@ const NotificationBell = () => {
   const [errors, setErrors] = useState([]);
   const [isManual, setIsManual] = useState(false);
   const [open, setOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
+  const isMobile = useSelector((state) => state.ui.isMobile);
 
   const handleWebSocketMessage = useCallback((event) => {
     try {
