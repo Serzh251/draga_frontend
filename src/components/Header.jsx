@@ -16,7 +16,7 @@ const AppHeader = () => {
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [menuCollapsed, setMenuCollapsed] = useState(false);
+  const [menuCollapsed, setMenuCollapsed] = useState(true);
 
   useEffect(() => {
     const checkIsMobile = () => {

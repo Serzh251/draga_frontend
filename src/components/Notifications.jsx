@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
-import { Dropdown, List, Typography, Space, Empty } from 'antd';
-import { BellOutlined } from '@ant-design/icons';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Dropdown, List, Typography, Space, Empty, Modal, Button } from 'antd';
+import { BellOutlined, CloseOutlined } from '@ant-design/icons';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import configApi from '@/api/config-api';
 
@@ -25,6 +25,17 @@ const NotificationBell = () => {
   const [errors, setErrors] = useState([]);
   const [isManual, setIsManual] = useState(false);
   const [open, setOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   const handleWebSocketMessage = useCallback((event) => {
     try {
@@ -60,6 +71,10 @@ const NotificationBell = () => {
   const clearErrors = () => {
     setErrors([]);
     setIsManual(false);
+    // Не закрываем модальное окно, чтобы пользователь мог увидеть "нет ошибок"
+  };
+
+  const closeNotification = () => {
     setOpen(false);
   };
 
@@ -74,25 +89,36 @@ const NotificationBell = () => {
   const menuContent = (
     <div
       style={{
-        width: 450,
+        width: isMobile ? 'calc(100vw - 32px)' : 450,
+        maxWidth: isMobile ? '100%' : 450,
         padding: '8px 0',
         background: '#fff',
         borderRadius: 8,
         boxShadow:
           '0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05)',
+        overflow: 'auto',
+        maxHeight: isMobile ? '70vh' : '60vh',
+        position: 'relative',
       }}
     >
-      <div style={{ padding: '0 12px 8px' }}>
-        <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-          <Paragraph strong underline>
-            {isManual ? 'Результат сохранения точки' : 'Ошибки и предупреждения'}
-          </Paragraph>
-          {errors.length > 0 && (
-            <Text type="secondary" style={{ cursor: 'pointer' }} onClick={clearErrors}>
-              Скрыть
-            </Text>
-          )}
-        </Space>
+      {/* Кнопка закрытия в правом верхнем углу */}
+      <Button
+        type="text"
+        icon={<CloseOutlined />}
+        onClick={closeNotification}
+        style={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          zIndex: 10,
+          color: '#595959',
+        }}
+      />
+
+      <div style={{ padding: '0 12px 8px', marginTop: 24 }}>
+        <Paragraph strong underline>
+          {isManual ? 'Результат сохранения точки' : 'Ошибки и предупреждения'}
+        </Paragraph>
       </div>
 
       {errors.length > 0 ? (
@@ -111,6 +137,11 @@ const NotificationBell = () => {
               </List.Item>
             )}
           />
+          <div style={{ padding: '12px 12px 0' }}>
+            <Button type="link" onClick={clearErrors}>
+              Очистить ошибки
+            </Button>
+          </div>
         </div>
       ) : isManual ? (
         <div style={{ padding: '12px' }}>
@@ -124,6 +155,38 @@ const NotificationBell = () => {
     </div>
   );
 
+  // На мобильных устройствах используем Modal вместо Dropdown
+  if (isMobile) {
+    return (
+      <>
+        <BellOutlined
+          style={{
+            fontSize: '20px',
+            color: errors.length > 0 ? '#ff4d4f' : '#595959',
+            animation: errors.length > 0 ? 'pulse 1.5s infinite' : 'none',
+            cursor: 'pointer',
+            transition: 'color 0.3s',
+          }}
+          onClick={() => setOpen(true)}
+        />
+        <Modal
+          open={open}
+          onCancel={closeNotification} // Закрываем только при клике на оверлей/ESC
+          footer={null}
+          closable={false}
+          maskClosable={true}
+          width={null}
+          styles={{ body: { padding: 0 } }}
+          style={{ top: 10, padding: 0 }}
+          wrapClassName="notification-modal-wrapper"
+        >
+          {menuContent}
+        </Modal>
+      </>
+    );
+  }
+
+  // На десктопе используем обычный Dropdown
   return (
     <Dropdown
       overlayStyle={{ top: 65, right: 70 }}
