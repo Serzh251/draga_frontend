@@ -3,14 +3,6 @@ import React from 'react';
 import { Button, Tooltip } from 'antd';
 import { UndoOutlined, RedoOutlined } from '@ant-design/icons';
 
-/**
- * RotateButtons — два простых кнопки поворота карты влево/вправо.
- *
- * Props:
- *  - map: экземпляр Leaflet map (обязательный для работы)
- *  - step: шаг поворота в градусах (по умолчанию 10)
- *  - style: дополнительный стиль для контейнера (опционально)
- */
 const RotateButtons = ({ map, step = 10, style = {} }) => {
   const handleRotate = (delta) => {
     if (!map) {
@@ -18,7 +10,6 @@ const RotateButtons = ({ map, step = 10, style = {} }) => {
       return;
     }
 
-    // Получаем текущий угол (bearing) безопасно
     const getBearing =
       typeof map.getBearing === 'function'
         ? map.getBearing.bind(map)
@@ -32,7 +23,6 @@ const RotateButtons = ({ map, step = 10, style = {} }) => {
     if (setBearing) {
       setBearing(next);
     } else {
-      // Если setBearing нет — просто логируем, чтобы не ломать приложение
       console.warn('RotateButtons: map does not support setBearing(). Make sure leaflet-rotate is loaded.');
     }
   };

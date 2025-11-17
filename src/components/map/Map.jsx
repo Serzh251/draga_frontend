@@ -1,14 +1,13 @@
 // src/components/MapComponent.jsx
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-rotate';
 import '../../static/css/MapMain.css';
 import config from '../../config';
-import ToggleButtonGroup from '../buttons/ToogleButtons';
 import usePersistentState from '@/hooks/usePersistentState';
 import MapInstruments from './Instruments/MapInstruments';
-import { useDispatch } from 'react-redux';
 import { setYearsData } from '@/store/slices/mapDataSlice';
 import { useFetchYearsQuery, useFetchDefaultMapCenterQuery } from '@/api/api';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,11 +26,14 @@ import MyLocationMarker from '../location/MyLocationMarker';
 import GridCells from './Fields/GridCells';
 import SaveCurrentPointButton from './Instruments/SaveCurrentPointButton';
 import ReloadButton from '../buttons/ReloadBtn';
+import ToggleButtonGroup from '@/components/buttons/ToogleButtons';
 
 const MapComponent = () => {
   const dispatch = useDispatch();
   const { isAuth, authStatus } = useAuth();
   const { yearsData } = useMapData();
+
+  const isMobile = useSelector((state) => state.ui?.isMobile);
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -41,15 +43,7 @@ const MapComponent = () => {
   const [selectedYears, setSelectedYears] = useState(new Set());
   const [selectedYearsPrev, setSelectedYearsPrev] = useState(new Set());
 
-  const [displayStates, setDisplayStates] = useState({
-    showGridCells: usePersistentState('showGridCells', false)[0],
-    showMapPoints: usePersistentState('showMapPoints', false)[0],
-    showMyLocation: usePersistentState('showMyLocation', false)[0],
-    showCleanPoints: usePersistentState('showCleanPoints', true)[0],
-    showBatymetryLayer: usePersistentState('showBatymetryLayer', true)[0],
-    showHotMap: usePersistentState('showHotMap', true)[0],
-  });
-
+  // persistent flags (single source of truth)
   const [showGridCells, setShowGridCells] = usePersistentState('showGridCells', false);
   const [showMapPoints, setShowMapPoints] = usePersistentState('showMapPoints', false);
   const [showMyLocation, setShowMyLocation] = usePersistentState('showMyLocation', false);
@@ -57,16 +51,42 @@ const MapComponent = () => {
   const [showBatymetryLayer, setShowBatymetryLayer] = usePersistentState('showBatymetryLayer', true);
   const [showHotMap, setShowHotMap] = usePersistentState('showHotMap', true);
 
-  useEffect(() => {
-    setDisplayStates({
+  const displayStates = useMemo(
+    () => ({
       showGridCells,
       showMapPoints,
       showMyLocation,
       showCleanPoints,
       showBatymetryLayer,
       showHotMap,
-    });
-  }, [showGridCells, showMapPoints, showMyLocation, showCleanPoints, showBatymetryLayer, showHotMap]);
+    }),
+    [showGridCells, showMapPoints, showMyLocation, showCleanPoints, showBatymetryLayer, showHotMap]
+  );
+
+  const toggleDisplayState = (key) => {
+    switch (key) {
+      case 'showGridCells':
+        setShowGridCells((v) => !v);
+        break;
+      case 'showMapPoints':
+        setShowMapPoints((v) => !v);
+        break;
+      case 'showMyLocation':
+        setShowMyLocation((v) => !v);
+        break;
+      case 'showCleanPoints':
+        setShowCleanPoints((v) => !v);
+        break;
+      case 'showBatymetryLayer':
+        setShowBatymetryLayer((v) => !v);
+        break;
+      case 'showHotMap':
+        setShowHotMap((v) => !v);
+        break;
+      default:
+        break;
+    }
+  };
 
   const { data: mapData } = useFetchDefaultMapCenterQuery(undefined, { skip: !isAuth });
   const { data: listUniqueYears } = useFetchYearsQuery(undefined, { skip: !isAuth });
@@ -75,6 +95,7 @@ const MapComponent = () => {
     if (listUniqueYears) dispatch(setYearsData(listUniqueYears));
   }, [listUniqueYears, dispatch]);
 
+  // init map
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -96,38 +117,42 @@ const MapComponent = () => {
       touchGestures: true,
     });
 
-    const fieldsPane = map.createPane('fieldsPane');
-    fieldsPane.style.zIndex = 650;
-    const popupAbovePane = map.createPane('popupAbovePane');
-    popupAbovePane.style.zIndex = 710;
+    // create panes
+    map.createPane('fieldsPane').style.zIndex = 650;
+    map.createPane('popupAbovePane').style.zIndex = 710;
+
+    // add mobile class to container if needed
+    if (isMobile && mapContainerRef.current) {
+      mapContainerRef.current.classList.add('mobile-map');
+    }
 
     mapInstanceRef.current = map;
 
     map.whenReady(() => requestAnimationFrame(() => setIsMapReady(true)));
 
     return () => {
+      // remove mobile class on unmount
+      if (mapContainerRef.current) {
+        mapContainerRef.current.classList.remove('mobile-map');
+      }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
       setIsMapReady(false);
     };
-  }, [mapData?.center?.coordinates?.join(','), mapData?.zoom]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapData?.center?.coordinates?.join(','), mapData?.zoom]); // don't include isMobile here to avoid re-creating map
+
+  // update mobile class when isMobile changes (do NOT recreate map)
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container) return;
+    if (isMobile) container.classList.add('mobile-map');
+    else container.classList.remove('mobile-map');
+  }, [isMobile]);
 
   if (authStatus === 'loading') return <div>Загрузка...</div>;
-
-  const toggleDisplayState = (key) => {
-    setDisplayStates((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-    if (key === 'showGridCells') setShowGridCells((prev) => !prev);
-    if (key === 'showMapPoints') setShowMapPoints((prev) => !prev);
-    if (key === 'showMyLocation') setShowMyLocation((prev) => !prev);
-    if (key === 'showCleanPoints') setShowCleanPoints((prev) => !prev);
-    if (key === 'showBatymetryLayer') setShowBatymetryLayer((prev) => !prev);
-    if (key === 'showHotMap') setShowHotMap((prev) => !prev);
-  };
 
   return (
     <div className="app-layout">
@@ -152,29 +177,28 @@ const MapComponent = () => {
             years={yearsData || []}
             selectedYears={selectedYearsPrev}
             onSelectionChange={setSelectedYearsPrev}
-            isPrev={true}
+            isPrev
           />
 
           {isMapReady && (
             <>
-              <ReloadButton />
+              <ReloadButton style={{ top: 352, left: 11, width: 30, height: 30, padding: 2 }} />
               <MapFields map={mapInstanceRef.current} />
               <RotateButtons map={mapInstanceRef.current} />
-              <SaveCurrentPointButton />
-              {displayStates.showBatymetryLayer && <BatymetryLayer map={mapInstanceRef.current} />}
+              <SaveCurrentPointButton style={{ top: 312, left: 11, width: 30, height: 30, padding: 2 }} />
+
+              {showBatymetryLayer && <BatymetryLayer map={mapInstanceRef.current} />}
               <LocationMarker map={mapInstanceRef.current} />
-              {displayStates.showMyLocation && <MyLocationMarker map={mapInstanceRef.current} />}
-              {displayStates.showGridCells && (
-                <GridCells selectedFields={selectedFields} map={mapInstanceRef.current} />
-              )}
-              {displayStates.showMapPoints && (
+              {showMyLocation && <MyLocationMarker map={mapInstanceRef.current} />}
+              {showGridCells && <GridCells selectedFields={selectedFields} map={mapInstanceRef.current} />}
+              {showMapPoints && (
                 <MapPoints
                   map={mapInstanceRef.current}
                   selectedFields={selectedFields}
                   selectedYears={selectedYears}
                 />
               )}
-              {displayStates.showCleanPoints && (
+              {showCleanPoints && (
                 <>
                   <MapCleanPoints
                     map={mapInstanceRef.current}
@@ -186,11 +210,11 @@ const MapComponent = () => {
                     map={mapInstanceRef.current}
                     selectedFields={selectedFields}
                     selectedYears={selectedYearsPrev}
-                    isPrev={true}
+                    isPrev
                   />
                 </>
               )}
-              {displayStates.showHotMap && (
+              {showHotMap && (
                 <HeatmapLayer
                   map={mapInstanceRef.current}
                   selectedFields={selectedFields}

@@ -1,5 +1,4 @@
-// src/components/buttons/ToogleButtons.jsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   AimOutlined,
   AreaChartOutlined,
@@ -8,93 +7,108 @@ import {
   FileExcelOutlined,
   RadarChartOutlined,
 } from '@ant-design/icons';
-import { Tooltip } from 'antd';
 import { useAuth } from '@/hooks/useAuth';
+import BaseIconButton from './BaseIconButton';
+import { useSelector } from 'react-redux';
 
-// Общая базовая кнопка
-const ToggleButton = ({ title, icon: Icon, onClick, isActive, activeColor = '#1890ff', ...props }) => {
-  const baseStyle = {
-    position: 'absolute',
-    zIndex: 500,
-    fontSize: '25px',
-    cursor: 'pointer',
-    background: 'white',
-    padding: '9px',
-    borderRadius: '5px',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-    color: isActive ? activeColor : undefined,
-    transform: isActive ? 'scale(1.1)' : 'scale(1)',
-    transition: 'all 0.2s ease',
-  };
+const BUTTONS_CONFIG = [
+  {
+    key: 'showBatymetryLayer',
+    titleOn: 'Скрыть промеры',
+    titleOff: 'Показать промеры',
+    Icon: AreaChartOutlined,
+    activeColor: 'blue',
+    style: { top: 272, left: 11, width: 30, height: 30, padding: 3 },
+  },
+  {
+    key: 'showMyLocation',
+    titleOn: 'Скрыть мое местоположение',
+    titleOff: 'Показать мое местоположение',
+    Icon: AimOutlined,
+    activeColor: '#52c41a',
+    style: { top: 312, left: 11, width: 30, height: 30, padding: 3 },
+  },
+  {
+    key: 'showCleanPoints',
+    titleOn: 'Скрыть clean точки',
+    titleOff: 'Показать clean точки',
+    Icon: EnvironmentFilled,
+    activeColor: 'green',
+    style: { top: 350, right: 11 },
+  },
+  {
+    key: 'showHotMap',
+    titleOn: 'Скрыть hot map',
+    titleOff: 'Показать hot map',
+    Icon: RadarChartOutlined,
+    activeColor: 'blue',
+    style: { top: 292, right: 11 },
+  },
+  {
+    key: 'showMapPoints',
+    titleOn: 'Скрыть все точки',
+    titleOff: 'Показать все точки',
+    Icon: EnvironmentOutlined,
+    activeColor: 'red',
+    style: { top: 406, right: 11 },
+    adminOnly: true,
+  },
+  {
+    key: 'showGridCells',
+    titleOn: 'Скрыть сетку',
+    titleOff: 'Показать сетку',
+    Icon: FileExcelOutlined,
+    activeColor: '#faad14',
+    style: { top: 462, right: 11 },
+    adminOnly: true,
+  },
+];
 
-  return (
-    <Tooltip placement="left" title={title}>
-      <Icon onClick={onClick} style={{ ...baseStyle, ...props.style }} />
-    </Tooltip>
-  );
+const scaleStyleForMobile = (style, scale = 0.75) => {
+  if (!style) return style;
+  const s = { ...style };
+  // scale top/left/right if numeric
+  ['top', 'left', 'right', 'bottom'].forEach((k) => {
+    if (s[k] !== undefined && typeof s[k] === 'number') s[k] = Math.round(s[k] * scale);
+  });
+  // scale width/height/padding
+  ['width', 'height', 'padding'].forEach((k) => {
+    if (s[k] !== undefined && typeof s[k] === 'number') s[k] = Math.max(20, Math.round(s[k] * scale));
+  });
+  return s;
 };
 
 const ToggleButtonGroup = ({ displayStates, toggleDisplayState }) => {
   const { isAdmin } = useAuth();
+  const isMobile = useSelector((state) => state.ui?.isMobile);
+
+  const cfg = useMemo(
+    () =>
+      BUTTONS_CONFIG.filter((c) => {
+        if (c.adminOnly && !isAdmin) return false;
+        return true;
+      }),
+    [isAdmin]
+  );
 
   return (
     <>
-      <ToggleButton
-        title={displayStates.showBatymetryLayer ? 'Скрыть промеры' : 'Показать промеры'}
-        icon={AreaChartOutlined}
-        onClick={() => toggleDisplayState('showBatymetryLayer')}
-        isActive={displayStates.showBatymetryLayer}
-        activeColor="blue"
-        style={{ top: 272, left: 11, width: 30, height: 30, padding: 3 }}
-      />
-      <ToggleButton
-        title={displayStates.showMyLocation ? 'Скрыть мое местоположение' : 'Показать мое местоположение'}
-        icon={AimOutlined}
-        onClick={() => toggleDisplayState('showMyLocation')}
-        isActive={displayStates.showMyLocation}
-        activeColor="#52c41a"
-        style={{ top: 392, left: 11, width: 30, height: 30, padding: 3 }}
-      />
-
-      <ToggleButton
-        title={displayStates.showCleanPoints ? 'Скрыть clean точки' : 'Показать clean точки'}
-        icon={EnvironmentFilled}
-        onClick={() => toggleDisplayState('showCleanPoints')}
-        isActive={displayStates.showCleanPoints}
-        activeColor="green"
-        style={{ top: 350, right: 11 }}
-      />
-
-      <ToggleButton
-        title={displayStates.showHotMap ? 'Скрыть hot map' : 'Показать hot map'}
-        icon={RadarChartOutlined}
-        onClick={() => toggleDisplayState('showHotMap')}
-        isActive={displayStates.showHotMap}
-        activeColor="blue"
-        style={{ top: 292, right: 11 }}
-      />
-
-      {isAdmin && (
-        <>
-          <ToggleButton
-            title={displayStates.showMapPoints ? 'Скрыть все точки' : 'Показать все точки'}
-            icon={EnvironmentOutlined}
-            onClick={() => toggleDisplayState('showMapPoints')}
-            isActive={displayStates.showMapPoints}
-            activeColor="red"
-            style={{ top: 406, right: 11 }}
+      {cfg.map((c) => {
+        const isActive = !!displayStates[c.key];
+        const title = isActive ? c.titleOn : c.titleOff;
+        const style = isMobile ? scaleStyleForMobile(c.style, 0.75) : c.style;
+        return (
+          <BaseIconButton
+            key={c.key}
+            title={title}
+            Icon={c.Icon}
+            onClick={() => toggleDisplayState(c.key)}
+            isActive={isActive}
+            activeColor={c.activeColor}
+            style={style}
           />
-
-          <ToggleButton
-            title={displayStates.showGridCells ? 'Скрыть сетку' : 'Показать сетку'}
-            icon={FileExcelOutlined}
-            onClick={() => toggleDisplayState('showGridCells')}
-            isActive={displayStates.showGridCells}
-            activeColor="#faad14"
-            style={{ top: 462, right: 11 }}
-          />
-        </>
-      )}
+        );
+      })}
     </>
   );
 };

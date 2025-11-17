@@ -34,7 +34,6 @@ const addPulseStyles = () => {
   document.head.appendChild(styleSheet);
 };
 
-// Проверка: мобильное устройство (iOS, Android)
 const isMobileDevice = () => {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 };
@@ -46,7 +45,6 @@ const MyLocationMarker = ({ map }) => {
   useEffect(() => {
     if (!map) return;
 
-    // На десктопах — не пытаемся получить геолокацию вообще
     if (!isMobileDevice()) {
       console.log('Геолокация отключена на десктопе');
       return;
