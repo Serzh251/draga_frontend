@@ -199,22 +199,7 @@ const DrawTools = ({ map, isAuth }) => {
       {contextHolder}
       {isAuth && (
         <Tooltip title="Сохранить данные" placement="right">
-          <SaveOutlined
-            onClick={() => setShowModal(true)}
-            style={{
-              position: 'absolute',
-              top: '230px',
-              left: '10px',
-              background: 'white',
-              padding: '3px',
-              borderRadius: '5px',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-              fontSize: '25px',
-              // color: '#007bff',
-              cursor: 'pointer',
-              zIndex: 1000,
-            }}
-          />
+          <SaveOutlined onClick={() => setShowModal(true)} className={'btn-save-user-geo-data'} />
         </Tooltip>
       )}
 

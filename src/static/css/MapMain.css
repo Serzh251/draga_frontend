@@ -91,25 +91,36 @@
       z-index: 1000;
       pointer-events: none;
 }
+.leaflet-control a,
+.leaflet-control-attribution a {
+    width: 30px !important;
+    height: 30px !important;
+}
+.mobile-map .leaflet-control {
+    transform-origin: top right;
+    margin-top: 6px !important;
+    margin-right: 4px !important;
+}
 
-    .mobile-map .leaflet-control {
-        transform-origin: top right;
-        margin-top: 6px !important;
-        margin-right: 6px !important;
-    }
+.mobile-map .leaflet-control a,
+.mobile-map .leaflet-control button {
+    width: 30px !important;
+    height: 30px !important;
+    line-height: 26px !important;
+    font-size: 14px !important;
+}
 
-    .mobile-map .leaflet-control a,
-    .mobile-map .leaflet-control button {
-        width: 30px !important;
-        height: 30px !important;
-        line-height: 26px !important;
-        font-size: 14px !important;
-    }
+.mobile-map .leaflet-bar a {
+    padding: 4px !important;
+}
 
-    .mobile-map .leaflet-bar a {
-        padding: 4px !important;
-    }
+.mobile-map .leaflet-bar {
+    border-radius: 4px !important;
+}
 
-    .mobile-map .leaflet-bar {
-        border-radius: 4px !important;
+/* ===== МОБИЛЬНАЯ ВЕРСТКА ===== */
+@media (max-width: 768px) {
+    .leaflet-left .leaflet-control {
+        margin-left: 6px !important;
     }
+}

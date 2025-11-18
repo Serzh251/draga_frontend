@@ -1,6 +1,6 @@
 .year-sidebar-wrapper {
   position: absolute;
-  top: 180px;
+  top: 140px;
   right: 11px;
   display: flex;
   flex-direction: column;
@@ -10,7 +10,7 @@
   transition: outline 0.2s ease;
 }
 .clean-points-sidebar-wrapper {
-    top: 170px;
+    top: 140px;
 }
 
 .year-sidebar-wrapper.has-selection {
@@ -19,12 +19,12 @@
 }
 
 .last-year-position {
-  top: 236px;
+  top: 180px;
   z-index: 609;
 }
 .year-toggle-button {
-    width: 43px;
-    height: 43px;
+    width: 30px;
+    height: 30px;
     background: white;
     display: flex;
     align-items: center;
@@ -90,5 +90,11 @@
     height: 28px !important;
     padding: 2px 6px !important;
     font-size: 12px !important;
+  }
+}
+/* ===== МОБИЛЬНАЯ ВЕРСТКА ===== */
+@media (max-width: 768px) {
+  .year-sidebar-wrapper {
+    right: 6px !important;
   }
 }

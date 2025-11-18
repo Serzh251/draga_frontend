@@ -4,7 +4,7 @@ import { EditOutlined } from '@ant-design/icons';
 import { useCreateManualPointMutation } from '@/api/api';
 import BaseIconButton from '@/components/buttons/BaseIconButton';
 
-const SaveCurrentPointButton = ({ style }) => {
+const SaveCurrentPointButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [createUserGeoData, { isLoading }] = useCreateManualPointMutation();
 
@@ -22,8 +22,8 @@ const SaveCurrentPointButton = ({ style }) => {
       <BaseIconButton
         title="Сохранить текущую точку"
         Icon={EditOutlined}
+        className={'btn-save-clear-point-manually'}
         onClick={() => setIsModalOpen(true)}
-        style={style}
       />
       <Modal
         title="Сохранить текущую точку?"

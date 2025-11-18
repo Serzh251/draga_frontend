@@ -139,21 +139,7 @@ const UserDataGeometryTable = ({
     <>
       {isAuth && (
         <Tooltip title="Показать данные" placement="right">
-          <SearchOutlined
-            style={{
-              position: 'absolute',
-              top: 190,
-              left: 10,
-              background: 'rgba(255, 255, 255, 0.9)',
-              padding: '3px',
-              borderRadius: '5px',
-              fontSize: '24px',
-              cursor: 'pointer',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-              zIndex: 1000,
-            }}
-            onClick={onOpenModal}
-          />
+          <SearchOutlined className={'btn-search'} onClick={onOpenModal} />
         </Tooltip>
       )}
 

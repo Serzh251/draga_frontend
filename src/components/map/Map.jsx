@@ -182,10 +182,10 @@ const MapComponent = () => {
 
           {isMapReady && (
             <>
-              <ReloadButton style={{ top: 352, left: 11, width: 30, height: 30, padding: 2 }} />
+              <ReloadButton />
               <MapFields map={mapInstanceRef.current} />
               <RotateButtons map={mapInstanceRef.current} />
-              <SaveCurrentPointButton style={{ top: 312, left: 11, width: 30, height: 30, padding: 2 }} />
+              <SaveCurrentPointButton />
 
               {showBatymetryLayer && <BatymetryLayer map={mapInstanceRef.current} />}
               <LocationMarker map={mapInstanceRef.current} />

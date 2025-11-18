@@ -1,6 +1,6 @@
 .field-sidebar-wrapper {
   position: absolute;
-  top: 125px;
+  top: 100px;
   right: 11px;
   display: flex;
   flex-direction: column;
@@ -15,8 +15,8 @@
 }
 
 .field-toggle-button {
-  width: 43px;
-  height: 43px;
+  width: 30px;
+  height: 30px;
   background: white;
   display: flex;
   align-items: center;
@@ -82,4 +82,10 @@
 .mobile-field-sidebar .ant-select-selection-item,
 .mobile-field-sidebar .ant-select-selection-placeholder {
   font-size: 12px !important;
+}
+/* ===== МОБИЛЬНАЯ ВЕРСТКА ===== */
+@media (max-width: 768px) {
+  .field-sidebar-wrapper {
+    right: 6px !important;
+  }
 }
