@@ -50,7 +50,45 @@
     gap: 5px;
     font-size: 14px;
 }
-.last-year-position{
-    top: 236px;
-    z-index: 609;
+
+/* рамка вокруг выбранного года */
+.year-sidebar-wrapper.has-selection {
+  box-shadow: 0 0 0 2px #48fa19;
+  border-radius: 6px;
+}
+
+/* ===== МОБИЛЬНАЯ ВЕРСТКА ===== */
+@media (max-width: 768px) {
+  .year-sidebar-wrapper {
+    top: 132px !important;
+    right: 8px !important;
+  }
+
+  .year-sidebar-wrapper.last-year-position {
+    top: 172px !important;
+  }
+
+  .year-toggle-button {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+  }
+
+  .year-sidebar {
+    padding: 6px 8px !important;
+    border-radius: 6px !important;
+    margin-top: 6px;
+  }
+
+  .year-sidebar-title {
+    font-size: 12px !important;
+  }
+
+  .year-sidebar .ant-select-selector {
+    height: 28px !important;
+    padding: 2px 6px !important;
+    font-size: 12px !important;
+  }
 }

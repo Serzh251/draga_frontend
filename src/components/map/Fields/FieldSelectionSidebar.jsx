@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Select } from 'antd';
 import 'antd/dist/reset.css';
-import '../../../static/css/MapFields.css';
+import '../../../static/css/FieldSelectionSidebar.css';
 import { useMapData } from '@/hooks/useDataMap';
 import { useSelector } from 'react-redux';
 
@@ -11,6 +11,7 @@ const FieldSelectionSidebar = ({ onSelectionChange }) => {
   const [selectedField, setSelectedField] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
+  const wrapperRef = useRef(null);
   const isMobile = useSelector((state) => state.ui.isMobile);
   const { fieldsData } = useMapData();
   const safeFields = fieldsData?.features || [];
@@ -24,6 +25,7 @@ const FieldSelectionSidebar = ({ onSelectionChange }) => {
     return Math.min(maxTextWidth + (isMobile ? 36 : 48), window.innerWidth * 0.8);
   }, [safeFields, isMobile]);
 
+  // Загружаем сохранённый выбор
   useEffect(() => {
     const savedField = localStorage.getItem('selectedField');
     if (savedField && savedField !== 'null') {
@@ -31,6 +33,7 @@ const FieldSelectionSidebar = ({ onSelectionChange }) => {
     }
   }, []);
 
+  // Сохраняем выбор и передаём наружу
   useEffect(() => {
     if (selectedField) {
       localStorage.setItem('selectedField', JSON.stringify(selectedField));
@@ -40,12 +43,34 @@ const FieldSelectionSidebar = ({ onSelectionChange }) => {
     onSelectionChange(selectedField ? new Set([selectedField]) : new Set());
   }, [selectedField, onSelectionChange]);
 
+  // Мобильное открытие панели
   const handleOpen = () => {
     if (isMobile) setIsOpen((prev) => !prev);
   };
 
+  // Закрытие при клике вне (только для мобильных)
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handler = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [isMobile]);
+
+  // Закрывать список после выбора — только мобильный
+  const handleSelectChange = (value) => {
+    setSelectedField(value || null);
+    if (isMobile) setIsOpen(false);
+  };
+
   return (
     <div
+      ref={wrapperRef}
       className={`field-sidebar-wrapper ${selectedField ? 'has-selection' : ''} ${
         isMobile ? 'mobile-field-sidebar' : ''
       }`}
@@ -53,7 +78,7 @@ const FieldSelectionSidebar = ({ onSelectionChange }) => {
       onMouseEnter={() => !isMobile && setIsOpen(true)}
       onMouseLeave={() => !isMobile && setIsOpen(false)}
     >
-      <div className={`field-toggle-button ${isMobile ? 'mobile-field-sidebar' : ''}`} onClick={handleOpen}>
+      <div className={`field-toggle-button ${isMobile ? 'mobile-field-toggle' : ''}`} onClick={handleOpen}>
         ☰
       </div>
 
@@ -70,7 +95,7 @@ const FieldSelectionSidebar = ({ onSelectionChange }) => {
             className={selectedField ? 'select-with-value' : ''}
             placeholder="Выберите месторождение"
             value={selectedField || undefined}
-            onChange={(value) => setSelectedField(value || null)}
+            onChange={handleSelectChange}
             allowClear
             styles={{
               popup: {

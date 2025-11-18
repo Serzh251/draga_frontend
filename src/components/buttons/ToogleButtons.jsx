@@ -34,7 +34,7 @@ const BUTTONS_CONFIG = [
     titleOff: 'Показать clean точки',
     Icon: EnvironmentFilled,
     activeColor: 'green',
-    style: { top: 350, right: 11 },
+    style: { top: 346, right: 11 },
   },
   {
     key: 'showHotMap',
@@ -42,7 +42,7 @@ const BUTTONS_CONFIG = [
     titleOff: 'Показать hot map',
     Icon: RadarChartOutlined,
     activeColor: 'blue',
-    style: { top: 292, right: 11 },
+    style: { top: 290, right: 11 },
   },
   {
     key: 'showMapPoints',
@@ -50,7 +50,7 @@ const BUTTONS_CONFIG = [
     titleOff: 'Показать все точки',
     Icon: EnvironmentOutlined,
     activeColor: 'red',
-    style: { top: 406, right: 11 },
+    style: { top: 402, right: 11 },
     adminOnly: true,
   },
   {
@@ -59,7 +59,7 @@ const BUTTONS_CONFIG = [
     titleOff: 'Показать сетку',
     Icon: FileExcelOutlined,
     activeColor: '#faad14',
-    style: { top: 462, right: 11 },
+    style: { top: 460, right: 11 },
     adminOnly: true,
   },
 ];
