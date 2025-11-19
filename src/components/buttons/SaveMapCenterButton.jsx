@@ -45,19 +45,7 @@ const SaveMapCenterButton = ({ map, onSaveSuccess }) => {
   };
 
   return (
-    <Button
-      type="primary"
-      onClick={handleSave}
-      disabled={!map}
-      style={{
-        position: 'absolute',
-        bottom: 20,
-        left: 25,
-        zIndex: 1000,
-        padding: 4,
-        height: 'auto',
-      }}
-    >
+    <Button type="primary" onClick={handleSave} disabled={!map}>
       Сохранить настройки карты
     </Button>
   );

@@ -229,16 +229,15 @@ const DrawTools = ({ map, isAuth }) => {
             <Input.TextArea placeholder="Введите описание" onFocus={() => handleFocus('description')} />
           </Form.Item>
 
-          <Form.Item label="Выберите цвет:" name="color" style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{ display: 'inline-block' }}>
-              <ColorPicker
-                onChange={(color) => form.setFieldsValue({ color: color.toHexString() })}
-                style={{ height: '40px', marginTop: '5px' }}
-              />
+          <Form.Item label="Выберите цвет:" name="color">
+            <div>
+              <ColorPicker onChange={(color) => form.setFieldsValue({ color: color.toHexString() })} />
             </div>
           </Form.Item>
+          <Form.Item style={{ display: 'flex', justifyContent: 'right' }}>
+            <SaveMapCenterButton map={map} onSaveSuccess={() => setShowModal(false)} />
+          </Form.Item>
         </Form>
-        <SaveMapCenterButton map={map} onSaveSuccess={() => setShowModal(false)} />
       </Modal>
 
       {showVirtualKeyboard && activeField && (
