@@ -91,8 +91,8 @@
       z-index: 1000;
       pointer-events: none;
 }
-.leaflet-control a,
-.leaflet-control-attribution a {
+.leaflet-control > a,
+.leaflet-control-attribution {
     width: 30px !important;
     height: 30px !important;
 }
@@ -102,7 +102,7 @@
     margin-right: 4px !important;
 }
 
-.mobile-map .leaflet-control a,
+.mobile-map .leaflet-control > a,
 .mobile-map .leaflet-control button {
     width: 30px !important;
     height: 30px !important;
@@ -122,5 +122,10 @@
 @media (max-width: 768px) {
     .leaflet-left .leaflet-control {
         margin-left: 6px !important;
+    }
+    .leaflet-draw-actions > li > a{
+        font-size: 10px !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
     }
 }

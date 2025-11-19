@@ -53,3 +53,17 @@
 .ant-message {
   z-index: 999999 !important;
 }
+.ant-tooltip {
+  z-index: 1050 !important;
+}
+
+.ant-tooltip-inner {
+  z-index: 1050 !important;
+}
+
+.ant-tooltip-arrow {
+  z-index: 1050 !important;
+}
+body.modal-is-open .ant-tooltip {
+  display: none !important;
+}

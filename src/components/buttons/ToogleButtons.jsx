@@ -26,7 +26,7 @@ const BUTTONS_CONFIG = [
     titleOff: 'Показать мое местоположение',
     Icon: AimOutlined,
     activeColor: '#52c41a',
-    style: { top: 312, left: 11 },
+    style: { top: 393, left: 11 },
   },
   {
     key: 'showCleanPoints',
@@ -86,7 +86,7 @@ const ToggleButtonGroup = ({ displayStates, toggleDisplayState }) => {
         return (
           <BaseIconButton
             key={c.key}
-            className={`btn-${c.key}`} // ← УНИКАЛЬНЫЙ КЛАСС
+            className={`btn-${c.key}`}
             title={title}
             Icon={c.Icon}
             onClick={() => toggleDisplayState(c.key)}

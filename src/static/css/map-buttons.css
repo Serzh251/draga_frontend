@@ -52,12 +52,12 @@
     z-index: 1000;
 }
 
+
 .btn-save-clear-point-manually {
     top: 312px;
-    left: 10px;
-    width: 30px;
-    height: 30px;
-    padding: 2px;
+    left: 11px;
+    padding: 3px;
+    color: #1890ff;
 }
 .btn-reload {
     top: 352px;
@@ -66,7 +66,10 @@
     height: 30px;
     padding: 2px;
 }
-/* MOBILE: строгие размеры и меньшие отступы */
+.btn-showMyLocation{
+    display: none;
+}
+/* MOBILE: */
 @media (max-width: 768px) {
     .map-button {
       width: 30px !important;
@@ -115,5 +118,8 @@
     .btn-showMyLocation{
         left: 8px !important;
         top: 385px !important;
+    }
+    .btn-showMyLocation{
+        display: block;
     }
 }

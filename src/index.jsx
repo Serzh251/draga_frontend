@@ -11,13 +11,24 @@ import { store } from './store';
 import '@ant-design/v5-patch-for-react-19';
 import App from './App';
 import ResponsiveProvider from '@/components/ResponsiveProvider';
+import { ConfigProvider } from 'antd';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
     <Provider store={store}>
       <ResponsiveProvider>
-        <App />
+        <ConfigProvider
+          theme={{
+            components: {
+              Modal: {
+                zIndexPopup: 1100, // Высокий zIndex для Modal
+              },
+            },
+          }}
+        >
+          <App />
+        </ConfigProvider>
       </ResponsiveProvider>
     </Provider>
   </BrowserRouter>
